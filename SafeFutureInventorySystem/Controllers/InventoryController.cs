@@ -35,7 +35,7 @@ public class InventoryController : Controller
         {
             
             ViewBag.Error = $"Error reading inventory file: {ex.Message}";
-            return View(items); // Return an empty list or with an error
+            return View(items);
         }
 
         
