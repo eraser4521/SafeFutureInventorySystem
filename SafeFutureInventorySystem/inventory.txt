@@ -1,0 +1,6 @@
+Id,Name,Quantity,DateAdded
+1,Diapers Size 4,50,2025-09-22
+2,Baby Wipes,120,2025-09-15
+3,Formula,30,2025-09-28
+4,Diapers Size 2,75,2025-08-30
+5,Baby Powder, 200,2025-03-21
