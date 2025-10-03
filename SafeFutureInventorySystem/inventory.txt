@@ -1,0 +1,21 @@
+Id,Name,Quantity,DateAdded
+1,Diapers Size 4,50,2025-09-22
+2,Baby Wipes,120,2025-09-15
+3,Formula,30,2025-09-28
+4,Diapers Size 2,75,2025-08-30
+5,Baby Powder, 200,2025-03-21
+6,Diaper Rash Cream,25,2025-07-20
+7,Pampers Sensitive Wipes,80,2025-09-18
+8,Gerber Baby Food (Applesauce),150,2025-08-15
+9,Diapers Newborn (Box),60,2025-09-25
+10,Baby Bottles (4 oz),40,2025-08-01
+11,Similac Formula (Can),22,2025-09-02
+12,Baby Shampoo,35,2025-09-30
+13,Diapers Size 5 (Box),40,2025-09-11
+14,Pacifiers (2-Pack),55,2025-07-28
+15,Toddler Snack Puffs,90,2025-09-08
+16,Diapers Size 1 (Box),85,2025-09-29
+17,Baby Lotion,33,2025-08-22
+18,Gerber Baby Food (Pears),140,2025-08-16
+19,Diapers Size 3 (Box),110,2025-09-01
+20,Desitin Diaper Cream,28,2025-09-25
