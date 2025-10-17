@@ -1,0 +1,13 @@
+@model SafeFutureInventorySystem.Models.InventoryItem
+@{
+    ViewData["Title"] = "Item Barcode";
+}
+
+<div class="text-center">
+    <h2>Barcode for @Model.Name</h2>
+    <p>Quantity: @Model.Quantity</p>
+    <img src="@Url.Action("BarcodeImage", "Inventory", new { id = Model.Id })" alt="Barcode for @Model.Name" />
+    <div class="mt-2">
+        <a class="btn btn-outline-secondary" href="@Url.Action("BarcodeImage", "Inventory", new { id = Model.Id })">Download PNG</a>
+    </div>
+</div>
