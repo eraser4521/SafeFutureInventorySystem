@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SafeFutureInventorySystem.Models;
+using SkiaSharp;
+using System.Runtime.InteropServices;
 
 namespace SafeFutureInventorySystem.Controllers;
 
@@ -81,22 +83,29 @@ public class BarcodesController : Controller
 
         var pixelData = writer.Write(value);
 
-        using (var bitmap = new System.Drawing.Bitmap(pixelData.Width, pixelData.Height, System.Drawing.Imaging.PixelFormat.Format32bppRgb))
+        // Create a new SkiaSharp bitmap and draw the barcode
+        using (var surface = SKSurface.Create(new SKImageInfo(pixelData.Width, pixelData.Height)))
         {
-            var bitmapData = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, pixelData.Width, pixelData.Height), System.Drawing.Imaging.ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppRgb);
-            try
+            using (var canvas = surface.Canvas)
             {
-                System.Runtime.InteropServices.Marshal.Copy(pixelData.Pixels, 0, bitmapData.Scan0, pixelData.Pixels.Length);
-            }
-            finally
-            {
-                bitmap.UnlockBits(bitmapData);
+                // Create bitmap and copy pixel data
+                using (var bitmap = new SKBitmap(new SKImageInfo(pixelData.Width, pixelData.Height)))
+                {
+                    var ptr = bitmap.GetPixels();
+                    Marshal.Copy(pixelData.Pixels, 0, ptr, pixelData.Pixels.Length);
+                    
+                    // Draw bitmap to canvas (white background, black barcode)
+                    canvas.Clear(SKColors.White);
+                    canvas.DrawBitmap(bitmap, 0, 0);
+                }
             }
 
+            // Encode as PNG and return
+            using (var image = surface.Snapshot())
+            using (var data = image.Encode(SKEncodedImageFormat.Png, 100))
             using (var ms = new MemoryStream())
             {
-                bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-                ms.Position = 0;
+                data.SaveTo(ms);
                 return File(ms.ToArray(), "image/png");
             }
         }
