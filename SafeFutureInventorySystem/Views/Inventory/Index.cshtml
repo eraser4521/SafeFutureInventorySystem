@@ -19,7 +19,7 @@ else
         <tr>
             <th>Name</th>
             <th>Quantity</th>
-            <th>Barcode</th>
+            <th>QR Code</th>
             <th>Date Added</th>
         </tr>
         </thead>
@@ -30,7 +30,7 @@ else
                 <td>@item.Name</td>
                 <td>@item.Quantity</td>
                 <td>
-                    <a class="btn btn-sm btn-primary" target="_blank" href="@Url.Action("Generate", "Barcodes", new { id = item.Id })">Create Barcode</a>
+                    <a class="btn btn-sm btn-primary" target="_blank" href="@Url.Action("Generate", "QRCodes", new { id = item.Id })">Create QR Code</a>
                 </td>
                 <td>@item.DateAdded.ToShortDateString()</td>
             </tr>

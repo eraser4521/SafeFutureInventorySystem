@@ -46,7 +46,7 @@ public class InventoryController : Controller
         return View(sortedItems);
     }
 
-    // Show a page with the barcode for the given item id
+    // Show a page with the QR code for the given item id
     public IActionResult Barcode(int id)
     {
         var items = LoadItems();
@@ -58,7 +58,7 @@ public class InventoryController : Controller
         return View(item);
     }
 
-    // Return the barcode image (PNG) for the given item id
+    // Return the QR code image (PNG) for the given item id
     public IActionResult BarcodeImage(int id)
     {
         var items = LoadItems();
@@ -73,12 +73,12 @@ public class InventoryController : Controller
 
         var writer = new ZXing.BarcodeWriterPixelData
         {
-            Format = ZXing.BarcodeFormat.CODE_128,
+            Format = ZXing.BarcodeFormat.QR_CODE,
             Options = new ZXing.Common.EncodingOptions
             {
-                Height = 80,
-                Width = 300,
-                Margin = 10
+                Height = 250,
+                Width = 250,
+                Margin = 1
             }
         };
 

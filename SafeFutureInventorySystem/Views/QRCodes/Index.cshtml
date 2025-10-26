@@ -1,10 +1,10 @@
 @model List<SafeFutureInventorySystem.Models.BarcodeRecord>
 @{
-    ViewData["Title"] = "Saved Barcodes";
+    ViewData["Title"] = "Saved QR Codes";
 }
 
 <div class="text-center">
-    <h1>Saved Barcodes</h1>
+    <h1>Saved QR Codes</h1>
 </div>
 
 <table class="table table-striped">
@@ -27,7 +27,7 @@
             <td>@r.Value</td>
             <td>@r.Format</td>
             <td>@r.GeneratedAt.ToString("u")</td>
-            <td><a class="btn btn-sm btn-secondary" href="@Url.Action("ImageRecord","Barcodes", new { id = r.Id })" target="_blank">View</a></td>
+            <td><a class="btn btn-sm btn-secondary" href="@Url.Action("ImageRecord","QRCodes", new { id = r.Id })" target="_blank">View</a></td>
         </tr>
     }
     </tbody>

@@ -5,10 +5,10 @@ using System.Runtime.InteropServices;
 
 namespace SafeFutureInventorySystem.Controllers;
 
-public class BarcodesController : Controller
+public class QRCodesController : Controller
 {
     private string InventoryFile => Path.Combine(AppContext.BaseDirectory, "inventory.txt");
-    private string BarcodesFile => Path.Combine(AppContext.BaseDirectory, "barcodes.txt");
+    private string QRCodesFile => Path.Combine(AppContext.BaseDirectory, "qrcodes.txt");
 
     public IActionResult Index()
     {
@@ -16,7 +16,7 @@ public class BarcodesController : Controller
         return View(records);
     }
 
-    // Show a page to generate/save barcode for an inventory item
+    // Show a page to generate/save QR code for an inventory item
     public IActionResult Generate(int id)
     {
         var item = LoadInventory().FirstOrDefault(i => i.Id == id);
@@ -59,7 +59,7 @@ public class BarcodesController : Controller
         return GenerateImageResult(rec.Value);
     }
 
-    // Return the PNG for a given inventory item value (preview)
+    // Return the QR code image (PNG) for a given inventory item value (preview)
     public IActionResult ImageForItem(int inventoryItemId)
     {
         var item = LoadInventory().FirstOrDefault(i => i.Id == inventoryItemId);
@@ -83,7 +83,7 @@ public class BarcodesController : Controller
 
         var pixelData = writer.Write(value);
 
-        // Create a new SkiaSharp bitmap and draw the barcode
+        // Create a new SkiaSharp bitmap and draw the QR code
         using (var surface = SKSurface.Create(new SKImageInfo(pixelData.Width, pixelData.Height)))
         {
             using (var canvas = surface.Canvas)
@@ -94,7 +94,7 @@ public class BarcodesController : Controller
                     var ptr = bitmap.GetPixels();
                     Marshal.Copy(pixelData.Pixels, 0, ptr, pixelData.Pixels.Length);
                     
-                    // Draw bitmap to canvas (white background, black barcode)
+                    // Draw bitmap to canvas (white background, black QR code)
                     canvas.Clear(SKColors.White);
                     canvas.DrawBitmap(bitmap, 0, 0);
                 }
@@ -143,13 +143,13 @@ public class BarcodesController : Controller
         var records = new List<BarcodeRecord>();
         try
         {
-            if (!System.IO.File.Exists(BarcodesFile))
+            if (!System.IO.File.Exists(QRCodesFile))
             {
                 // create header
-                System.IO.File.WriteAllText(BarcodesFile, "Id,InventoryItemId,Value,Format,GeneratedAt\n");
+                System.IO.File.WriteAllText(QRCodesFile, "Id,InventoryItemId,Value,Format,GeneratedAt\n");
             }
 
-            var lines = System.IO.File.ReadAllLines(BarcodesFile).Skip(1);
+            var lines = System.IO.File.ReadAllLines(QRCodesFile).Skip(1);
             foreach (var line in lines)
             {
                 var parts = line.Split(',');
@@ -176,6 +176,6 @@ public class BarcodesController : Controller
     {
         var lines = new List<string> { "Id,InventoryItemId,Value,Format,GeneratedAt" };
         lines.AddRange(records.Select(r => $"{r.Id},{r.InventoryItemId},{r.Value},{r.Format},{r.GeneratedAt:o}"));
-        System.IO.File.WriteAllLines(BarcodesFile, lines);
+        System.IO.File.WriteAllLines(QRCodesFile, lines);
     }
 }
