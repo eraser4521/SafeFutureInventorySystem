@@ -47,7 +47,7 @@ public class InventoryController : Controller
     }
 
     // Show a page with the QR code for the given item id
-    public IActionResult Barcode(int id)
+    public IActionResult QrCode(int id)
     {
         var items = LoadItems();
         var item = items.FirstOrDefault(i => i.Id == id);
@@ -55,11 +55,12 @@ public class InventoryController : Controller
         {
             return NotFound();
         }
-        return View(item);
+        // Render the QR code view
+        return View("QrCode", item);
     }
 
     // Return the QR code image (PNG) for the given item id
-    public IActionResult BarcodeImage(int id)
+    public IActionResult QrCodeImage(int id)
     {
         var items = LoadItems();
         var item = items.FirstOrDefault(i => i.Id == id);
@@ -68,8 +69,8 @@ public class InventoryController : Controller
             return NotFound();
         }
 
-        // Create a barcode (Code 128) using ZXing
-        var barcodeValue = $"INV-{item.Id:00000}";
+        // Encode a URL that links to the Edit page for this item so scanning the QR opens the edit UI
+        var qrValue = Url.Action("Edit", "Inventory", new { id = item.Id }, Request.Scheme) ?? $"INV-{item.Id:00000}";
 
         var writer = new ZXing.BarcodeWriterPixelData
         {
@@ -82,7 +83,7 @@ public class InventoryController : Controller
             }
         };
 
-        var pixelData = writer.Write(barcodeValue);
+    var pixelData = writer.Write(qrValue);
 
         // Create a new SkiaSharp bitmap and draw the barcode
         using (var surface = SKSurface.Create(new SKImageInfo(pixelData.Width, pixelData.Height)))
@@ -107,7 +108,7 @@ public class InventoryController : Controller
             using (var ms = new MemoryStream())
             {
                 data.SaveTo(ms);
-                return File(ms.ToArray(), "image/png", $"barcode-{item.Id}.png");
+                return File(ms.ToArray(), "image/png", $"qrcode-{item.Id}.png");
             }
         }
     }
@@ -143,5 +144,65 @@ public class InventoryController : Controller
         }
 
         return items;
+    }
+
+    // Show details page for an item
+    public IActionResult Details(int id)
+    {
+        var items = LoadItems();
+        var item = items.FirstOrDefault(i => i.Id == id);
+        if (item == null) return NotFound();
+        return View(item);
+    }
+
+    // Edit page (GET)
+    public IActionResult Edit(int id)
+    {
+        var items = LoadItems();
+        var item = items.FirstOrDefault(i => i.Id == id);
+        if (item == null) return NotFound();
+        return View(item);
+    }
+
+    // Edit handler (POST)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Edit(InventoryItem model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var items = LoadItems();
+        var existing = items.FirstOrDefault(i => i.Id == model.Id);
+        if (existing == null) return NotFound();
+
+        // Update editable fields (allow name and quantity edits)
+        existing.Name = model.Name;
+        existing.Quantity = model.Quantity;
+
+        SaveItems(items);
+
+        return RedirectToAction("Details", new { id = model.Id });
+    }
+
+    private void SaveItems(List<InventoryItem> items)
+    {
+        var filePath = Path.Combine(AppContext.BaseDirectory, "inventory.txt");
+        var lines = new List<string> { "Id,Name,Quantity,DateAdded" };
+        lines.AddRange(items.Select(i => $"{i.Id},{EscapeCsv(i.Name)},{i.Quantity},{i.DateAdded:yyyy-MM-dd}"));
+        System.IO.File.WriteAllLines(filePath, lines);
+    }
+
+    // Simple CSV escape for commas/newlines in names
+    private string EscapeCsv(string input)
+    {
+        if (input == null) return string.Empty;
+        if (input.Contains(',') || input.Contains('"') || input.Contains('\n'))
+        {
+            return '"' + input.Replace("\"", "\"\"") + '"';
+        }
+        return input;
     }
 }

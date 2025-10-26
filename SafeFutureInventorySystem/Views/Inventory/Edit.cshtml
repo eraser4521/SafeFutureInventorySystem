@@ -1,0 +1,40 @@
+@model SafeFutureInventorySystem.Models.InventoryItem
+@{
+    ViewData["Title"] = "Edit Item";
+}
+
+<div class="container">
+    <h2>Edit: @Model.Name</h2>
+
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="Id" value="@Model.Id" />
+
+        <div class="form-group">
+            <label for="Name">Name</label>
+            <input class="form-control" id="Name" name="Name" value="@Model.Name" />
+        </div>
+
+        <div class="form-group">
+            <label for="Quantity">Quantity</label>
+            <input class="form-control" id="Quantity" name="Quantity" type="number" value="@Model.Quantity" />
+        </div>
+
+        <div class="form-group">
+            <label>Date Added</label>
+            <div>@Model.DateAdded.ToShortDateString()</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a class="btn btn-link" href="@Url.Action("Details", "Inventory", new { id = Model.Id })">Cancel</a>
+    </form>
+
+    <hr />
+
+    <form method="post" action="@Url.Action("Create", "QRCodes")">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="inventoryItemId" value="@Model.Id" />
+        <button type="submit" class="btn btn-success">Create QR Code</button>
+        <a class="btn btn-link" href="@Url.Action("Index", "QRCodes")">View Saved QR Codes</a>
+    </form>
+</div>

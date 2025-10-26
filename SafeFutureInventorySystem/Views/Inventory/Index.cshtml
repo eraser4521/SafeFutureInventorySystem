@@ -19,7 +19,7 @@ else
         <tr>
             <th>Name</th>
             <th>Quantity</th>
-            <th>QR Code</th>
+            <th>Actions</th>
             <th>Date Added</th>
         </tr>
         </thead>
@@ -27,10 +27,10 @@ else
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.Name</td>
+                <td><a href="@Url.Action("Details", "Inventory", new { id = item.Id })">@item.Name</a></td>
                 <td>@item.Quantity</td>
                 <td>
-                    <a class="btn btn-sm btn-primary" target="_blank" href="@Url.Action("Generate", "QRCodes", new { id = item.Id })">Create QR Code</a>
+                    <a class="btn btn-sm btn-secondary" href="@Url.Action("Edit", "Inventory", new { id = item.Id })">Edit</a>
                 </td>
                 <td>@item.DateAdded.ToShortDateString()</td>
             </tr>

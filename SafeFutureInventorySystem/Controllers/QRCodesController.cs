@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using SafeFutureInventorySystem.Models;
 using SkiaSharp;
 using System.Runtime.InteropServices;
@@ -9,6 +10,12 @@ public class QRCodesController : Controller
 {
     private string InventoryFile => Path.Combine(AppContext.BaseDirectory, "inventory.txt");
     private string QRCodesFile => Path.Combine(AppContext.BaseDirectory, "qrcodes.txt");
+    private readonly IConfiguration _config;
+
+    public QRCodesController(IConfiguration config)
+    {
+        _config = config;
+    }
 
     public IActionResult Index()
     {
@@ -29,8 +36,8 @@ public class QRCodesController : Controller
     {
         var item = LoadInventory().FirstOrDefault(i => i.Id == inventoryItemId);
         if (item == null) return NotFound();
-
-        var value = $"INV-{item.Id:00000}";
+        // Store a path-only value (e.g. "/Inventory/Edit/12"). When scanned, the app can combine this with a base URL.
+        var pathValue = Url.Action("Edit", "Inventory", new { id = item.Id }) ?? $"/Inventory/Edit/{item.Id}";
         var format = "QR_CODE";
         var records = LoadBarcodeRecords();
         var nextId = (records.Any() ? records.Max(r => r.Id) : 0) + 1;
@@ -39,7 +46,7 @@ public class QRCodesController : Controller
         {
             Id = nextId,
             InventoryItemId = item.Id,
-            Value = value,
+            Value = pathValue,
             Format = format,
             GeneratedAt = DateTime.UtcNow
         };
@@ -47,7 +54,8 @@ public class QRCodesController : Controller
         records.Add(record);
         SaveBarcodeRecords(records);
 
-        return RedirectToAction("Index");
+        // After creating a QR record, return the user to the item's edit page for a smoother workflow
+        return RedirectToAction("Edit", "Inventory", new { id = inventoryItemId });
     }
 
     // Return the PNG for a saved record
@@ -56,7 +64,8 @@ public class QRCodesController : Controller
         var records = LoadBarcodeRecords();
         var rec = records.FirstOrDefault(r => r.Id == id);
         if (rec == null) return NotFound();
-        return GenerateImageResult(rec.Value);
+        var absolute = ResolveToAbsolute(rec.Value);
+        return GenerateImageResult(absolute);
     }
 
     // Return the QR code image (PNG) for a given inventory item value (preview)
@@ -64,8 +73,10 @@ public class QRCodesController : Controller
     {
         var item = LoadInventory().FirstOrDefault(i => i.Id == inventoryItemId);
         if (item == null) return NotFound();
-        var value = $"INV-{item.Id:00000}";
-        return GenerateImageResult(value);
+        // Preview: generate the same path-only value and resolve to absolute when rendering the QR
+        var pathValue = Url.Action("Edit", "Inventory", new { id = item.Id }) ?? $"/Inventory/Edit/{item.Id}";
+        var absolute = ResolveToAbsolute(pathValue);
+        return GenerateImageResult(absolute);
     }
 
     private IActionResult GenerateImageResult(string value)
@@ -170,6 +181,32 @@ public class QRCodesController : Controller
         {
         }
         return records;
+    }
+
+    // Resolve a stored value (path or absolute) into an absolute URL for QR rendering.
+    private string ResolveToAbsolute(string storedValue)
+    {
+        if (string.IsNullOrEmpty(storedValue)) return storedValue ?? string.Empty;
+
+        // If it's already an absolute URL, return as-is
+        if (storedValue.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || storedValue.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            return storedValue;
+        }
+
+        // storedValue is a path (e.g. /Inventory/Edit/12)
+        var configuredBase = _config?[
+            "QrCodeBaseUrl"];
+        if (!string.IsNullOrEmpty(configuredBase))
+        {
+            // ensure no double slashes
+            return configuredBase.TrimEnd('/') + (storedValue.StartsWith("/") ? storedValue : "/" + storedValue);
+        }
+
+        // Fallback: build from current request
+        var scheme = Request?.Scheme ?? "http";
+        var host = Request?.Host.Value ?? "localhost";
+        return scheme + "://" + host + (storedValue.StartsWith("/") ? storedValue : "/" + storedValue);
     }
 
     private void SaveBarcodeRecords(List<BarcodeRecord> records)
