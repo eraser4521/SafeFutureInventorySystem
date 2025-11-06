@@ -1,0 +1,207 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\alexi\\Documents\\Senior Project Project FIle\\SafeFutureInventorySystem\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{B11D7704-26E8-43E8-9320-0D3D6EA78A87}|SafeFutureInventorySystem\\SafeFutureInventorySystem.csproj|c:\\users\\alexi\\documents\\senior project project file\\safefutureinventorysystem\\safefutureinventorysystem\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B11D7704-26E8-43E8-9320-0D3D6EA78A87}|SafeFutureInventorySystem\\SafeFutureInventorySystem.csproj|solutionrelative:safefutureinventorysystem\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B11D7704-26E8-43E8-9320-0D3D6EA78A87}|SafeFutureInventorySystem\\SafeFutureInventorySystem.csproj|c:\\users\\alexi\\documents\\senior project project file\\safefutureinventorysystem\\safefutureinventorysystem\\models\\inventoryfilterviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B11D7704-26E8-43E8-9320-0D3D6EA78A87}|SafeFutureInventorySystem\\SafeFutureInventorySystem.csproj|solutionrelative:safefutureinventorysystem\\models\\inventoryfilterviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B11D7704-26E8-43E8-9320-0D3D6EA78A87}|SafeFutureInventorySystem\\SafeFutureInventorySystem.csproj|c:\\users\\alexi\\documents\\senior project project file\\safefutureinventorysystem\\safefutureinventorysystem\\models\\inventoryitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B11D7704-26E8-43E8-9320-0D3D6EA78A87}|SafeFutureInventorySystem\\SafeFutureInventorySystem.csproj|solutionrelative:safefutureinventorysystem\\models\\inventoryitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B11D7704-26E8-43E8-9320-0D3D6EA78A87}|SafeFutureInventorySystem\\SafeFutureInventorySystem.csproj|c:\\users\\alexi\\documents\\senior project project file\\safefutureinventorysystem\\safefutureinventorysystem\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B11D7704-26E8-43E8-9320-0D3D6EA78A87}|SafeFutureInventorySystem\\SafeFutureInventorySystem.csproj|solutionrelative:safefutureinventorysystem\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B11D7704-26E8-43E8-9320-0D3D6EA78A87}|SafeFutureInventorySystem\\SafeFutureInventorySystem.csproj|c:\\users\\alexi\\documents\\senior project project file\\safefutureinventorysystem\\safefutureinventorysystem\\controllers\\inventorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B11D7704-26E8-43E8-9320-0D3D6EA78A87}|SafeFutureInventorySystem\\SafeFutureInventorySystem.csproj|solutionrelative:safefutureinventorysystem\\controllers\\inventorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B11D7704-26E8-43E8-9320-0D3D6EA78A87}|SafeFutureInventorySystem\\SafeFutureInventorySystem.csproj|c:\\users\\alexi\\documents\\senior project project file\\safefutureinventorysystem\\safefutureinventorysystem\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{B11D7704-26E8-43E8-9320-0D3D6EA78A87}|SafeFutureInventorySystem\\SafeFutureInventorySystem.csproj|solutionrelative:safefutureinventorysystem\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B11D7704-26E8-43E8-9320-0D3D6EA78A87}|SafeFutureInventorySystem\\SafeFutureInventorySystem.csproj|c:\\users\\alexi\\documents\\senior project project file\\safefutureinventorysystem\\safefutureinventorysystem\\models\\inventoryadjustmentlog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B11D7704-26E8-43E8-9320-0D3D6EA78A87}|SafeFutureInventorySystem\\SafeFutureInventorySystem.csproj|solutionrelative:safefutureinventorysystem\\models\\inventoryadjustmentlog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B11D7704-26E8-43E8-9320-0D3D6EA78A87}|SafeFutureInventorySystem\\SafeFutureInventorySystem.csproj|c:\\users\\alexi\\documents\\senior project project file\\safefutureinventorysystem\\safefutureinventorysystem\\views\\inventory\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B11D7704-26E8-43E8-9320-0D3D6EA78A87}|SafeFutureInventorySystem\\SafeFutureInventorySystem.csproj|solutionrelative:safefutureinventorysystem\\views\\inventory\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B11D7704-26E8-43E8-9320-0D3D6EA78A87}|SafeFutureInventorySystem\\SafeFutureInventorySystem.csproj|c:\\users\\alexi\\documents\\senior project project file\\safefutureinventorysystem\\safefutureinventorysystem\\wwwroot\\css\\site.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{B11D7704-26E8-43E8-9320-0D3D6EA78A87}|SafeFutureInventorySystem\\SafeFutureInventorySystem.csproj|solutionrelative:safefutureinventorysystem\\wwwroot\\css\\site.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B11D7704-26E8-43E8-9320-0D3D6EA78A87}|SafeFutureInventorySystem\\SafeFutureInventorySystem.csproj|c:\\users\\alexi\\documents\\senior project project file\\safefutureinventorysystem\\safefutureinventorysystem\\web.config||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{B11D7704-26E8-43E8-9320-0D3D6EA78A87}|SafeFutureInventorySystem\\SafeFutureInventorySystem.csproj|solutionrelative:safefutureinventorysystem\\web.config||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B11D7704-26E8-43E8-9320-0D3D6EA78A87}|SafeFutureInventorySystem\\SafeFutureInventorySystem.csproj|c:\\users\\alexi\\documents\\senior project project file\\safefutureinventorysystem\\safefutureinventorysystem\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B11D7704-26E8-43E8-9320-0D3D6EA78A87}|SafeFutureInventorySystem\\SafeFutureInventorySystem.csproj|solutionrelative:safefutureinventorysystem\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\alexi\\Documents\\Senior Project Project FIle\\SafeFutureInventorySystem\\SafeFutureInventorySystem\\Program.cs",
+              "RelativeDocumentMoniker": "SafeFutureInventorySystem\\Program.cs",
+              "ToolTip": "C:\\Users\\alexi\\Documents\\Senior Project Project FIle\\SafeFutureInventorySystem\\SafeFutureInventorySystem\\Program.cs",
+              "RelativeToolTip": "SafeFutureInventorySystem\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACoAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-06T03:11:19.602Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "site.css",
+              "DocumentMoniker": "C:\\Users\\alexi\\Documents\\Senior Project Project FIle\\SafeFutureInventorySystem\\SafeFutureInventorySystem\\wwwroot\\css\\site.css",
+              "RelativeDocumentMoniker": "SafeFutureInventorySystem\\wwwroot\\css\\site.css",
+              "ToolTip": "C:\\Users\\alexi\\Documents\\Senior Project Project FIle\\SafeFutureInventorySystem\\SafeFutureInventorySystem\\wwwroot\\css\\site.css",
+              "RelativeToolTip": "SafeFutureInventorySystem\\wwwroot\\css\\site.css",
+              "ViewState": "AgIAABsAAAAAAAAAAAAAAFwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-11-06T02:28:16.97Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ApplicationDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\alexi\\Documents\\Senior Project Project FIle\\SafeFutureInventorySystem\\SafeFutureInventorySystem\\Data\\ApplicationDbContext.cs",
+              "RelativeDocumentMoniker": "SafeFutureInventorySystem\\Data\\ApplicationDbContext.cs",
+              "ToolTip": "C:\\Users\\alexi\\Documents\\Senior Project Project FIle\\SafeFutureInventorySystem\\SafeFutureInventorySystem\\Data\\ApplicationDbContext.cs",
+              "RelativeToolTip": "SafeFutureInventorySystem\\Data\\ApplicationDbContext.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAwwD4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-06T02:27:57.965Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\alexi\\Documents\\Senior Project Project FIle\\SafeFutureInventorySystem\\SafeFutureInventorySystem\\Views\\Inventory\\Index.cshtml",
+              "RelativeDocumentMoniker": "SafeFutureInventorySystem\\Views\\Inventory\\Index.cshtml",
+              "ToolTip": "C:\\Users\\alexi\\Documents\\Senior Project Project FIle\\SafeFutureInventorySystem\\SafeFutureInventorySystem\\Views\\Inventory\\Index.cshtml",
+              "RelativeToolTip": "SafeFutureInventorySystem\\Views\\Inventory\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-06T02:26:41.316Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "InventoryAdjustmentLog.cs",
+              "DocumentMoniker": "C:\\Users\\alexi\\Documents\\Senior Project Project FIle\\SafeFutureInventorySystem\\SafeFutureInventorySystem\\Models\\InventoryAdjustmentLog.cs",
+              "RelativeDocumentMoniker": "SafeFutureInventorySystem\\Models\\InventoryAdjustmentLog.cs",
+              "ToolTip": "C:\\Users\\alexi\\Documents\\Senior Project Project FIle\\SafeFutureInventorySystem\\SafeFutureInventorySystem\\Models\\InventoryAdjustmentLog.cs",
+              "RelativeToolTip": "SafeFutureInventorySystem\\Models\\InventoryAdjustmentLog.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-06T02:26:00.55Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "InventoryController.cs",
+              "DocumentMoniker": "C:\\Users\\alexi\\Documents\\Senior Project Project FIle\\SafeFutureInventorySystem\\SafeFutureInventorySystem\\Controllers\\InventoryController.cs",
+              "RelativeDocumentMoniker": "SafeFutureInventorySystem\\Controllers\\InventoryController.cs",
+              "ToolTip": "C:\\Users\\alexi\\Documents\\Senior Project Project FIle\\SafeFutureInventorySystem\\SafeFutureInventorySystem\\Controllers\\InventoryController.cs",
+              "RelativeToolTip": "SafeFutureInventorySystem\\Controllers\\InventoryController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-05T21:30:14.193Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "InventoryFilterViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\alexi\\Documents\\Senior Project Project FIle\\SafeFutureInventorySystem\\SafeFutureInventorySystem\\Models\\InventoryFilterViewModel.cs",
+              "RelativeDocumentMoniker": "SafeFutureInventorySystem\\Models\\InventoryFilterViewModel.cs",
+              "ToolTip": "C:\\Users\\alexi\\Documents\\Senior Project Project FIle\\SafeFutureInventorySystem\\SafeFutureInventorySystem\\Models\\InventoryFilterViewModel.cs",
+              "RelativeToolTip": "SafeFutureInventorySystem\\Models\\InventoryFilterViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-06T02:24:19.029Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "InventoryItem.cs",
+              "DocumentMoniker": "C:\\Users\\alexi\\Documents\\Senior Project Project FIle\\SafeFutureInventorySystem\\SafeFutureInventorySystem\\Models\\InventoryItem.cs",
+              "RelativeDocumentMoniker": "SafeFutureInventorySystem\\Models\\InventoryItem.cs",
+              "ToolTip": "C:\\Users\\alexi\\Documents\\Senior Project Project FIle\\SafeFutureInventorySystem\\SafeFutureInventorySystem\\Models\\InventoryItem.cs",
+              "RelativeToolTip": "SafeFutureInventorySystem\\Models\\InventoryItem.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB4AAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-06T02:22:17.334Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\alexi\\Documents\\Senior Project Project FIle\\SafeFutureInventorySystem\\SafeFutureInventorySystem\\appsettings.json",
+              "RelativeDocumentMoniker": "SafeFutureInventorySystem\\appsettings.json",
+              "ToolTip": "C:\\Users\\alexi\\Documents\\Senior Project Project FIle\\SafeFutureInventorySystem\\SafeFutureInventorySystem\\appsettings.json",
+              "RelativeToolTip": "SafeFutureInventorySystem\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-11-06T02:28:41.317Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Web.config",
+              "DocumentMoniker": "C:\\Users\\alexi\\Documents\\Senior Project Project FIle\\SafeFutureInventorySystem\\SafeFutureInventorySystem\\Web.config",
+              "RelativeDocumentMoniker": "SafeFutureInventorySystem\\Web.config",
+              "ToolTip": "C:\\Users\\alexi\\Documents\\Senior Project Project FIle\\SafeFutureInventorySystem\\SafeFutureInventorySystem\\Web.config",
+              "RelativeToolTip": "SafeFutureInventorySystem\\Web.config",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000601|",
+              "WhenOpened": "2025-11-06T02:30:25.393Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "HomeController.cs",
+              "DocumentMoniker": "C:\\Users\\alexi\\Documents\\Senior Project Project FIle\\SafeFutureInventorySystem\\SafeFutureInventorySystem\\Controllers\\HomeController.cs",
+              "RelativeDocumentMoniker": "SafeFutureInventorySystem\\Controllers\\HomeController.cs",
+              "ToolTip": "C:\\Users\\alexi\\Documents\\Senior Project Project FIle\\SafeFutureInventorySystem\\SafeFutureInventorySystem\\Controllers\\HomeController.cs",
+              "RelativeToolTip": "SafeFutureInventorySystem\\Controllers\\HomeController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAAA8AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-05T21:30:14.897Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
