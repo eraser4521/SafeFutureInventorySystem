@@ -29,3 +29,33 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+/* Force badge icons to inherit text color */
+.badge i.fas {
+    color: inherit !important;
+}
+
+/* Specific badge color fixes */
+.badge.bg-danger,
+.badge-danger {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+.badge.bg-warning,
+.badge-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.badge.bg-success,
+.badge-success {
+    background-color: #28a745 !important;
+    color: white !important;
+}
+
+.badge.bg-secondary,
+.badge-secondary {
+    background-color: #6c757d !important;
+    color: white !important;
+}

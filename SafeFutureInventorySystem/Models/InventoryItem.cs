@@ -1,9 +1,54 @@
-﻿namespace SafeFutureInventorySystem.Models;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
-public class InventoryItem
+namespace SafeFutureInventorySystem.Models
 {
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public int Quantity { get; set; }
-    public DateTime DateAdded { get; set; }
+    public class InventoryItem
+    {
+        public int Id { get; set; }
+
+        [Required]
+        [StringLength(100)]
+        public string Name { get; set; }
+
+        [StringLength(500)]
+        public string? Description { get; set; }
+
+        [Required]
+        public int Quantity { get; set; }
+
+        [StringLength(50)]
+        public string? Barcode { get; set; }
+
+        [DataType(DataType.Date)]
+        public DateTime? ExpirationDate { get; set; }
+
+        [DataType(DataType.Date)]
+        public DateTime DateAdded { get; set; }
+
+        public DateTime? LastUpdated { get; set; }
+
+        public string? Category { get; set; }
+
+        // Computed property for expiration status
+        public string ExpirationStatus
+        {
+            get
+            {
+                if (!ExpirationDate.HasValue)
+                    return "No Expiration";
+
+                var daysUntilExpiration = (ExpirationDate.Value - DateTime.Now).Days;
+
+                if (daysUntilExpiration < 0)
+                    return "Expired";
+                else if (daysUntilExpiration <= 7)
+                    return "Expiring Soon";
+                else if (daysUntilExpiration <= 30)
+                    return "Expiring This Month";
+                else
+                    return "Good";
+            }
+        }
+    }
 }
