@@ -348,7 +348,7 @@
             $('#removeSelectedBtn').prop('disabled', count === 0);
         }
 
-        // USER STORY 1: Remove selected items - FIXED VERSION
+        // USER STORY 1: Remove selected items 
         $('#removeSelectedBtn').click(function() {
             var selectedIds = [];
 
@@ -357,7 +357,7 @@
                 selectedIds.push(parseInt($(this).val()));
             });
 
-            console.log('Selected IDs:', selectedIds); // Debug log
+            console.log('Selected IDs:', selectedIds);
 
             if (selectedIds.length === 0) {
                 alert('Please select items to remove.');
@@ -371,7 +371,7 @@
                     contentType: 'application/json',
                     data: JSON.stringify(selectedIds), // Send array directly
                     success: function(response) {
-                        console.log('Response:', response); // Debug log
+                        console.log('Response:', response);
                         if (response.success) {
                             alert(response.message);
                             location.reload();
@@ -380,7 +380,7 @@
                         }
                     },
                     error: function(xhr, status, error) {
-                        console.log('Error:', error); // Debug log
+                        console.log('Error:', error); 
                         alert('An error occurred while removing items: ' + error);
                     }
                 });
