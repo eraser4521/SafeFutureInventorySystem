@@ -8,22 +8,22 @@ namespace SafeFutureInventorySystem.Controllers
 {
     public class AccountController : Controller
     {
-        
+        // GET: /Account/Login
         [HttpGet, AllowAnonymous]
         public IActionResult Login(string? returnUrl = null)
         {
             ViewBag.ReturnUrl = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
 
-            
+            // Use Views/Account/Login.cshtml
             return View("Login");
         }
 
-        
+        // POST: /Account/Login
         [HttpPost, AllowAnonymous]
         public async Task<IActionResult> Login(string email, string password, string? returnUrl = null)
         {
-            
-            
+           
+
             if (email == demoUser && password == demoPass)
             {
                 var claims = new List<Claim>
@@ -48,7 +48,6 @@ namespace SafeFutureInventorySystem.Controllers
             ViewBag.Error = "Invalid username or password.";
             ViewBag.ReturnUrl = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
 
-            // Show the same styled login page again
             return View("Login");
         }
 
@@ -56,7 +55,7 @@ namespace SafeFutureInventorySystem.Controllers
         [HttpGet, AllowAnonymous]
         public IActionResult Register()
         {
-            return View("Register"); // Views/Account/Register.cshtml
+            return View("Register");
         }
 
         // POST: /Account/Register
@@ -69,7 +68,7 @@ namespace SafeFutureInventorySystem.Controllers
                 return View("Register");
             }
 
-            // TODO: save user to database (for now just pretend success)
+            // TODO: Save user to DB later
             return RedirectToAction("Login");
         }
 
@@ -77,14 +76,13 @@ namespace SafeFutureInventorySystem.Controllers
         [HttpGet, AllowAnonymous]
         public IActionResult ForgotPassword()
         {
-            return View("ForgotPassword"); // Views/Account/ForgotPassword.cshtml
+            return View("ForgotPassword");
         }
 
         // POST: /Account/ForgotPassword
         [HttpPost, AllowAnonymous]
         public IActionResult ForgotPassword(string email)
         {
-            // TODO: send reset email (for now just show a message)
             ViewBag.Message = "If an account exists for that email, a reset link will be sent.";
             return View("ForgotPassword");
         }
