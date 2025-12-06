@@ -4,6 +4,17 @@
     ViewBag.Title = "Inventory Management";
 }
 
+<!-- Success Message -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+        <button type="button" class="close" data-dismiss="alert">
+            <span>&times;</span>
+        </button>
+    </div>
+}
+
 <div class="container-fluid">
     <h2>
         <i class="fas fa-boxes"></i> Inventory Management
@@ -12,7 +23,7 @@
     <!-- Search and Filter Section -->
     <div class="card mb-4">
         <div class="card-body">
-            <form method="get" asp-action="Index" class="form-inline">
+            <form method="get" asp-action="Index" class="form-inline" id="filterForm">
                 <div class="row w-100">
                     <!-- USER STORY 4: Search by Name -->
                     <div class="col-md-4 mb-3">
@@ -57,19 +68,43 @@
                         </button>
                     </div>
                 </div>
+
+                <!-- NEW: Page Size Selector -->
+                <div class="row w-100 mt-2">
+                    <div class="col-md-3">
+                        <label>Items per page:</label>
+                        <select name="pageSize" class="form-control" onchange="this.form.submit()">
+                            <option value="5" selected="@(Model.PageSize == 5)">5</option>
+                            <option value="10" selected="@(Model.PageSize == 10)">10</option>
+                            <option value="25" selected="@(Model.PageSize == 25)">25</option>
+                            <option value="50" selected="@(Model.PageSize == 50)">50</option>
+                            <option value="100" selected="@(Model.PageSize == 100)">100</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Hidden fields to preserve state -->
+                <input type="hidden" name="sortBy" value="@Model.SortBy" />
+                <input type="hidden" name="sortOrder" value="@Model.SortOrder" />
             </form>
         </div>
     </div>
 
     <!-- Action Buttons -->
     <div class="mb-3">
-        <button type="button" class="btn btn-success" onclick="location.href='@Url.Action("Create", "Inventory")'">
+        <!-- NEW: Add Item Button -->
+        <a asp-action="Create" class="btn btn-success">
             <i class="fas fa-plus"></i> Add New Item
-        </button>
+        </a>
 
         <!-- USER STORY 1: Remove Selected Items -->
         <button type="button" class="btn btn-danger" id="removeSelectedBtn" disabled>
             <i class="fas fa-trash"></i> Remove Selected (<span id="selectedCount">0</span>)
+        </button>
+
+        <!-- UPDATED: Export to PDF Button -->
+        <button type="button" class="btn btn-danger" id="exportPdfBtn">
+            <i class="fas fa-file-pdf"></i> Export to PDF
         </button>
     </div>
 
@@ -87,6 +122,7 @@
                                 <a asp-action="Index"
                                    asp-route-searchTerm="@Model.SearchTerm"
                                    asp-route-expirationFilter="@Model.ExpirationFilter"
+                                   asp-route-pageSize="@Model.PageSize"
                                    asp-route-sortBy="Name"
                                    asp-route-sortOrder="@(Model.SortBy == "Name" && Model.SortOrder == "asc" ? "desc" : "asc")">
                                     Name
@@ -97,10 +133,12 @@
                                 </a>
                             </th>
                             <th>Description</th>
+                            <th>Donor</th> <!-- NEW DONOR COLUMN -->
                             <th>
                                 <a asp-action="Index"
                                    asp-route-searchTerm="@Model.SearchTerm"
                                    asp-route-expirationFilter="@Model.ExpirationFilter"
+                                   asp-route-pageSize="@Model.PageSize"
                                    asp-route-sortBy="Quantity"
                                    asp-route-sortOrder="@(Model.SortBy == "Quantity" && Model.SortOrder == "asc" ? "desc" : "asc")">
                                     Quantity
@@ -114,6 +152,7 @@
                                 <a asp-action="Index"
                                    asp-route-searchTerm="@Model.SearchTerm"
                                    asp-route-expirationFilter="@Model.ExpirationFilter"
+                                   asp-route-pageSize="@Model.PageSize"
                                    asp-route-sortBy="DateAdded"
                                    asp-route-sortOrder="@(Model.SortBy == "DateAdded" && Model.SortOrder == "asc" ? "desc" : "asc")">
                                     Date Added
@@ -127,6 +166,7 @@
                                 <a asp-action="Index"
                                    asp-route-searchTerm="@Model.SearchTerm"
                                    asp-route-expirationFilter="@Model.ExpirationFilter"
+                                   asp-route-pageSize="@Model.PageSize"
                                    asp-route-sortBy="ExpirationDate"
                                    asp-route-sortOrder="@(Model.SortBy == "ExpirationDate" && Model.SortOrder == "asc" ? "desc" : "asc")">
                                     Expiration Date
@@ -151,6 +191,28 @@
                                     </td>
                                     <td>@item.Name</td>
                                     <td>@(item.Description ?? "N/A")</td>
+
+                                    <!-- NEW: DONOR INFORMATION CELL -->
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.DonorName))
+                                        {
+                                            <div>
+                                                <i class="fas fa-user text-primary"></i>
+                                                <strong>@item.DonorName</strong>
+                                            </div>
+                                            @if (!string.IsNullOrEmpty(item.DonorPhone))
+                                            {
+                                                <small class="text-muted">
+                                                    <i class="fas fa-phone"></i> @item.DonorPhone
+                                                </small>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Unknown</span>
+                                        }
+                                    </td>
+
                                     <td>
                                         <span class="badge badge-light text-dark">@item.Quantity</span>
                                     </td>
@@ -169,41 +231,48 @@
                                     </td>
                                     <td>
                                         @{
-                                            var statusClass = "";
+                                            var bgClass = "";
+                                            var textClass = "text-white";
                                             var statusIcon = "";
                                             switch (item.ExpirationStatus)
                                             {
                                                 case "Expired":
-                                                    statusClass = "badge-danger";
+                                                    bgClass = "bg-danger";
                                                     statusIcon = "fa-times-circle";
                                                     break;
                                                 case "Expiring Soon":
-                                                    statusClass = "badge-warning";
+                                                    bgClass = "bg-warning";
+                                                    textClass = "text-dark";
                                                     statusIcon = "fa-exclamation-triangle";
                                                     break;
                                                 case "Expiring This Month":
-                                                    statusClass = "badge-warning";
+                                                    bgClass = "bg-warning";
+                                                    textClass = "text-dark";
                                                     statusIcon = "fa-clock";
                                                     break;
                                                 case "Good":
-                                                    statusClass = "badge-success";
+                                                    bgClass = "bg-success";
                                                     statusIcon = "fa-check-circle";
                                                     break;
                                                 default:
-                                                    statusClass = "badge-secondary";
+                                                    bgClass = "bg-secondary";
                                                     statusIcon = "fa-infinity";
                                                     break;
                                             }
                                         }
-                                        <span class="badge @statusClass">
+                                        <span class="badge @bgClass @textClass">
                                             <i class="fas @statusIcon"></i> @item.ExpirationStatus
                                         </span>
                                     </td>
                                     <td>
+                                        <!-- View Details Button -->
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
                                         <!-- USER STORY 3: Adjust Quantity Button -->
                                         <button type="button" class="btn btn-sm btn-warning"
-                                                onclick="openAdjustQuantityModal(@item.Id, '@item.Name', @item.Quantity)">
-                                            <i class="fas fa-edit"></i> Adjust
+                                                onclick="openAdjustQuantityModal(@item.Id, '@item.Name', @item.Quantity)" title="Adjust Quantity">
+                                            <i class="fas fa-edit"></i>
                                         </button>
                                     </td>
                                 </tr>
@@ -212,7 +281,8 @@
                         else
                         {
                             <tr>
-                                <td colspan="8" class="text-center">
+                                <td colspan="9" class="text-center">
+                                    <!-- Changed from 8 to 9 for donor column -->
                                     <p class="text-muted">No items found matching your criteria.</p>
                                 </td>
                             </tr>
@@ -221,11 +291,12 @@
                 </table>
             </div>
 
-            <!-- Pagination -->
+            <!-- Enhanced Pagination with Jump to Page -->
             @if (Model.TotalPages > 1)
             {
                 <nav>
                     <ul class="pagination justify-content-center">
+                        <!-- First Page -->
                         @if (Model.PageNumber > 1)
                         {
                             <li class="page-item">
@@ -234,11 +305,29 @@
                                    asp-route-expirationFilter="@Model.ExpirationFilter"
                                    asp-route-sortBy="@Model.SortBy"
                                    asp-route-sortOrder="@Model.SortOrder"
+                                   asp-route-pageSize="@Model.PageSize"
+                                   asp-route-page="1">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" asp-action="Index"
+                                   asp-route-searchTerm="@Model.SearchTerm"
+                                   asp-route-expirationFilter="@Model.ExpirationFilter"
+                                   asp-route-sortBy="@Model.SortBy"
+                                   asp-route-sortOrder="@Model.SortOrder"
+                                   asp-route-pageSize="@Model.PageSize"
                                    asp-route-page="@(Model.PageNumber - 1)">Previous</a>
                             </li>
                         }
 
-                        @for (int i = 1; i <= Model.TotalPages; i++)
+                        <!-- Page Numbers (show 5 at a time) -->
+                        @{
+                            int startPage = Math.Max(1, Model.PageNumber - 2);
+                            int endPage = Math.Min(Model.TotalPages, Model.PageNumber + 2);
+                        }
+
+                        @for (int i = startPage; i <= endPage; i++)
                         {
                             <li class="page-item @(i == Model.PageNumber ? "active" : "")">
                                 <a class="page-link" asp-action="Index"
@@ -246,10 +335,12 @@
                                    asp-route-expirationFilter="@Model.ExpirationFilter"
                                    asp-route-sortBy="@Model.SortBy"
                                    asp-route-sortOrder="@Model.SortOrder"
+                                   asp-route-pageSize="@Model.PageSize"
                                    asp-route-page="@i">@i</a>
                             </li>
                         }
 
+                        <!-- Next and Last -->
                         @if (Model.PageNumber < Model.TotalPages)
                         {
                             <li class="page-item">
@@ -258,14 +349,43 @@
                                    asp-route-expirationFilter="@Model.ExpirationFilter"
                                    asp-route-sortBy="@Model.SortBy"
                                    asp-route-sortOrder="@Model.SortOrder"
+                                   asp-route-pageSize="@Model.PageSize"
                                    asp-route-page="@(Model.PageNumber + 1)">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" asp-action="Index"
+                                   asp-route-searchTerm="@Model.SearchTerm"
+                                   asp-route-expirationFilter="@Model.ExpirationFilter"
+                                   asp-route-sortBy="@Model.SortBy"
+                                   asp-route-sortOrder="@Model.SortOrder"
+                                   asp-route-pageSize="@Model.PageSize"
+                                   asp-route-page="@Model.TotalPages">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
                             </li>
                         }
                     </ul>
+
+                    <!-- NEW: Jump to Page Feature -->
+                    <div class="text-center mt-3">
+                        <form method="get" asp-action="Index" class="form-inline justify-content-center" id="jumpToPageForm">
+                            <input type="hidden" name="searchTerm" value="@Model.SearchTerm" />
+                            <input type="hidden" name="expirationFilter" value="@Model.ExpirationFilter" />
+                            <input type="hidden" name="sortBy" value="@Model.SortBy" />
+                            <input type="hidden" name="sortOrder" value="@Model.SortOrder" />
+                            <input type="hidden" name="pageSize" value="@Model.PageSize" />
+
+                            <label class="mr-2">Jump to page:</label>
+                            <input type="number" name="page" class="form-control form-control-sm"
+                                   min="1" max="@Model.TotalPages" value="@Model.PageNumber"
+                                   style="width: 80px;" />
+                            <button type="submit" class="btn btn-sm btn-primary ml-2">Go</button>
+                        </form>
+                    </div>
                 </nav>
             }
 
-            <div class="text-center text-muted">
+            <div class="text-center text-muted mt-3">
                 Showing @((Model.PageNumber - 1) * Model.PageSize + 1) to
                 @(Math.Min(Model.PageNumber * Model.PageSize, Model.TotalCount))
                 of @Model.TotalCount items
@@ -302,6 +422,7 @@
                         <label for="adjustNewQuantity">New Quantity: <span class="text-danger">*</span></label>
                         <input type="number" class="form-control" id="adjustNewQuantity"
                                min="0" required />
+                        <small class="form-text text-muted">Only positive numbers allowed</small>
                     </div>
 
                     <div class="form-group">
@@ -348,16 +469,13 @@
             $('#removeSelectedBtn').prop('disabled', count === 0);
         }
 
-        // USER STORY 1: Remove selected items 
+        // USER STORY 1: Remove selected items
         $('#removeSelectedBtn').click(function() {
             var selectedIds = [];
 
-            // Collect all checked checkbox values
             $('.item-checkbox:checked').each(function() {
                 selectedIds.push(parseInt($(this).val()));
             });
-
-            console.log('Selected IDs:', selectedIds);
 
             if (selectedIds.length === 0) {
                 alert('Please select items to remove.');
@@ -369,9 +487,8 @@
                     url: '@Url.Action("RemoveItems", "Inventory")',
                     type: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify(selectedIds), // Send array directly
+                    data: JSON.stringify(selectedIds),
                     success: function(response) {
-                        console.log('Response:', response);
                         if (response.success) {
                             alert(response.message);
                             location.reload();
@@ -380,11 +497,30 @@
                         }
                     },
                     error: function(xhr, status, error) {
-                        console.log('Error:', error); 
                         alert('An error occurred while removing items: ' + error);
                     }
                 });
             }
+        });
+
+        // NEW: Export to PDF with current filters
+        $('#exportPdfBtn').click(function() {
+            var searchTerm = '@Model.SearchTerm';
+            var expirationFilter = '@Model.ExpirationFilter';
+            var fromDate = '@Model.FromDate?.ToString("yyyy-MM-dd")';
+            var toDate = '@Model.ToDate?.ToString("yyyy-MM-dd")';
+            var sortBy = '@Model.SortBy';
+            var sortOrder = '@Model.SortOrder';
+
+            var url = '@Url.Action("ExportInventoryPdf", "Inventory")' +
+                '?searchTerm=' + encodeURIComponent(searchTerm) +
+                '&expirationFilter=' + encodeURIComponent(expirationFilter) +
+                '&fromDate=' + encodeURIComponent(fromDate) +
+                '&toDate=' + encodeURIComponent(toDate) +
+                '&sortBy=' + encodeURIComponent(sortBy) +
+                '&sortOrder=' + encodeURIComponent(sortOrder);
+
+            window.location.href = url;
         });
 
         // USER STORY 3: Open adjust quantity modal
@@ -397,14 +533,15 @@
             $('#adjustQuantityModal').modal('show');
         }
 
-        // USER STORY 3: Submit quantity adjustment
+        // USER STORY 3 & 7: Submit quantity adjustment with validation
         function submitQuantityAdjustment() {
             var id = $('#adjustItemId').val();
             var newQuantity = parseInt($('#adjustNewQuantity').val());
             var reason = $('#adjustReason').val();
 
-            if (!newQuantity && newQuantity !== 0) {
-                alert('Please enter a valid quantity.');
+            // Validation
+            if (isNaN(newQuantity) || newQuantity < 0) {
+                alert('Please enter a valid non-negative quantity.');
                 return;
             }
 
@@ -435,5 +572,32 @@
                 }
             });
         }
+
+        // USER STORY 7: Prevent non-numeric characters in quantity field
+        document.getElementById('adjustNewQuantity').addEventListener('keypress', function(e) {
+            // Only allow numbers (0-9)
+            if (e.which < 48 || e.which > 57) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // Prevent negative numbers in real-time
+        document.getElementById('adjustNewQuantity').addEventListener('input', function(e) {
+            if (this.value < 0) {
+                this.value = 0;
+            }
+        });
+
+        // Validate jump to page input
+        document.querySelector('input[name="page"]').addEventListener('input', function() {
+            var max = parseInt(this.getAttribute('max'));
+            if (parseInt(this.value) > max) {
+                this.value = max;
+            }
+            if (parseInt(this.value) < 1) {
+                this.value = 1;
+            }
+        });
     </script>
 }

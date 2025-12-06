@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SafeFutureInventorySystem.Data;
 using SafeFutureInventorySystem.Models;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using System.IO;
 
 namespace SafeFutureInventorySystem.Controllers
 {
@@ -19,7 +22,7 @@ namespace SafeFutureInventorySystem.Controllers
         // GET: Inventory
         public IActionResult Index(string searchTerm, string expirationFilter,
             DateTime? fromDate, DateTime? toDate, string sortBy = "Name",
-            string sortOrder = "asc", int page = 1)
+            string sortOrder = "asc", int page = 1, int pageSize = 10)
         {
             var query = _context.InventoryItems.AsQueryable();
 
@@ -103,8 +106,10 @@ namespace SafeFutureInventorySystem.Controllers
             // Get total count before pagination
             var totalCount = query.Count();
 
+            // NEW: User Story - Configurable page size (default 10, max 100)
+            pageSize = Math.Max(5, Math.Min(pageSize, 100));
+
             // Apply pagination
-            var pageSize = 10;
             var items = query.Skip((page - 1) * pageSize)
                             .Take(pageSize)
                             .ToList();
@@ -126,6 +131,52 @@ namespace SafeFutureInventorySystem.Controllers
             return View(viewModel);
         }
 
+        // NEW: User Story - Add new item to inventory
+        // GET: Inventory/Create
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        // POST: Inventory/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(InventoryItem item)
+        {
+            if (ModelState.IsValid)
+            {
+                item.DateAdded = DateTime.Now;
+                _context.InventoryItems.Add(item);
+                _context.SaveChanges();
+
+                TempData["SuccessMessage"] = $"Item '{item.Name}' added successfully!";
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(item);
+        }
+
+        // NEW: User Story - View item details/count
+        // GET: Inventory/Details/5
+        public IActionResult Details(int id)
+        {
+            var item = _context.InventoryItems.Find(id);
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            // Get adjustment history
+            var adjustmentHistory = _context.AdjustmentLogs
+                .Where(l => l.InventoryItemId == id)
+                .OrderByDescending(l => l.AdjustmentDate)
+                .Take(10)
+                .ToList();
+
+            ViewBag.AdjustmentHistory = adjustmentHistory;
+            return View(item);
+        }
+
         // USER STORY 3: Adjust quantity
         [HttpPost]
         public JsonResult AdjustQuantity(int id, int newQuantity, string reason)
@@ -136,6 +187,12 @@ namespace SafeFutureInventorySystem.Controllers
                 if (item == null)
                 {
                     return new JsonResult(new { success = false, message = "Item not found" });
+                }
+
+                // NEW: Validation - ensure non-negative quantity
+                if (newQuantity < 0)
+                {
+                    return new JsonResult(new { success = false, message = "Quantity cannot be negative" });
                 }
 
                 var oldQuantity = item.Quantity;
@@ -200,6 +257,121 @@ namespace SafeFutureInventorySystem.Controllers
             }
         }
 
+        // NEW: Export Inventory to PDF
+        [HttpGet]
+        [Route("Export")]
+        public IActionResult ExportInventoryPdf()
+        {
+            try
+            {
+                var items = _context.InventoryItems.OrderBy(i => i.Name).ToList();
+
+                if (!items.Any())
+                {
+                    TempData["error"] = "No inventory items to export.";
+                    return RedirectToAction("Index");
+                }
+
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    // Create document
+                    Document document = new Document(PageSize.A4.Rotate(), 10, 10, 10, 10);
+                    PdfWriter writer = PdfWriter.GetInstance(document, memoryStream);
+                    document.Open();
+
+                    // Add title
+                    PdfPTable titleTable = new PdfPTable(1);
+                    titleTable.WidthPercentage = 100;
+                    PdfPCell titleCell = new PdfPCell(new Phrase("Inventory Report",
+                        FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 16, BaseColor.WHITE)))
+                    {
+                        HorizontalAlignment = Element.ALIGN_CENTER,
+                        Padding = 10,
+                        BackgroundColor = new BaseColor(0, 51, 102)
+                    };
+                    titleTable.AddCell(titleCell);
+                    document.Add(titleTable);
+
+                    // Add date
+                    Paragraph dateParagraph = new Paragraph($"Generated on: {DateTime.Now:yyyy-MM-dd HH:mm:ss}",
+                        FontFactory.GetFont(FontFactory.HELVETICA, 10))
+                    {
+                        Alignment = Element.ALIGN_RIGHT,
+                        SpacingAfter = 20
+                    };
+                    document.Add(dateParagraph);
+
+                    // Create data table
+                    PdfPTable table = new PdfPTable(8);
+                    table.WidthPercentage = 100;
+                    table.SetWidths(new float[] { 10, 18, 18, 10, 12, 12, 12, 12 });
+
+                    // Header row
+                    string[] headers = { "ID", "Name", "Description", "Quantity", "Category", "Barcode", "Expiration Date", "Date Added" };
+                    foreach (string header in headers)
+                    {
+                        PdfPCell headerCell = new PdfPCell(new Phrase(header,
+                            FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 10, BaseColor.WHITE)))
+                        {
+                            BackgroundColor = new BaseColor(0, 102, 204),
+                            HorizontalAlignment = Element.ALIGN_CENTER,
+                            Padding = 8
+                        };
+                        table.AddCell(headerCell);
+                    }
+
+                    // Data rows
+                    foreach (var item in items)
+                    {
+                        table.AddCell(new PdfPCell(new Phrase(item.Id.ToString(),
+                            FontFactory.GetFont(FontFactory.HELVETICA, 9)))
+                        { Padding = 6 });
+                        table.AddCell(new PdfPCell(new Phrase(item.Name,
+                            FontFactory.GetFont(FontFactory.HELVETICA, 9)))
+                        { Padding = 6 });
+                        table.AddCell(new PdfPCell(new Phrase(item.Description ?? "",
+                            FontFactory.GetFont(FontFactory.HELVETICA, 9)))
+                        { Padding = 6 });
+                        table.AddCell(new PdfPCell(new Phrase(item.Quantity.ToString(),
+                            FontFactory.GetFont(FontFactory.HELVETICA, 9)))
+                        { Padding = 6, HorizontalAlignment = Element.ALIGN_CENTER });
+                        table.AddCell(new PdfPCell(new Phrase(item.Category ?? "",
+                            FontFactory.GetFont(FontFactory.HELVETICA, 9)))
+                        { Padding = 6 });
+                        table.AddCell(new PdfPCell(new Phrase(item.Barcode ?? "",
+                            FontFactory.GetFont(FontFactory.HELVETICA, 9)))
+                        { Padding = 6 });
+                        table.AddCell(new PdfPCell(new Phrase(item.ExpirationDate?.ToString("yyyy-MM-dd") ?? "N/A",
+                            FontFactory.GetFont(FontFactory.HELVETICA, 9)))
+                        { Padding = 6, HorizontalAlignment = Element.ALIGN_CENTER });
+                        table.AddCell(new PdfPCell(new Phrase(item.DateAdded.ToString("yyyy-MM-dd"),
+                            FontFactory.GetFont(FontFactory.HELVETICA, 9)))
+                        { Padding = 6 });
+                    }
+
+                    document.Add(table);
+
+                    // Add summary
+                    Paragraph summary = new Paragraph($"\nTotal Items: {items.Count}",
+                        FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 11))
+                    {
+                        SpacingBefore = 20
+                    };
+                    document.Add(summary);
+
+                    document.Close();
+                    byte[] pdfBytes = memoryStream.ToArray();
+                    string fileName = $"Inventory_Export_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+                    return File(pdfBytes, "application/pdf", fileName);
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["error"] = $"Error exporting inventory: {ex.Message}";
+                return RedirectToAction("Index");
+            }
+        }
+
         // Get item details
         [HttpGet]
         public JsonResult GetItemDetails(int id)
@@ -221,7 +393,8 @@ namespace SafeFutureInventorySystem.Controllers
                         name = item.Name,
                         quantity = item.Quantity,
                         description = item.Description,
-                        barcode = item.Barcode
+                        barcode = item.Barcode,
+                        expirationStatus = item.ExpirationStatus
                     }
                 });
             }
