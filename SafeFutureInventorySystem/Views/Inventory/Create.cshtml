@@ -1,0 +1,159 @@
+﻿@model SafeFutureInventorySystem.Models.InventoryItem
+
+@{
+    ViewBag.Title = "Add New Inventory Item";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h3><i class="fas fa-plus-circle"></i> Add New Inventory Item</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <div class="row">
+                            <!-- ITEM INFORMATION SECTION -->
+                            <div class="col-md-6">
+                                <h4 class="mb-3"><i class="fas fa-box"></i> Item Information</h4>
+
+                                <div class="form-group">
+                                    <label asp-for="Name" class="control-label">Item Name <span class="text-danger">*</span></label>
+                                    <input asp-for="Name" class="form-control" placeholder="e.g., Pampers Size 3 Diapers" required />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label asp-for="Description" class="control-label">Description</label>
+                                    <textarea asp-for="Description" class="form-control" rows="3"
+                                              placeholder="Detailed description of the item"></textarea>
+                                    <span asp-validation-for="Description" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label asp-for="Category" class="control-label">Category</label>
+                                    <select asp-for="Category" class="form-control">
+                                        <option value="">-- Select Category --</option>
+                                        <option value="Diapers">Diapers</option>
+                                        <option value="Baby Wipes">Baby Wipes</option>
+                                        <option value="Baby Formula">Baby Formula</option>
+                                        <option value="Baby Food">Baby Food</option>
+                                        <option value="Feeding">Feeding</option>
+                                        <option value="Clothing">Clothing</option>
+                                        <option value="Baby Care">Baby Care</option>
+                                        <option value="Diapering">Diapering</option>
+                                        <option value="Baby Health">Baby Health</option>
+                                        <option value="Bathing">Bathing</option>
+                                        <option value="Bedding">Bedding</option>
+                                        <option value="Safety">Safety</option>
+                                        <option value="Accessories">Accessories</option>
+                                        <option value="Comfort">Comfort</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="Quantity" class="control-label">Quantity <span class="text-danger">*</span></label>
+                                            <input asp-for="Quantity" class="form-control" type="number" min="0"
+                                                   placeholder="0" required />
+                                            <span asp-validation-for="Quantity" class="text-danger"></span>
+                                            <small class="form-text text-muted">Must be a positive number</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label asp-for="Barcode" class="control-label">Barcode</label>
+                                            <input asp-for="Barcode" class="form-control" placeholder="e.g., 037000465911" />
+                                            <span asp-validation-for="Barcode" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label asp-for="ExpirationDate" class="control-label">Expiration Date</label>
+                                    <input asp-for="ExpirationDate" class="form-control" type="date" />
+                                    <span asp-validation-for="ExpirationDate" class="text-danger"></span>
+                                    <small class="form-text text-muted">Leave blank if no expiration</small>
+                                </div>
+                            </div>
+
+                            <!-- DONOR INFORMATION SECTION -->
+                            <div class="col-md-6">
+                                <h4 class="mb-3"><i class="fas fa-user-plus"></i> Donor Information</h4>
+
+                                <div class="form-group">
+                                    <label asp-for="DonorName" class="control-label">Donor Name</label>
+                                    <input asp-for="DonorName" class="form-control"
+                                           placeholder="Enter donor's full name or organization" />
+                                    <span asp-validation-for="DonorName" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label asp-for="DonorPhone" class="control-label">Donor Phone</label>
+                                    <input asp-for="DonorPhone" type="tel" class="form-control"
+                                           placeholder="555-0123" />
+                                    <span asp-validation-for="DonorPhone" class="text-danger"></span>
+                                    <small class="form-text text-muted">Format: 555-0123</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label asp-for="DonorEmail" class="control-label">Donor Email</label>
+                                    <input asp-for="DonorEmail" type="email" class="form-control"
+                                           placeholder="donor@email.com" />
+                                    <span asp-validation-for="DonorEmail" class="text-danger"></span>
+                                </div>
+
+                                <div class="alert alert-info mt-4">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Note:</strong> Donor information is optional but helps track donations.
+                                    Providing at least a donor name is recommended.
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <div class="form-group text-right">
+                            <a asp-action="Index" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-save"></i> Add Item
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Prevent non-numeric input in quantity field
+        document.querySelector('input[name="Quantity"]').addEventListener('keypress', function(e) {
+            // Only allow numbers
+            if (e.which < 48 || e.which > 57) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // Prevent negative numbers
+        document.querySelector('input[name="Quantity"]').addEventListener('input', function(e) {
+            if (this.value < 0) {
+                this.value = 0;
+            }
+        });
+    </script>
+}
