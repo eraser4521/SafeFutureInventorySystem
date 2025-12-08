@@ -56,7 +56,7 @@ public async Task<IActionResult> Login(string email, string password, string? re
             CookieAuthenticationDefaults.AuthenticationScheme,
             principal);
 
-        return LocalRedirect(string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl!);
+        return RedirectToAction("Index", "Inventory");
     }
 
     // If it gets here, login failed – show exactly what the server saw
