@@ -20,8 +20,6 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
-var app = builder.Build();
-
 
 // Add DbContext with SQLite
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
