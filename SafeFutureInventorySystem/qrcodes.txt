@@ -1,0 +1,1 @@
+Id,InventoryItemId,Value,Format,GeneratedAt

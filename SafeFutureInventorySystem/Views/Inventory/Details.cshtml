@@ -1,0 +1,313 @@
+@model SafeFutureInventorySystem.Models.InventoryItem
+
+@{
+    ViewBag.Title = "Item Details";
+    var adjustmentHistory = ViewBag.AdjustmentHistory as List<SafeFutureInventorySystem.Models.InventoryAdjustmentLog>;
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3><i class="fas fa-info-circle"></i> Item Details</h3>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Item Name:</dt>
+                        <dd class="col-sm-8"><strong>@Model.Name</strong></dd>
+
+                        <dt class="col-sm-4">Description:</dt>
+                        <dd class="col-sm-8">@(Model.Description ?? "N/A")</dd>
+
+                        <dt class="col-sm-4">Category:</dt>
+                        <dd class="col-sm-8">@(Model.Category ?? "N/A")</dd>
+
+                        <dt class="col-sm-4">Current Quantity:</dt>
+                        <dd class="col-sm-8">
+                            <h3>
+                                <span class="badge bg-primary">
+                                    @Model.Quantity units
+                                </span>
+                            </h3>
+                        </dd>
+
+                        <dt class="col-sm-4">Barcode:</dt>
+                        <dd class="col-sm-8">@(Model.Barcode ?? "N/A")</dd>
+
+                        <dt class="col-sm-4">Date Added:</dt>
+                        <dd class="col-sm-8">@Model.DateAdded.ToString("MMMM dd, yyyy")</dd>
+
+                        <dt class="col-sm-4">Expiration Date:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.ExpirationDate.HasValue)
+                            {
+                                @Model.ExpirationDate.Value.ToString("MMMM dd, yyyy")
+                            }
+                            else
+                            {
+                                <span class="text-muted">No Expiration Date</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Status:</dt>
+                        <dd class="col-sm-8">
+                            @{
+                                var bgClass = "";
+                                var textClass = "text-white";
+                                var statusIcon = "";
+                                switch (Model.ExpirationStatus)
+                                {
+                                    case "Expired":
+                                        bgClass = "bg-danger";
+                                        statusIcon = "fa-times-circle";
+                                        break;
+                                    case "Expiring Soon":
+                                        bgClass = "bg-warning";
+                                        textClass = "text-dark";
+                                        statusIcon = "fa-exclamation-triangle";
+                                        break;
+                                    case "Expiring This Month":
+                                        bgClass = "bg-warning";
+                                        textClass = "text-dark";
+                                        statusIcon = "fa-clock";
+                                        break;
+                                    case "Good":
+                                        bgClass = "bg-success";
+                                        statusIcon = "fa-check-circle";
+                                        break;
+                                    default:
+                                        bgClass = "bg-secondary";
+                                        statusIcon = "fa-infinity";
+                                        break;
+                                }
+                            }
+                            <span class="badge @bgClass @textClass">
+                                <i class="fas @statusIcon"></i> @Model.ExpirationStatus
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-4">Last Updated:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.LastUpdated.HasValue)
+                            {
+                                @Model.LastUpdated.Value.ToString("MMMM dd, yyyy hh:mm tt")
+                            }
+                            else
+                            {
+                                <span class="text-muted">Never updated</span>
+                            }
+                        </dd>
+                    </dl>
+
+                    <hr class="my-4" />
+
+                    <!-- DONOR INFORMATION SECTION -->
+                    <h4 class="mb-3"><i class="fas fa-user-friends"></i> Donor Information</h4>
+
+                    <dl class="row">
+                        <dt class="col-sm-4">Donor Name:</dt>
+                        <dd class="col-sm-8">
+                            @if (!string.IsNullOrEmpty(Model.DonorName))
+                            {
+                                <i class="fas fa-user text-primary"></i> <strong>@Model.DonorName</strong>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Not recorded</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Donor Phone:</dt>
+                        <dd class="col-sm-8">
+                            @if (!string.IsNullOrEmpty(Model.DonorPhone))
+                            {
+                                <i class="fas fa-phone text-success"></i>
+                                <a href="tel:@Model.DonorPhone">@Model.DonorPhone</a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Not provided</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Donor Email:</dt>
+                        <dd class="col-sm-8">
+                            @if (!string.IsNullOrEmpty(Model.DonorEmail))
+                            {
+                                <i class="fas fa-envelope text-info"></i>
+                                <a href="mailto:@Model.DonorEmail">@Model.DonorEmail</a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Not provided</span>
+                            }
+                        </dd>
+                    </dl>
+
+                    <hr />
+
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-warning"
+                                onclick="openAdjustQuantityModal(@Model.Id, '@Model.Name', @Model.Quantity)">
+                            <i class="fas fa-edit"></i> Adjust Quantity
+                        </button>
+                        <a asp-action="QrCode" asp-route-id="@Model.Id" class="btn btn-secondary">
+                            <i class="fas fa-qrcode"></i> QR Code
+                        </a>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Adjustment History -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="fas fa-history"></i> Recent Adjustments</h5>
+                </div>
+                <div class="card-body" style="max-height: 500px; overflow-y: auto;">
+                    @if (adjustmentHistory != null && adjustmentHistory.Any())
+                    {
+                        <ul class="list-group">
+                            @foreach (var log in adjustmentHistory)
+                            {
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>@log.OldQuantity -> @log.NewQuantity</strong>
+                                        <small class="text-muted">@log.AdjustmentDate.ToString("MM/dd/yy")</small>
+                                    </div>
+                                    <small class="text-muted">
+                                        @log.Reason<br />
+                                        By: @log.AdjustedBy
+                                    </small>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">No adjustment history</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Adjust Quantity Modal -->
+<div class="modal fade" id="adjustQuantityModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Adjust Quantity</h5>
+                <button type="button" class="close adjust-close" data-dismiss="modal" aria-label="Close">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="adjustQuantityForm">
+                    <input type="hidden" id="adjustItemId" />
+
+                    <div class="form-group">
+                        <label>Item Name:</label>
+                        <input type="text" class="form-control" id="adjustItemName" readonly />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Current Quantity:</label>
+                        <input type="number" class="form-control" id="adjustCurrentQuantity" readonly />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="adjustNewQuantity">New Quantity: <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="adjustNewQuantity"
+                               min="0" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="adjustReason">Reason for Adjustment: <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="adjustReason" rows="3"
+                                  placeholder="E.g., Physical stock check, damaged items, etc." required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary adjust-cancel" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitQuantityAdjustment()">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openAdjustQuantityModal(id, name, currentQuantity) {
+            $('#adjustItemId').val(id);
+            $('#adjustItemName').val(name);
+            $('#adjustCurrentQuantity').val(currentQuantity);
+            $('#adjustNewQuantity').val(currentQuantity);
+            $('#adjustReason').val('');
+            $('#adjustQuantityModal').modal('show');
+        }
+
+        function submitQuantityAdjustment() {
+            var id = $('#adjustItemId').val();
+            var newQuantity = parseInt($('#adjustNewQuantity').val());
+            var reason = $('#adjustReason').val();
+
+            if (!newQuantity && newQuantity !== 0) {
+                alert('Please enter a valid quantity.');
+                return;
+            }
+
+            if (newQuantity < 0) {
+                alert('Quantity cannot be negative.');
+                return;
+            }
+
+            if (!reason || reason.trim() === '') {
+                alert('Please provide a reason for the adjustment.');
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("AdjustQuantity", "Inventory")',
+                type: 'POST',
+                data: {
+                    id: id,
+                    newQuantity: newQuantity,
+                    reason: reason
+                },
+                success: function(response) {
+                    if (response.success) {
+                        alert(response.message);
+                        $('#adjustQuantityModal').modal('hide');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('An error occurred while adjusting the quantity.');
+                }
+            });
+        }
+
+        document.getElementById('adjustNewQuantity').addEventListener('keypress', function(e) {
+            if (e.which < 48 || e.which > 57) {
+                e.preventDefault();
+            }
+        });
+
+        // Ensure the adjust modal can always be closed
+        $(document).on('click', '.adjust-close, .adjust-cancel', function() {
+            $('#adjustQuantityModal').modal('hide');
+        });
+    </script>
+}
