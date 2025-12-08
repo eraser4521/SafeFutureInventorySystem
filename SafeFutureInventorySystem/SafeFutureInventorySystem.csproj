@@ -18,6 +18,15 @@
       <None Update="inventory.txt">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+      <None Update="barcodes.txt">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="ZXing.Net" Version="0.16.8" />
+      <PackageReference Include="SkiaSharp" Version="2.88.6" />
+      <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.6" />
     </ItemGroup>
 
 </Project>

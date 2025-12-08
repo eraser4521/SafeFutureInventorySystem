@@ -1,4 +1,4 @@
-﻿@model SafeFutureInventorySystem.Models.InventoryItem
+@model SafeFutureInventorySystem.Models.InventoryItem
 
 @{
     ViewBag.Title = "Item Details";
@@ -102,7 +102,7 @@
 
                     <hr class="my-4" />
 
-                    <!-- NEW: DONOR INFORMATION SECTION -->
+                    <!-- DONOR INFORMATION SECTION -->
                     <h4 class="mb-3"><i class="fas fa-user-friends"></i> Donor Information</h4>
 
                     <dl class="row">
@@ -122,7 +122,7 @@
                         <dd class="col-sm-8">
                             @if (!string.IsNullOrEmpty(Model.DonorPhone))
                             {
-                                <i class="fas fa-phone text-success"></i> 
+                                <i class="fas fa-phone text-success"></i>
                                 <a href="tel:@Model.DonorPhone">@Model.DonorPhone</a>
                             }
                             else
@@ -135,7 +135,7 @@
                         <dd class="col-sm-8">
                             @if (!string.IsNullOrEmpty(Model.DonorEmail))
                             {
-                                <i class="fas fa-envelope text-info"></i> 
+                                <i class="fas fa-envelope text-info"></i>
                                 <a href="mailto:@Model.DonorEmail">@Model.DonorEmail</a>
                             }
                             else
@@ -152,6 +152,9 @@
                                 onclick="openAdjustQuantityModal(@Model.Id, '@Model.Name', @Model.Quantity)">
                             <i class="fas fa-edit"></i> Adjust Quantity
                         </button>
+                        <a asp-action="QrCode" asp-route-id="@Model.Id" class="btn btn-secondary">
+                            <i class="fas fa-qrcode"></i> QR Code
+                        </a>
                         <a asp-action="Index" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Back to List
                         </a>
@@ -174,7 +177,7 @@
                             {
                                 <li class="list-group-item">
                                     <div class="d-flex justify-content-between">
-                                        <strong>@log.OldQuantity → @log.NewQuantity</strong>
+                                        <strong>@log.OldQuantity -> @log.NewQuantity</strong>
                                         <small class="text-muted">@log.AdjustmentDate.ToString("MM/dd/yy")</small>
                                     </div>
                                     <small class="text-muted">

@@ -269,6 +269,10 @@
                                         <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="View Details">
                                             <i class="fas fa-eye"></i>
                                         </a>
+                                        <!-- QR Code Button -->
+                                        <a asp-action="QrCode" asp-route-id="@item.Id" class="btn btn-sm btn-secondary" title="View QR Code">
+                                            <i class="fas fa-qrcode"></i>
+                                        </a>
                                         <!-- USER STORY 3: Adjust Quantity Button -->
                                         <button type="button" class="btn btn-sm btn-warning"
                                                 onclick="openAdjustQuantityModal(@item.Id, '@item.Name', @item.Quantity)" title="Adjust Quantity">

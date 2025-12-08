@@ -1,149 +1,224 @@
-﻿using System;
+using System;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SafeFutureInventorySystem.Data;
 using SafeFutureInventorySystem.Models;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
-using System.IO;
+using SkiaSharp;
 
 namespace SafeFutureInventorySystem.Controllers
 {
     public class InventoryController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<InventoryController> _logger;
 
-        public InventoryController(ApplicationDbContext context)
+        public InventoryController(ApplicationDbContext context, ILogger<InventoryController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
-        // GET: Inventory
         public IActionResult Index(string searchTerm, string expirationFilter,
             DateTime? fromDate, DateTime? toDate, string sortBy = "Name",
             string sortOrder = "asc", int page = 1, int pageSize = 10)
         {
-            var query = _context.InventoryItems.AsQueryable();
-
-            // USER STORY 4: Search by name
-            if (!string.IsNullOrWhiteSpace(searchTerm))
+            try
             {
-                query = query.Where(i =>
-                    i.Name.Contains(searchTerm) ||
-                    (i.Description != null && i.Description.Contains(searchTerm)) ||
-                    (i.Barcode != null && i.Barcode.Contains(searchTerm)));
-            }
+                var query = _context.InventoryItems.AsQueryable();
 
-            // USER STORY 2: Filter by expiration date
-            if (!string.IsNullOrWhiteSpace(expirationFilter))
-            {
-                var today = DateTime.Now.Date;
-
-                switch (expirationFilter)
+                if (!string.IsNullOrWhiteSpace(searchTerm))
                 {
-                    case "Expired":
-                        query = query.Where(i => i.ExpirationDate.HasValue &&
-                                               i.ExpirationDate.Value < today);
-                        break;
-
-                    case "ExpiringSoon":
-                        var weekFromNow = today.AddDays(7);
-                        query = query.Where(i => i.ExpirationDate.HasValue &&
-                                               i.ExpirationDate.Value >= today &&
-                                               i.ExpirationDate.Value <= weekFromNow);
-                        break;
-
-                    case "ExpiringThisMonth":
-                        var monthFromNow = today.AddDays(30);
-                        query = query.Where(i => i.ExpirationDate.HasValue &&
-                                               i.ExpirationDate.Value >= today &&
-                                               i.ExpirationDate.Value <= monthFromNow);
-                        break;
-
-                    case "Good":
-                        var thirtyDaysFromNow = today.AddDays(30);
-                        query = query.Where(i => !i.ExpirationDate.HasValue ||
-                                               i.ExpirationDate.Value > thirtyDaysFromNow);
-                        break;
-
-                    case "NoExpiration":
-                        query = query.Where(i => !i.ExpirationDate.HasValue);
-                        break;
+                    query = query.Where(i =>
+                        i.Name.Contains(searchTerm) ||
+                        (i.Description != null && i.Description.Contains(searchTerm)) ||
+                        (i.Barcode != null && i.Barcode.Contains(searchTerm)));
                 }
+
+                if (!string.IsNullOrWhiteSpace(expirationFilter))
+                {
+                    var today = DateTime.Now.Date;
+
+                    switch (expirationFilter)
+                    {
+                        case "Expired":
+                            query = query.Where(i => i.ExpirationDate.HasValue &&
+                                                   i.ExpirationDate.Value < today);
+                            break;
+
+                        case "ExpiringSoon":
+                            var weekFromNow = today.AddDays(7);
+                            query = query.Where(i => i.ExpirationDate.HasValue &&
+                                                   i.ExpirationDate.Value >= today &&
+                                                   i.ExpirationDate.Value <= weekFromNow);
+                            break;
+
+                        case "ExpiringThisMonth":
+                            var monthFromNow = today.AddDays(30);
+                            query = query.Where(i => i.ExpirationDate.HasValue &&
+                                                   i.ExpirationDate.Value >= today &&
+                                                   i.ExpirationDate.Value <= monthFromNow);
+                            break;
+
+                        case "Good":
+                            var thirtyDaysFromNow = today.AddDays(30);
+                            query = query.Where(i => !i.ExpirationDate.HasValue ||
+                                                   i.ExpirationDate.Value > thirtyDaysFromNow);
+                            break;
+
+                        case "NoExpiration":
+                            query = query.Where(i => !i.ExpirationDate.HasValue);
+                            break;
+                    }
+                }
+
+                if (fromDate.HasValue)
+                {
+                    query = query.Where(i => i.ExpirationDate.HasValue &&
+                                            i.ExpirationDate.Value >= fromDate.Value);
+                }
+
+                if (toDate.HasValue)
+                {
+                    query = query.Where(i => i.ExpirationDate.HasValue &&
+                                            i.ExpirationDate.Value <= toDate.Value);
+                }
+
+                query = sortBy switch
+                {
+                    "ExpirationDate" => sortOrder == "desc"
+                        ? query.OrderByDescending(i => i.ExpirationDate)
+                        : query.OrderBy(i => i.ExpirationDate),
+                    "Quantity" => sortOrder == "desc"
+                        ? query.OrderByDescending(i => i.Quantity)
+                        : query.OrderBy(i => i.Quantity),
+                    "DateAdded" => sortOrder == "desc"
+                        ? query.OrderByDescending(i => i.DateAdded)
+                        : query.OrderBy(i => i.DateAdded),
+                    _ => sortOrder == "desc"
+                        ? query.OrderByDescending(i => i.Name)
+                        : query.OrderBy(i => i.Name)
+                };
+
+                var totalCount = query.Count();
+
+                pageSize = Math.Max(5, Math.Min(pageSize, 100));
+
+                var items = query.Skip((page - 1) * pageSize)
+                                .Take(pageSize)
+                                .ToList();
+
+                var viewModel = new InventoryFilterViewModel
+                {
+                    Items = items,
+                    SearchTerm = searchTerm,
+                    ExpirationFilter = expirationFilter,
+                    FromDate = fromDate,
+                    ToDate = toDate,
+                    SortBy = sortBy,
+                    SortOrder = sortOrder,
+                    PageNumber = page,
+                    PageSize = pageSize,
+                    TotalCount = totalCount
+                };
+
+                return View(viewModel);
             }
-
-            // Date range filter
-            if (fromDate.HasValue)
+            catch (Exception ex)
             {
-                query = query.Where(i => i.ExpirationDate.HasValue &&
-                                        i.ExpirationDate.Value >= fromDate.Value);
+                _logger.LogError(ex, "Error loading inventory index.");
+                return BuildErrorResult("We couldn't load the inventory data.", ex.ToString(), 500);
             }
-
-            if (toDate.HasValue)
-            {
-                query = query.Where(i => i.ExpirationDate.HasValue &&
-                                        i.ExpirationDate.Value <= toDate.Value);
-            }
-
-            // Sorting
-            query = sortBy switch
-            {
-                "ExpirationDate" => sortOrder == "desc"
-                    ? query.OrderByDescending(i => i.ExpirationDate)
-                    : query.OrderBy(i => i.ExpirationDate),
-                "Quantity" => sortOrder == "desc"
-                    ? query.OrderByDescending(i => i.Quantity)
-                    : query.OrderBy(i => i.Quantity),
-                "DateAdded" => sortOrder == "desc"
-                    ? query.OrderByDescending(i => i.DateAdded)
-                    : query.OrderBy(i => i.DateAdded),
-                _ => sortOrder == "desc"
-                    ? query.OrderByDescending(i => i.Name)
-                    : query.OrderBy(i => i.Name)
-            };
-
-            // Get total count before pagination
-            var totalCount = query.Count();
-
-            // NEW: User Story - Configurable page size (default 10, max 100)
-            pageSize = Math.Max(5, Math.Min(pageSize, 100));
-
-            // Apply pagination
-            var items = query.Skip((page - 1) * pageSize)
-                            .Take(pageSize)
-                            .ToList();
-
-            var viewModel = new InventoryFilterViewModel
-            {
-                Items = items,
-                SearchTerm = searchTerm,
-                ExpirationFilter = expirationFilter,
-                FromDate = fromDate,
-                ToDate = toDate,
-                SortBy = sortBy,
-                SortOrder = sortOrder,
-                PageNumber = page,
-                PageSize = pageSize,
-                TotalCount = totalCount
-            };
-
-            return View(viewModel);
         }
 
-        // NEW: User Story - Add new item to inventory
-        // GET: Inventory/Create
+        public IActionResult QrCode(int id)
+        {
+            try
+            {
+                var item = _context.InventoryItems.Find(id);
+                if (item == null) return ItemNotFoundResult(id);
+
+                return View("QrCode", item);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error preparing QR code view for item {ItemId}", id);
+                return BuildErrorResult("We couldn't generate the QR code for this item.", ex.ToString(), 500);
+            }
+        }
+
+        public IActionResult QrCodeImage(int id)
+        {
+            try
+            {
+                var item = _context.InventoryItems.Find(id);
+                if (item == null) return ItemNotFoundResult(id);
+
+                var qrValue = Url.Action("Edit", "Inventory", new { id = item.Id }, Request.Scheme) ?? $"INV-{item.Id:00000}";
+
+                var writer = new ZXing.BarcodeWriterPixelData
+                {
+                    Format = ZXing.BarcodeFormat.QR_CODE,
+                    Options = new ZXing.Common.EncodingOptions
+                    {
+                        Height = 250,
+                        Width = 250,
+                        Margin = 1
+                    }
+                };
+
+                var pixelData = writer.Write(qrValue);
+
+                using (var surface = SKSurface.Create(new SKImageInfo(pixelData.Width, pixelData.Height)))
+                {
+                    using (var canvas = surface.Canvas)
+                    {
+                        using (var bitmap = new SKBitmap(new SKImageInfo(pixelData.Width, pixelData.Height)))
+                        {
+                            var ptr = bitmap.GetPixels();
+                            Marshal.Copy(pixelData.Pixels, 0, ptr, pixelData.Pixels.Length);
+
+                            canvas.Clear(SKColors.White);
+                            canvas.DrawBitmap(bitmap, 0, 0);
+                        }
+                    }
+
+                    using (var image = surface.Snapshot())
+                    using (var data = image.Encode(SKEncodedImageFormat.Png, 100))
+                    using (var ms = new MemoryStream())
+                    {
+                        data.SaveTo(ms);
+                        return File(ms.ToArray(), "image/png", $"qrcode-{item.Id}.png");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating QR code image for item {ItemId}", id);
+                return BuildErrorResult("We couldn't generate the QR code for this item.", ex.ToString(), 500);
+            }
+        }
+
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Inventory/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(InventoryItem item)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+            {
+                return View(item);
+            }
+
+            try
             {
                 item.DateAdded = DateTime.Now;
                 _context.InventoryItems.Add(item);
@@ -152,32 +227,40 @@ namespace SafeFutureInventorySystem.Controllers
                 TempData["SuccessMessage"] = $"Item '{item.Name}' added successfully!";
                 return RedirectToAction(nameof(Index));
             }
-
-            return View(item);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating inventory item {Name}", item.Name);
+                ModelState.AddModelError(string.Empty, "We couldn't save the item. Please try again.");
+                return View(item);
+            }
         }
 
-        // NEW: User Story - View item details/count
-        // GET: Inventory/Details/5
         public IActionResult Details(int id)
         {
-            var item = _context.InventoryItems.Find(id);
-            if (item == null)
+            try
             {
-                return NotFound();
+                var item = _context.InventoryItems.Find(id);
+                if (item == null)
+                {
+                    return ItemNotFoundResult(id);
+                }
+
+                var adjustmentHistory = _context.AdjustmentLogs
+                    .Where(l => l.InventoryItemId == id)
+                    .OrderByDescending(l => l.AdjustmentDate)
+                    .Take(10)
+                    .ToList();
+
+                ViewBag.AdjustmentHistory = adjustmentHistory;
+                return View(item);
             }
-
-            // Get adjustment history
-            var adjustmentHistory = _context.AdjustmentLogs
-                .Where(l => l.InventoryItemId == id)
-                .OrderByDescending(l => l.AdjustmentDate)
-                .Take(10)
-                .ToList();
-
-            ViewBag.AdjustmentHistory = adjustmentHistory;
-            return View(item);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading details for item {ItemId}", id);
+                return BuildErrorResult("We couldn't load this inventory item.", ex.ToString(), 500);
+            }
         }
 
-        // USER STORY 3: Adjust quantity
         [HttpPost]
         public JsonResult AdjustQuantity(int id, int newQuantity, string reason)
         {
@@ -189,7 +272,6 @@ namespace SafeFutureInventorySystem.Controllers
                     return new JsonResult(new { success = false, message = "Item not found" });
                 }
 
-                // NEW: Validation - ensure non-negative quantity
                 if (newQuantity < 0)
                 {
                     return new JsonResult(new { success = false, message = "Quantity cannot be negative" });
@@ -199,7 +281,6 @@ namespace SafeFutureInventorySystem.Controllers
                 item.Quantity = newQuantity;
                 item.LastUpdated = DateTime.Now;
 
-                // Log the adjustment
                 var log = new InventoryAdjustmentLog
                 {
                     InventoryItemId = id,
@@ -222,11 +303,11 @@ namespace SafeFutureInventorySystem.Controllers
             }
             catch (Exception ex)
             {
-                return new JsonResult(new { success = false, message = ex.Message });
+                _logger.LogError(ex, "Error adjusting quantity for item {ItemId}", id);
+                return new JsonResult(new { success = false, message = "An error occurred while adjusting the quantity." });
             }
         }
 
-        // USER STORY 1: Remove selected items
         [HttpPost]
         public JsonResult RemoveItems([FromBody] int[] itemIds)
         {
@@ -253,11 +334,11 @@ namespace SafeFutureInventorySystem.Controllers
             }
             catch (Exception ex)
             {
-                return new JsonResult(new { success = false, message = ex.Message });
+                _logger.LogError(ex, "Error removing items {@ItemIds}", itemIds);
+                return new JsonResult(new { success = false, message = "An error occurred while removing items." });
             }
         }
 
-        // NEW: Export Inventory to PDF
         [HttpGet]
         [Route("Export")]
         public IActionResult ExportInventoryPdf()
@@ -274,12 +355,10 @@ namespace SafeFutureInventorySystem.Controllers
 
                 using (MemoryStream memoryStream = new MemoryStream())
                 {
-                    // Create document
                     Document document = new Document(PageSize.A4.Rotate(), 10, 10, 10, 10);
                     PdfWriter writer = PdfWriter.GetInstance(document, memoryStream);
                     document.Open();
 
-                    // Add title
                     PdfPTable titleTable = new PdfPTable(1);
                     titleTable.WidthPercentage = 100;
                     PdfPCell titleCell = new PdfPCell(new Phrase("Inventory Report",
@@ -292,7 +371,6 @@ namespace SafeFutureInventorySystem.Controllers
                     titleTable.AddCell(titleCell);
                     document.Add(titleTable);
 
-                    // Add date
                     Paragraph dateParagraph = new Paragraph($"Generated on: {DateTime.Now:yyyy-MM-dd HH:mm:ss}",
                         FontFactory.GetFont(FontFactory.HELVETICA, 10))
                     {
@@ -301,12 +379,10 @@ namespace SafeFutureInventorySystem.Controllers
                     };
                     document.Add(dateParagraph);
 
-                    // Create data table
                     PdfPTable table = new PdfPTable(8);
                     table.WidthPercentage = 100;
                     table.SetWidths(new float[] { 10, 18, 18, 10, 12, 12, 12, 12 });
 
-                    // Header row
                     string[] headers = { "ID", "Name", "Description", "Quantity", "Category", "Barcode", "Expiration Date", "Date Added" };
                     foreach (string header in headers)
                     {
@@ -320,7 +396,6 @@ namespace SafeFutureInventorySystem.Controllers
                         table.AddCell(headerCell);
                     }
 
-                    // Data rows
                     foreach (var item in items)
                     {
                         table.AddCell(new PdfPCell(new Phrase(item.Id.ToString(),
@@ -351,7 +426,6 @@ namespace SafeFutureInventorySystem.Controllers
 
                     document.Add(table);
 
-                    // Add summary
                     Paragraph summary = new Paragraph($"\nTotal Items: {items.Count}",
                         FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 11))
                     {
@@ -367,12 +441,12 @@ namespace SafeFutureInventorySystem.Controllers
             }
             catch (Exception ex)
             {
-                TempData["error"] = $"Error exporting inventory: {ex.Message}";
+                _logger.LogError(ex, "Error exporting inventory to PDF.");
+                TempData["error"] = "Error exporting inventory. Please try again.";
                 return RedirectToAction("Index");
             }
         }
 
-        // Get item details
         [HttpGet]
         public JsonResult GetItemDetails(int id)
         {
@@ -400,31 +474,59 @@ namespace SafeFutureInventorySystem.Controllers
             }
             catch (Exception ex)
             {
-                return new JsonResult(new { success = false, message = ex.Message });
+                _logger.LogError(ex, "Error retrieving item details for item {ItemId}", id);
+                return new JsonResult(new { success = false, message = "An error occurred while retrieving item details." });
             }
         }
 
-        // Search autocomplete
         [HttpGet]
         public JsonResult SearchItems(string term)
         {
-            if (string.IsNullOrWhiteSpace(term))
+            try
             {
+                if (string.IsNullOrWhiteSpace(term))
+                {
+                    return new JsonResult(new System.Collections.Generic.List<object>());
+                }
+
+                var items = _context.InventoryItems
+                    .Where(i => i.Name.Contains(term))
+                    .Take(10)
+                    .Select(i => new
+                    {
+                        id = i.Id,
+                        label = i.Name,
+                        value = i.Name,
+                        quantity = i.Quantity
+                    })
+                    .ToList();
+
+                return new JsonResult(items);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error searching items with term {Term}", term);
                 return new JsonResult(new System.Collections.Generic.List<object>());
             }
+        }
 
-            var items = _context.InventoryItems
-                .Where(i => i.Name.Contains(term))
-                .Take(10)
-                .Select(i => new {
-                    id = i.Id,
-                    label = i.Name,
-                    value = i.Name,
-                    quantity = i.Quantity
-                })
-                .ToList();
+        private IActionResult BuildErrorResult(string userMessage, string? detail, int statusCode)
+        {
+            Response.StatusCode = statusCode;
+            return View("~/Views/Shared/Error.cshtml", new ErrorViewModel
+            {
+                RequestId = HttpContext.TraceIdentifier,
+                UserMessage = userMessage,
+                Detail = detail,
+                Path = HttpContext.Request?.Path.Value,
+                StatusCode = statusCode
+            });
+        }
 
-            return new JsonResult(items);
+        private IActionResult ItemNotFoundResult(int id)
+        {
+            _logger.LogWarning("Inventory item {Id} not found for request {Path}", id, HttpContext.Request?.Path.Value);
+            return BuildErrorResult("We couldn't find that inventory item. If you scanned a QR code, it may be out of date.", $"Inventory item {id} was not found.", 404);
         }
     }
 }
