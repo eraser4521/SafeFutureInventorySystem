@@ -10,7 +10,16 @@
 
 @if (!string.IsNullOrEmpty(ViewBag.Error))
 {
-    <div class="alert alert-danger">@ViewBag.Error</div>
+    <div class="alert alert-danger">
+        <div>@ViewBag.Error</div>
+        @if (!string.IsNullOrEmpty(ViewBag.ErrorDetail))
+        {
+            <details class="small mt-2">
+                <summary>Technical details</summary>
+                <pre class="mb-0">@ViewBag.ErrorDetail</pre>
+            </details>
+        }
+    </div>
 }
 else
 {

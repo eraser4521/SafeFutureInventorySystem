@@ -11,10 +11,12 @@ public class QRCodesController : Controller
     private string InventoryFile => Path.Combine(AppContext.BaseDirectory, "inventory.txt");
     private string QRCodesFile => Path.Combine(AppContext.BaseDirectory, "qrcodes.txt");
     private readonly IConfiguration _config;
+    private readonly ILogger<QRCodesController> _logger;
 
-    public QRCodesController(IConfiguration config)
+    public QRCodesController(IConfiguration config, ILogger<QRCodesController> logger)
     {
         _config = config;
+        _logger = logger;
     }
 
     public IActionResult Index()
@@ -143,8 +145,9 @@ public class QRCodesController : Controller
                 }
             }
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "Error reading inventory file at {InventoryFile}", InventoryFile);
         }
         return items;
     }
@@ -177,8 +180,9 @@ public class QRCodesController : Controller
                 }
             }
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "Error reading QR codes file at {QRCodesFile}", QRCodesFile);
         }
         return records;
     }

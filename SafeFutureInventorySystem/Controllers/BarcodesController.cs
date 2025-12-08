@@ -9,6 +9,12 @@ public class BarcodesController : Controller
 {
     private string InventoryFile => Path.Combine(AppContext.BaseDirectory, "inventory.txt");
     private string BarcodesFile => Path.Combine(AppContext.BaseDirectory, "barcodes.txt");
+    private readonly ILogger<BarcodesController> _logger;
+
+    public BarcodesController(ILogger<BarcodesController> logger)
+    {
+        _logger = logger;
+    }
 
     public IActionResult Index()
     {
@@ -132,8 +138,9 @@ public class BarcodesController : Controller
                 }
             }
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "Error reading inventory file at {InventoryFile}", InventoryFile);
         }
         return items;
     }
@@ -166,8 +173,9 @@ public class BarcodesController : Controller
                 }
             }
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "Error reading barcodes file at {BarcodesFile}", BarcodesFile);
         }
         return records;
     }

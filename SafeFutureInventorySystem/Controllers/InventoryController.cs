@@ -7,40 +7,24 @@ namespace SafeFutureInventorySystem.Controllers;
 
 public class InventoryController : Controller
 {
+    private readonly ILogger<InventoryController> _logger;
+    private readonly string _inventoryFilePath;
+
+    public InventoryController(ILogger<InventoryController> logger)
+    {
+        _logger = logger;
+        _inventoryFilePath = Path.Combine(AppContext.BaseDirectory, "inventory.txt");
+    }
+
     public IActionResult Index()
     {
-        var items = new List<InventoryItem>();
-        var filePath = Path.Combine(AppContext.BaseDirectory, "inventory.txt");
-
-        try
+        if (!TryLoadItems(out var items, out var errorMessage, out var technicalDetail))
         {
-            
-            var lines = System.IO.File.ReadAllLines(filePath).Skip(1);
-
-            foreach (var line in lines)
-            {
-                var parts = line.Split(',');
-                if (parts.Length == 4)
-                {
-                    var item = new InventoryItem
-                    {
-                        Id = int.Parse(parts[0]),
-                        Name = parts[1],
-                        Quantity = int.Parse(parts[2]),
-                        DateAdded = DateTime.Parse(parts[3])
-                    };
-                    items.Add(item);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            
-            ViewBag.Error = $"Error reading inventory file: {ex.Message}";
-            return View(items);
+            ViewBag.Error = errorMessage ?? "We couldn't read the inventory file.";
+            ViewBag.ErrorDetail = technicalDetail;
+            return View(new List<InventoryItem>());
         }
 
-        
         var sortedItems = items.OrderBy(item => item.DateAdded).ToList();
 
         return View(sortedItems);
@@ -49,12 +33,13 @@ public class InventoryController : Controller
     // Show a page with the QR code for the given item id
     public IActionResult QrCode(int id)
     {
-        var items = LoadItems();
-        var item = items.FirstOrDefault(i => i.Id == id);
-        if (item == null)
+        if (!TryLoadItems(out var items, out var errorMessage, out var technicalDetail))
         {
-            return NotFound();
+            return InventoryLoadFailed(errorMessage, technicalDetail);
         }
+
+        var item = items.FirstOrDefault(i => i.Id == id);
+        if (item == null) return ItemNotFoundResult(id);
         // Render the QR code view
         return View("QrCode", item);
     }
@@ -62,12 +47,13 @@ public class InventoryController : Controller
     // Return the QR code image (PNG) for the given item id
     public IActionResult QrCodeImage(int id)
     {
-        var items = LoadItems();
-        var item = items.FirstOrDefault(i => i.Id == id);
-        if (item == null)
+        if (!TryLoadItems(out var items, out var errorMessage, out var technicalDetail))
         {
-            return NotFound();
+            return InventoryLoadFailed(errorMessage, technicalDetail);
         }
+
+        var item = items.FirstOrDefault(i => i.Id == id);
+        if (item == null) return ItemNotFoundResult(id);
 
         // Encode a URL that links to the Edit page for this item so scanning the QR opens the edit UI
         var qrValue = Url.Action("Edit", "Inventory", new { id = item.Id }, Request.Scheme) ?? $"INV-{item.Id:00000}";
@@ -83,7 +69,7 @@ public class InventoryController : Controller
             }
         };
 
-    var pixelData = writer.Write(qrValue);
+        var pixelData = writer.Write(qrValue);
 
         // Create a new SkiaSharp bitmap and draw the barcode
         using (var surface = SKSurface.Create(new SKImageInfo(pixelData.Width, pixelData.Height)))
@@ -113,14 +99,23 @@ public class InventoryController : Controller
         }
     }
 
-    private List<InventoryItem> LoadItems()
+    private bool TryLoadItems(out List<InventoryItem> items, out string? userMessage, out string? technicalDetail)
     {
-        var items = new List<InventoryItem>();
-        var filePath = Path.Combine(AppContext.BaseDirectory, "inventory.txt");
+        items = new List<InventoryItem>();
+        userMessage = null;
+        technicalDetail = null;
 
         try
         {
-            var lines = System.IO.File.ReadAllLines(filePath).Skip(1);
+            if (!System.IO.File.Exists(_inventoryFilePath))
+            {
+                userMessage = "Inventory data could not be found.";
+                technicalDetail = $"Missing file: {_inventoryFilePath}";
+                _logger.LogWarning("Inventory file not found at {Path}", _inventoryFilePath);
+                return false;
+            }
+
+            var lines = System.IO.File.ReadAllLines(_inventoryFilePath).Skip(1);
 
             foreach (var line in lines)
             {
@@ -137,30 +132,65 @@ public class InventoryController : Controller
                     items.Add(item);
                 }
             }
-        }
-        catch
-        {
-            // ignore here; callers handle missing/empty lists
-        }
 
-        return items;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            userMessage = "We couldn't read the inventory list. Please try again or contact support.";
+            technicalDetail = ex.ToString();
+            _logger.LogError(ex, "Error reading inventory file at {Path}", _inventoryFilePath);
+            return false;
+        }
+    }
+
+    private IActionResult BuildErrorResult(string userMessage, string? detail, int statusCode)
+    {
+        Response.StatusCode = statusCode;
+        return View("~/Views/Shared/Error.cshtml", new ErrorViewModel
+        {
+            RequestId = HttpContext.TraceIdentifier,
+            UserMessage = userMessage,
+            Detail = detail,
+            Path = HttpContext.Request?.Path.Value,
+            StatusCode = statusCode
+        });
+    }
+
+    private IActionResult InventoryLoadFailed(string? userMessage, string? detail)
+    {
+        return BuildErrorResult(userMessage ?? "We couldn't load the inventory data.", detail, 500);
+    }
+
+    private IActionResult ItemNotFoundResult(int id)
+    {
+        _logger.LogWarning("Inventory item {Id} not found for request {Path}", id, HttpContext.Request?.Path.Value);
+        return BuildErrorResult("We couldn't find that inventory item. If you scanned a QR code, it may be out of date.", $"Inventory item {id} was not found.", 404);
     }
 
     // Show details page for an item
     public IActionResult Details(int id)
     {
-        var items = LoadItems();
+        if (!TryLoadItems(out var items, out var errorMessage, out var technicalDetail))
+        {
+            return InventoryLoadFailed(errorMessage, technicalDetail);
+        }
+
         var item = items.FirstOrDefault(i => i.Id == id);
-        if (item == null) return NotFound();
+        if (item == null) return ItemNotFoundResult(id);
         return View(item);
     }
 
     // Edit page (GET)
     public IActionResult Edit(int id)
     {
-        var items = LoadItems();
+        if (!TryLoadItems(out var items, out var errorMessage, out var technicalDetail))
+        {
+            return InventoryLoadFailed(errorMessage, technicalDetail);
+        }
+
         var item = items.FirstOrDefault(i => i.Id == id);
-        if (item == null) return NotFound();
+        if (item == null) return ItemNotFoundResult(id);
         return View(item);
     }
 
@@ -174,25 +204,47 @@ public class InventoryController : Controller
             return View(model);
         }
 
-        var items = LoadItems();
+        if (!TryLoadItems(out var items, out var loadError, out var loadDetail))
+        {
+            ViewBag.Error = loadError ?? "We couldn't load the inventory data.";
+            ViewBag.ErrorDetail = loadDetail;
+            return View(model);
+        }
+
         var existing = items.FirstOrDefault(i => i.Id == model.Id);
-        if (existing == null) return NotFound();
+        if (existing == null) return ItemNotFoundResult(model.Id);
 
         // Update editable fields (allow name and quantity edits)
         existing.Name = model.Name;
         existing.Quantity = model.Quantity;
 
-        SaveItems(items);
+        if (!TrySaveItems(items, out var saveDetail))
+        {
+            ViewBag.Error = "We couldn't save your changes. Please try again.";
+            ViewBag.ErrorDetail = saveDetail;
+            return View(model);
+        }
 
         return RedirectToAction("Details", new { id = model.Id });
     }
 
-    private void SaveItems(List<InventoryItem> items)
+    private bool TrySaveItems(List<InventoryItem> items, out string? technicalDetail)
     {
-        var filePath = Path.Combine(AppContext.BaseDirectory, "inventory.txt");
-        var lines = new List<string> { "Id,Name,Quantity,DateAdded" };
-        lines.AddRange(items.Select(i => $"{i.Id},{EscapeCsv(i.Name)},{i.Quantity},{i.DateAdded:yyyy-MM-dd}"));
-        System.IO.File.WriteAllLines(filePath, lines);
+        technicalDetail = null;
+
+        try
+        {
+            var lines = new List<string> { "Id,Name,Quantity,DateAdded" };
+            lines.AddRange(items.Select(i => $"{i.Id},{EscapeCsv(i.Name)},{i.Quantity},{i.DateAdded:yyyy-MM-dd}"));
+            System.IO.File.WriteAllLines(_inventoryFilePath, lines);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            technicalDetail = ex.ToString();
+            _logger.LogError(ex, "Error saving inventory file at {Path}", _inventoryFilePath);
+            return false;
+        }
     }
 
     // Simple CSV escape for commas/newlines in names
