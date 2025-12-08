@@ -404,7 +404,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Adjust Quantity</h5>
-                <button type="button" class="close" data-dismiss="modal">
+                <button type="button" class="close adjust-close" data-dismiss="modal" aria-label="Close">
                     <span>&times;</span>
                 </button>
             </div>
@@ -437,7 +437,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary adjust-cancel" data-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" onclick="submitQuantityAdjustment()">
                     Save Changes
                 </button>
@@ -472,6 +472,11 @@
             $('#selectedCount').text(count);
             $('#removeSelectedBtn').prop('disabled', count === 0);
         }
+
+        // Ensure the adjust modal can always be closed
+        $(document).on('click', '.adjust-close, .adjust-cancel', function() {
+            $('#adjustQuantityModal').modal('hide');
+        });
 
         // USER STORY 1: Remove selected items
         $('#removeSelectedBtn').click(function() {
