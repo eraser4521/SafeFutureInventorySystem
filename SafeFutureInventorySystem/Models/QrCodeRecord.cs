@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SafeFutureInventorySystem.Models;
 
-public class BarcodeRecord
+public class QrCode
 {
     public int Id { get; set; }
     public int InventoryItemId { get; set; }
