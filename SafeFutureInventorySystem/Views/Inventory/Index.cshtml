@@ -62,7 +62,7 @@
                                value="@Model.ToDate?.ToString("yyyy-MM-dd")" placeholder="To Date" />
                     </div>
 
-                    <div class="col-md-1 mb-3">
+                    <div class="col-md-2 mb-3">
                         <button type="submit" class="btn btn-primary btn-block">
                             <i class="fas fa-filter"></i> Filter
                         </button>
@@ -267,16 +267,16 @@
                                     <td>
                                         <!-- View Details Button -->
                                         <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="View Details">
-                                            <i class="fas fa-eye"></i>
+                                            <i class="fas fa-eye"></i> Details
                                         </a>
                                         <!-- QR Code Button -->
                                         <a asp-action="QrCode" asp-route-id="@item.Id" class="btn btn-sm btn-secondary" title="View QR Code">
-                                            <i class="fas fa-qrcode"></i>
+                                            <i class="fas fa-qrcode"></i> QR
                                         </a>
                                         <!-- USER STORY 3: Adjust Quantity Button -->
                                         <button type="button" class="btn btn-sm btn-warning"
                                                 onclick="openAdjustQuantityModal(@item.Id, '@item.Name', @item.Quantity)" title="Adjust Quantity">
-                                            <i class="fas fa-edit"></i>
+                                            <i class="fas fa-edit"></i> Adjust
                                         </button>
                                     </td>
                                 </tr>
