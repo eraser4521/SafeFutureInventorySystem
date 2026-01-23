@@ -22,7 +22,15 @@ public class QRCodesController : Controller
     public IActionResult Index()
     {
         var records = LoadBarcodeRecords();
-        return View(records);
+        var qrCodes = records.ConvertAll(r => new QrCode
+        {
+            Id = r.Id,
+            InventoryItemId = r.InventoryItemId,
+            Value = r.Value,
+            Format = r.Format,
+            GeneratedAt = r.GeneratedAt
+        });
+        return View(qrCodes);
     }
 
     // Show a page to generate/save QR code for an inventory item
