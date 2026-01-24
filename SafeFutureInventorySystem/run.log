@@ -98,3 +98,5 @@ info: Microsoft.EntityFrameworkCore.Database.Command[20101]
       FROM "InventoryItems" AS "i"
       ORDER BY "i"."Name"
       LIMIT @__p_1 OFFSET @__p_0
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...

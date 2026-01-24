@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -446,6 +448,62 @@ namespace SafeFutureInventorySystem.Controllers
                 return RedirectToAction("Index");
             }
         }
+
+        [HttpGet]
+        [Route("ExportCsv")]
+        public IActionResult ExportInventoryCsv()
+        {
+            try
+            {
+                var items = _context.InventoryItems.OrderBy(i => i.Name).ToList();
+
+                if (!items.Any())
+                {
+                    TempData["error"] = "No inventory items to export.";
+                    return RedirectToAction("Index");
+                }
+
+                using (MemoryStream memoryStream = new MemoryStream())
+                using (TextWriter writer = new StreamWriter(memoryStream, System.Text.Encoding.UTF8))
+                {
+                    // Write CSV headers
+                    string[] headers = { "ID", "Name", "Description", "Quantity", "Category", "Barcode", "Expiration Date", "Date Added" };
+                    writer.WriteLine(string.Join(",", headers.Select(h => $"\"{h}\"")));
+
+                    // Write data rows
+                    foreach (var item in items)
+                    {
+                        var row = new[]
+                        {
+                            item.Id.ToString(),
+                            $"\"{item.Name}\"",
+                            $"\"{item.Description ?? ""}\"",
+                            item.Quantity.ToString(),
+                            $"\"{item.Category ?? ""}\"",
+                            $"\"{item.Barcode ?? ""}\"",
+                            item.ExpirationDate?.ToString("yyyy-MM-dd") ?? "N/A",
+                            item.DateAdded.ToString("yyyy-MM-dd")
+                        };
+                        writer.WriteLine(string.Join(",", row));
+                    }
+
+                    writer.Flush();
+                    byte[] csvBytes = memoryStream.ToArray();
+                    string fileName = $"Inventory_Export_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+                    return File(csvBytes, "text/csv", fileName);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting inventory to CSV.");
+                TempData["error"] = "Error exporting inventory. Please try again.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        [HttpGet]
+        [Route("ExportExcel")]
+
 
         [HttpGet]
         public JsonResult GetItemDetails(int id)
