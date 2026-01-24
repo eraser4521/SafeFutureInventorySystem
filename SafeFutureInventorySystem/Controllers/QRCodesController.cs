@@ -46,8 +46,8 @@ public class QRCodesController : Controller
     {
         var item = LoadInventory().FirstOrDefault(i => i.Id == inventoryItemId);
         if (item == null) return NotFound();
-        // Store a path-only value (e.g. "/Inventory/Edit/12"). When scanned, the app can combine this with a base URL.
-        var pathValue = Url.Action("Edit", "Inventory", new { id = item.Id }) ?? $"/Inventory/Edit/{item.Id}";
+        // Store a path-only value (e.g. "/Inventory/Details/12"). When scanned, the app can combine this with a base URL.
+        var pathValue = Url.Action("Details", "Inventory", new { id = item.Id }) ?? $"/Inventory/Details/{item.Id}";
         var format = "QR_CODE";
         var records = LoadBarcodeRecords();
         var nextId = (records.Any() ? records.Max(r => r.Id) : 0) + 1;
@@ -84,7 +84,7 @@ public class QRCodesController : Controller
         var item = LoadInventory().FirstOrDefault(i => i.Id == inventoryItemId);
         if (item == null) return NotFound();
         // Preview: generate the same path-only value and resolve to absolute when rendering the QR
-        var pathValue = Url.Action("Edit", "Inventory", new { id = item.Id }) ?? $"/Inventory/Edit/{item.Id}";
+        var pathValue = Url.Action("Details", "Inventory", new { id = item.Id }) ?? $"/Inventory/Details/{item.Id}";
         var absolute = ResolveToAbsolute(pathValue);
         return GenerateImageResult(absolute);
     }
