@@ -14,7 +14,6 @@ namespace SafeFutureInventorySystem.Data
 
         public DbSet<InventoryItem> InventoryItems { get; set; }
         public DbSet<InventoryAdjustmentLog> AdjustmentLogs { get; set; }
-        public DbSet<QrCode> QrCodes { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -34,37 +33,6 @@ namespace SafeFutureInventorySystem.Data
                 .WithMany()
                 .HasForeignKey(l => l.InventoryItemId)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            //QR CODE CONFIGURATION
-            modelBuilder.Entity<QrCode>(entity =>
-            {
-                // PK is configured by default via [Key] in model, but good to be explicit
-                entity.HasKey(e => e.Id);
-
-                // Index on InventoryItemId
-                entity.HasIndex(e => e.InventoryItemId);
-
-                // Configure properties
-                entity.Property(e => e.Value)
-                    .IsRequired()
-                    .HasMaxLength(400);
-
-                entity.Property(e => e.Format)
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .HasDefaultValue("QR_CODE");
-
-                entity.Property(e => e.GeneratedAt)
-                    .HasDefaultValueSql("GETUTCDATE()");
-
-                // Relationship: One InventoryItem has (potentially) many QrCodes 
-                // (usually 1:1, but 1:Many allows history if needed).
-                // Cascade Delete ensures if Item is deleted, QR record is gone.
-                entity.HasOne(d => d.InventoryItem)
-                    .WithMany()
-                    .HasForeignKey(d => d.InventoryItemId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
 
             // Comprehensive seed data for testing all features
             modelBuilder.Entity<InventoryItem>().HasData(
