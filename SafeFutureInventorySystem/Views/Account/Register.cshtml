@@ -12,7 +12,16 @@
             <div class="error">@ViewBag.Error</div>
         }
 
-        <form method="post" asp-action="Register" asp-controller="Account">
+        <form method="post" action="@Url.Action("Register", "Account")">
+
+            <div class="form-group">
+                <input id="firstName" name="firstName" type="text" required placeholder="First Name" />
+            </div>
+
+            <div class="form-group">
+                <input id="lastName" name="lastName" type="text" required placeholder="Last Name" />
+            </div>
+
             <div class="form-group">
                 <input id="email" name="email" type="text" required placeholder="Email" />
             </div>
@@ -29,14 +38,14 @@
         </form>
 
         <div class="links">
-            <a asp-action="Login" asp-controller="Account">Already have an account? Login</a>
+            <a href="@Url.Action("Login", "Account")">Already have an account? Login</a>
         </div>
     </div>
 </div>
 
 <style>
     body {
-        background-color: #979797; 
+        background-color: #979797;
         font-family: 'Segoe UI', Arial, sans-serif;
         margin: 0;
         padding: 0;
@@ -47,12 +56,12 @@
         align-items: flex-start;
         justify-content: center;
         min-height: 100vh;
-        padding-top: 40px;  /* <-- smaller padding, box higher */
+        padding-top: 40px;
     }
 
     .login-card {
         width: 420px;
-        background: #E2E2E2; 
+        background: #E2E2E2;
         border-radius: 18px;
         box-shadow: 0 14px 45px rgba(0,0,0,0.35);
         padding: 42px 48px 32px 48px;
@@ -67,7 +76,7 @@
 
     .login-card h2 {
         font-size: 28px;
-        color: #000000; 
+        color: #000000;
         margin-bottom: 28px;
         font-weight: 700;
         letter-spacing: 0.3px;
@@ -81,9 +90,9 @@
         width: 100%;
         padding: 14px;
         border-radius: 10px;
-        border: 1px solid #979797; 
+        border: 1px solid #979797;
         background-color: #FFFFFF;
-        color: #000000; 
+        color: #000000;
         font-size: 16px;
         box-sizing: border-box;
         box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
@@ -91,11 +100,11 @@
     }
 
     .form-group input::placeholder {
-        color: #979797; 
+        color: #979797;
     }
 
     .form-group input:focus {
-        border-color: #95C5FB; 
+        border-color: #95C5FB;
         box-shadow: 0 0 8px rgba(149,197,251,0.7);
         outline: none;
     }
@@ -106,8 +115,8 @@
         padding: 14px;
         border: none;
         border-radius: 10px;
-        background: #95C5FB; 
-        color: #000000; 
+        background: #95C5FB;
+        color: #000000;
         font-weight: 700;
         font-size: 17px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.25);
@@ -116,7 +125,7 @@
     }
 
     .btn-main:hover {
-        background: #000000; 
+        background: #000000;
         color: #FFFFFF;
         box-shadow: 0 4px 20px rgba(0,0,0,0.4);
         transform: translateY(-1px);
@@ -125,18 +134,18 @@
     .links {
         margin-top: 18px;
         font-size: 14px;
-        color: #000000; 
+        color: #000000;
     }
 
     .links a {
-        color: #000000; 
+        color: #000000;
         text-decoration: none;
         font-weight: 500;
         opacity: 0.9;
     }
 
     .links a:hover {
-        color: #95C5FB; 
+        color: #95C5FB;
         text-decoration: underline;
         opacity: 1;
     }

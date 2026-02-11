@@ -1,0 +1,42 @@
+@model List<SafeFutureInventorySystem.Models.ApplicationUser>
+
+<h2>Admin - Manage Users</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div style="color:red;">@TempData["Error"]</div>
+}
+@if (TempData["Success"] != null)
+{
+    <div style="color:green;">@TempData["Success"]</div>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>Name</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var u in Model)
+    {
+        var name = (string.IsNullOrWhiteSpace(u.FirstName) && string.IsNullOrWhiteSpace(u.LastName))
+            ? u.Email
+            : (u.FirstName + " " + u.LastName);
+
+        <tr>
+            <td>@u.Email</td>
+            <td>@name</td>
+            <td>
+                <form asp-controller="Admin" asp-action="Delete" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@u.Id" />
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

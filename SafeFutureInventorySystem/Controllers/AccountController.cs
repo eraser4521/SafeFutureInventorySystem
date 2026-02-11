@@ -1,115 +1,129 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SafeFutureInventorySystem.Models;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace SafeFutureInventorySystem.Controllers
 {
     public class AccountController : Controller
     {
-        // TEMPORARY HARDCODED USERS
-        public static List<User> Users = new List<User>
-        {
-            new User { Email = "test@test.com", Password = "1234" },
-            new User { Email = "admin@admin.com", Password = "admin" }
-        };
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        // GET: /Account/Login
+        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager)
+        {
+            _signInManager = signInManager;
+            _userManager = userManager;
+        }
+
         [HttpGet, AllowAnonymous]
         public IActionResult Login(string? returnUrl = null)
         {
             ViewBag.ReturnUrl = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
-
             return View("Login");
         }
 
-[HttpPost, AllowAnonymous]
-public async Task<IActionResult> Login(string email, string password, string? returnUrl = null)
-{
-    // Trim to remove accidental spaces
-    email = email?.Trim();
-    password = password?.Trim();
-
-    // 🔍 DEBUG: if you want you can put a breakpoint here later
-    // SUPER SIMPLE HARDCODED CHECK
-    if (email != null 
-        && email.Equals("test@test.com", StringComparison.OrdinalIgnoreCase)
-        && password == "1234")
-    {
-        var claims = new List<Claim>
+        [HttpPost, AllowAnonymous]
+        public async Task<IActionResult> Login(string email, string password, string? returnUrl = null)
         {
-            new Claim(ClaimTypes.Name, email),
-            new Claim(ClaimTypes.Role, "Admin")
-        };
+            email = (email ?? "").Trim();
+            password = (password ?? "").Trim();
 
-        var identity = new ClaimsIdentity(
-            claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                ViewBag.Error = "Invalid email or password.";
+                ViewBag.ReturnUrl = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
+                return View("Login");
+            }
 
-        var principal = new ClaimsPrincipal(identity);
+            var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
+            if (!result.Succeeded)
+            {
+                ViewBag.Error = "Invalid email or password.";
+                ViewBag.ReturnUrl = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
+                return View("Login");
+            }
 
-        await HttpContext.SignInAsync(
-            CookieAuthenticationDefaults.AuthenticationScheme,
-            principal);
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return Redirect(returnUrl);
 
-        return RedirectToAction("Index", "Inventory");
-    }
+            return RedirectToAction("Index", "Inventory");
+        }
 
-    // If it gets here, login failed – show exactly what the server saw
-    ViewBag.Error = $"Invalid username or password. (Debug: email='{email ?? "null"}', password='{password ?? "null"}')";
-
-    ViewBag.ReturnUrl = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
-    return View("Login");
-}
-
-
-        // GET: /Account/Register
         [HttpGet, AllowAnonymous]
         public IActionResult Register()
         {
             return View("Register");
         }
 
-        // POST: /Account/Register
         [HttpPost, AllowAnonymous]
-        public IActionResult Register(string email, string password, string confirmPassword)
+        public async Task<IActionResult> Register(string firstName, string lastName, string email, string password, string confirmPassword)
         {
+            firstName = (firstName ?? "").Trim();
+            lastName = (lastName ?? "").Trim();
+            email = (email ?? "").Trim();
+            password = (password ?? "").Trim();
+            confirmPassword = (confirmPassword ?? "").Trim();
+
+            if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName))
+            {
+                ViewBag.Error = "First and last name are required.";
+                return View("Register");
+            }
+
             if (password != confirmPassword)
             {
                 ViewBag.Error = "Passwords do not match.";
                 return View("Register");
             }
 
-            // For now we ignore registration and keep hard-coded users only
-            // Later we can add to a database or a list
+            var existing = await _userManager.FindByEmailAsync(email);
+            if (existing != null)
+            {
+                ViewBag.Error = "That email is already registered.";
+                return View("Register");
+            }
 
-            return RedirectToAction("Login");
+            var user = new ApplicationUser
+            {
+                UserName = email,
+                Email = email,
+                EmailConfirmed = true,
+                FirstName = firstName,
+                LastName = lastName
+            };
+
+            var create = await _userManager.CreateAsync(user, password);
+
+            if (!create.Succeeded)
+            {
+                ViewBag.Error = "Could not create account. Try a stronger password.";
+                return View("Register");
+            }
+
+            await _userManager.AddToRoleAsync(user, "Volunteer");
+
+            await _signInManager.SignInAsync(user, false);
+            return RedirectToAction("Index", "Inventory");
         }
 
-        // GET: /Account/ForgotPassword
-        [HttpGet, AllowAnonymous]
-        public IActionResult ForgotPassword()
+        // NAVBAR LOGOUT (LINK)
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> LogoutLink()
         {
-            return View("ForgotPassword");
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Login", "Account");
         }
 
-        // POST: /Account/ForgotPassword
-        [HttpPost, AllowAnonymous]
-        public IActionResult ForgotPassword(string email)
-        {
-            ViewBag.Message = "If an account exists for that email, a reset link will be sent.";
-            return View("ForgotPassword");
-        }
-
-        // POST: /Account/Logout
+        // Optional: POST logout
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await _signInManager.SignOutAsync();
             return RedirectToAction("Login", "Account");
         }
     }
