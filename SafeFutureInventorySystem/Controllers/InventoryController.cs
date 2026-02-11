@@ -1,15 +1,17 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SafeFutureInventorySystem.Data;
+using SafeFutureInventorySystem.Helpers;
 using SafeFutureInventorySystem.Models;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
-using SkiaSharp;
 
 namespace SafeFutureInventorySystem.Controllers
 {
@@ -17,11 +19,13 @@ namespace SafeFutureInventorySystem.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<InventoryController> _logger;
+        private readonly IConfiguration _config;
 
-        public InventoryController(ApplicationDbContext context, ILogger<InventoryController> logger)
+        public InventoryController(ApplicationDbContext context, ILogger<InventoryController> logger, IConfiguration config)
         {
             _context = context;
             _logger = logger;
+            _config = config;
         }
 
         public IActionResult Index(string searchTerm, string expirationFilter,
@@ -159,43 +163,11 @@ namespace SafeFutureInventorySystem.Controllers
                 var item = _context.InventoryItems.Find(id);
                 if (item == null) return ItemNotFoundResult(id);
 
-                var qrValue = Url.Action("Edit", "Inventory", new { id = item.Id }, Request.Scheme) ?? $"INV-{item.Id:00000}";
+                var pathValue = QrCodeHelper.BuildInventoryDetailsPath(Url, item.Id);
+                var absolute = QrCodeHelper.ResolveToAbsolute(_config, Request, pathValue);
+                var pngBytes = QrCodeHelper.GeneratePng(absolute);
 
-                var writer = new ZXing.BarcodeWriterPixelData
-                {
-                    Format = ZXing.BarcodeFormat.QR_CODE,
-                    Options = new ZXing.Common.EncodingOptions
-                    {
-                        Height = 250,
-                        Width = 250,
-                        Margin = 1
-                    }
-                };
-
-                var pixelData = writer.Write(qrValue);
-
-                using (var surface = SKSurface.Create(new SKImageInfo(pixelData.Width, pixelData.Height)))
-                {
-                    using (var canvas = surface.Canvas)
-                    {
-                        using (var bitmap = new SKBitmap(new SKImageInfo(pixelData.Width, pixelData.Height)))
-                        {
-                            var ptr = bitmap.GetPixels();
-                            Marshal.Copy(pixelData.Pixels, 0, ptr, pixelData.Pixels.Length);
-
-                            canvas.Clear(SKColors.White);
-                            canvas.DrawBitmap(bitmap, 0, 0);
-                        }
-                    }
-
-                    using (var image = surface.Snapshot())
-                    using (var data = image.Encode(SKEncodedImageFormat.Png, 100))
-                    using (var ms = new MemoryStream())
-                    {
-                        data.SaveTo(ms);
-                        return File(ms.ToArray(), "image/png", $"qrcode-{item.Id}.png");
-                    }
-                }
+                return File(pngBytes, "image/png", $"qrcode-{item.Id}.png");
             }
             catch (Exception ex)
             {
@@ -446,6 +418,62 @@ namespace SafeFutureInventorySystem.Controllers
                 return RedirectToAction("Index");
             }
         }
+
+        [HttpGet]
+        [Route("ExportCsv")]
+        public IActionResult ExportInventoryCsv()
+        {
+            try
+            {
+                var items = _context.InventoryItems.OrderBy(i => i.Name).ToList();
+
+                if (!items.Any())
+                {
+                    TempData["error"] = "No inventory items to export.";
+                    return RedirectToAction("Index");
+                }
+
+                using (MemoryStream memoryStream = new MemoryStream())
+                using (TextWriter writer = new StreamWriter(memoryStream, System.Text.Encoding.UTF8))
+                {
+                    // Write CSV headers
+                    string[] headers = { "ID", "Name", "Description", "Quantity", "Category", "Barcode", "Expiration Date", "Date Added" };
+                    writer.WriteLine(string.Join(",", headers.Select(h => $"\"{h}\"")));
+
+                    // Write data rows
+                    foreach (var item in items)
+                    {
+                        var row = new[]
+                        {
+                            item.Id.ToString(),
+                            $"\"{item.Name}\"",
+                            $"\"{item.Description ?? ""}\"",
+                            item.Quantity.ToString(),
+                            $"\"{item.Category ?? ""}\"",
+                            $"\"{item.Barcode ?? ""}\"",
+                            item.ExpirationDate?.ToString("yyyy-MM-dd") ?? "N/A",
+                            item.DateAdded.ToString("yyyy-MM-dd")
+                        };
+                        writer.WriteLine(string.Join(",", row));
+                    }
+
+                    writer.Flush();
+                    byte[] csvBytes = memoryStream.ToArray();
+                    string fileName = $"Inventory_Export_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+                    return File(csvBytes, "text/csv", fileName);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting inventory to CSV.");
+                TempData["error"] = "Error exporting inventory. Please try again.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        [HttpGet]
+        [Route("ExportExcel")]
+
 
         [HttpGet]
         public JsonResult GetItemDetails(int id)

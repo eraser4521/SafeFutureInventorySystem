@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using SafeFutureInventorySystem.Models;
+using System.Configuration;
 
 namespace SafeFutureInventorySystem.Data
 {
@@ -13,6 +15,14 @@ namespace SafeFutureInventorySystem.Data
         public DbSet<InventoryItem> InventoryItems { get; set; }
         public DbSet<InventoryAdjustmentLog> AdjustmentLogs { get; set; }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            base.OnConfiguring(optionsBuilder);
+
+            // Suppress the warning so we can use DateTime.Now in seed data
+            optionsBuilder.ConfigureWarnings(warnings =>
+                warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
+        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
