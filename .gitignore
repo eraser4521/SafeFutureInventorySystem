@@ -1,31 +1,19 @@
+# Build output
 bin/
 obj/
+
+# Rider / ReSharper
 /packages/
 riderModule.iml
-/_ReSharper.Caches/
-.vs/SafeFutureInventorySystem/CopilotIndices/17.14.995.13737/CodeChunks.db
-.vs/SafeFutureInventorySystem/CopilotIndices/17.14.995.13737/CodeChunks.db-shm
-.vs/SafeFutureInventorySystem/CopilotIndices/17.14.995.13737/CodeChunks.db-wal
-.vs/SafeFutureInventorySystem/CopilotIndices/17.14.995.13737/SemanticSymbols.db
-.vs/SafeFutureInventorySystem/CopilotIndices/17.14.995.13737/SemanticSymbols.db-shm
-.vs/SafeFutureInventorySystem/CopilotIndices/17.14.995.13737/SemanticSymbols.db-wal
-.vs/SafeFutureInventorySystem/DesignTimeBuild/.dtbcache.v2
-.vs/SafeFutureInventorySystem/FileContentIndex/82670f6d-6709-4e37-a129-9d8e65cdc6ff.vsidx
-.vs/SafeFutureInventorySystem/FileContentIndex/c1abad3c-18dd-43b2-9436-852fb854ba63.vsidx
-.vs/SafeFutureInventorySystem/v17/.suo
-.vs/SafeFutureInventorySystem/v17/DocumentLayout.backup.json
-.vs/SafeFutureInventorySystem/v17/DocumentLayout.json
-SafeFutureInventorySystem/SafeFutureInventory.db-shm
-SafeFutureInventorySystem/SafeFutureInventory.db-wal
-.vs/SafeFutureInventorySystem/CopilotIndices/17.14.995.13737/CodeChunks.db
-.vs/SafeFutureInventorySystem/CopilotIndices/17.14.995.13737/CodeChunks.db-shm
-.vs/SafeFutureInventorySystem/CopilotIndices/17.14.995.13737/CodeChunks.db-wal
-.vs/SafeFutureInventorySystem/CopilotIndices/17.14.995.13737/SemanticSymbols.db
-.vs/SafeFutureInventorySystem/CopilotIndices/17.14.995.13737/SemanticSymbols.db-shm
-.vs/SafeFutureInventorySystem/CopilotIndices/17.14.995.13737/SemanticSymbols.db-wal
-.vs/SafeFutureInventorySystem/DesignTimeBuild/.dtbcache.v2
-.vs/SafeFutureInventorySystem/v17/.suo
-.vs/SafeFutureInventorySystem/v17/DocumentLayout.backup.json
-.vs/SafeFutureInventorySystem/v17/DocumentLayout.json
-SafeFutureInventorySystem/SafeFutureInventory.db-shm
-SafeFutureInventorySystem/SafeFutureInventory.db-wal
+_ReSharper.Caches/
+
+# Visual Studio
+.vs/
+
+# Databases (SQLite)
+*.db
+*.db-shm
+*.db-wal
+
+# ASP.NET secrets
+appsettings.json
