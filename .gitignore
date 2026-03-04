@@ -17,3 +17,8 @@ _ReSharper.Caches/
 
 # ASP.NET secrets
 appsettings.json
+
+# SQLite databases
+*.db
+*.db-shm
+*.db-wal
