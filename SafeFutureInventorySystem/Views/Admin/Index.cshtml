@@ -1,42 +1,100 @@
-@model List<SafeFutureInventorySystem.Models.ApplicationUser>
+@model List<SafeFutureInventorySystem.Controllers.AdminUserRow>
 
-<h2>Admin - Manage Users</h2>
-
-@if (TempData["Error"] != null)
-{
-    <div style="color:red;">@TempData["Error"]</div>
-}
-@if (TempData["Success"] != null)
-{
-    <div style="color:green;">@TempData["Success"]</div>
+@{
+    ViewData["Title"] = "Admin - Users";
 }
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Email</th>
-            <th>Name</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach (var u in Model)
+<div class="container py-4">
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <div>
+            <h2 class="mb-1">User Management</h2>
+            <div class="text-muted">Manage roles, passwords, and accounts.</div>
+        </div>
+
+        <a asp-action="Create" class="btn btn-primary">
+            + Create User
+        </a>
+    </div>
+
+    <!-- Alerts -->
+    @if (TempData["Error"] != null)
     {
-        var name = (string.IsNullOrWhiteSpace(u.FirstName) && string.IsNullOrWhiteSpace(u.LastName))
-            ? u.Email
-            : (u.FirstName + " " + u.LastName);
-
-        <tr>
-            <td>@u.Email</td>
-            <td>@name</td>
-            <td>
-                <form asp-controller="Admin" asp-action="Delete" method="post">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="id" value="@u.Id" />
-                    <button type="submit" class="btn btn-danger">Delete</button>
-                </form>
-            </td>
-        </tr>
+        <div class="alert alert-danger">@TempData["Error"]</div>
     }
-    </tbody>
-</table>
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <!-- Table Card -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Email</th>
+                            <th>Name</th>
+                            <th style="width:140px;">Role</th>
+                            <th style="width:240px;" class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var u in Model)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@u.Email</td>
+                                <td>@u.Name</td>
+                                <td>
+                                    @if (u.Role == "Admin")
+                                    {
+                                        <span class="badge bg-danger">Admin</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-primary">Volunteer</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-inline-flex gap-2">
+                                        <a class="btn btn-outline-dark btn-sm"
+                                           asp-controller="Admin"
+                                           asp-action="Edit"
+                                           asp-route-id="@u.Id">
+                                            Manage
+                                        </a>
+
+                                        <form asp-controller="Admin"
+                                              asp-action="Delete"
+                                              method="post"
+                                              class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@u.Id" />
+                                            <button type="submit"
+                                                    class="btn btn-outline-danger btn-sm"
+                                                    onclick="return confirm('Delete this user? This cannot be undone.');">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+
+                        @if (Model.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">
+                                    No users found.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>

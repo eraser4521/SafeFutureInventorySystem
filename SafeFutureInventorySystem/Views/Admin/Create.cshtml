@@ -1,0 +1,63 @@
+@model SafeFutureInventorySystem.Controllers.CreateUserVM
+
+@{
+    ViewData["Title"] = "Create User";
+}
+
+<div class="container py-4" style="max-width: 800px;">
+    <h2 class="mb-3">Create New User</h2>
+
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label">First Name</label>
+                        <input class="form-control" asp-for="FirstName" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Last Name</label>
+                        <input class="form-control" asp-for="LastName" required />
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label">Email</label>
+                        <input class="form-control" asp-for="Email" type="email" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Password</label>
+                        <input class="form-control" asp-for="Password" type="password" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Confirm Password</label>
+                        <input class="form-control" asp-for="ConfirmPassword" type="password" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Role</label>
+                        <select class="form-select" asp-for="Role">
+                            <option value="Volunteer">Volunteer</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="text-danger mt-3">
+                    @Html.ValidationSummary()
+                </div>
+
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary px-4">Create User</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+    </form>
+</div>
