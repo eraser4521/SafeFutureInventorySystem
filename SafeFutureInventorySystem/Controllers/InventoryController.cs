@@ -115,6 +115,7 @@ namespace SafeFutureInventorySystem.Controllers
 
                 var items = query.Skip((page - 1) * pageSize)
                                 .Take(pageSize)
+                                .Include(i => i.DonationLogs)
                                 .ToList();
 
                 var viewModel = new InventoryFilterViewModel
@@ -183,21 +184,77 @@ namespace SafeFutureInventorySystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(InventoryItem item)
+        public IActionResult Create(InventoryItem item,
+    string? DonorName, string? DonorPhone, string? DonorEmail)
         {
+            ModelState.Remove("DonationLogs");
+            ModelState.Remove("AdjustmentLogs");
+
             if (!ModelState.IsValid)
-            {
                 return View(item);
-            }
 
             try
             {
-                item.DateAdded = DateTime.Now;
-                _context.InventoryItems.Add(item);
-                _context.SaveChanges();
+                // Step 1: Try to find a duplicate by barcode
+                InventoryItem? existing = null;
 
-                TempData["SuccessMessage"] = $"Item '{item.Name}' added successfully!";
-                return RedirectToAction(nameof(Index));
+                if (!string.IsNullOrWhiteSpace(item.Barcode))
+                {
+                    existing = _context.InventoryItems
+                        .FirstOrDefault(i => i.Barcode == item.Barcode);
+                }
+
+                // Step 2: If no barcode match, try name only (case-insensitive, trimmed)
+                if (existing == null && !string.IsNullOrWhiteSpace(item.Name))
+                {
+                    var nameLower = item.Name.Trim().ToLower();
+                    existing = _context.InventoryItems
+                        .FirstOrDefault(i => i.Name.ToLower() == nameLower);
+                }
+
+                if (existing != null)
+                {
+                    // MERGE into existing item
+                    int oldQty = existing.Quantity;
+                    existing.Quantity += item.Quantity;
+                    existing.LastUpdated = DateTime.Now;
+
+                    _context.DonationLogs.Add(new DonationLog
+                    {
+                        InventoryItemId = existing.Id,
+                        QuantityDonated = item.Quantity,
+                        DonationDate = DateTime.Now,
+                        DonorName = DonorName,
+                        Notes = $"Merged into existing stock. Previous qty: {oldQty}"
+                    });
+
+                    _context.SaveChanges();
+
+                    TempData["SuccessMessage"] =
+                        $"'{existing.Name}' already exists — {item.Quantity} unit(s) merged into existing stock (new total: {existing.Quantity}).";
+                    return RedirectToAction(nameof(Details), new { id = existing.Id });
+                }
+                else
+                {
+                    // Brand new item
+                    item.DateAdded = DateTime.Now;
+                    _context.InventoryItems.Add(item);
+                    _context.SaveChanges();
+
+                    _context.DonationLogs.Add(new DonationLog
+                    {
+                        InventoryItemId = item.Id,
+                        QuantityDonated = item.Quantity,
+                        DonationDate = DateTime.Now,
+                        DonorName = DonorName,
+                        Notes = "Initial donation — item created."
+                    });
+
+                    _context.SaveChanges();
+
+                    TempData["SuccessMessage"] = $"Item '{item.Name}' added successfully!";
+                    return RedirectToAction(nameof(Index));
+                }
             }
             catch (Exception ex)
             {
@@ -207,23 +264,28 @@ namespace SafeFutureInventorySystem.Controllers
             }
         }
 
+
         public IActionResult Details(int id)
         {
             try
             {
-                var item = _context.InventoryItems.Find(id);
-                if (item == null)
-                {
-                    return ItemNotFoundResult(id);
-                }
+                var item = _context.InventoryItems
+                    .Include(i => i.DonationLogs)
+                    .Include(i => i.AdjustmentLogs)
+                    .FirstOrDefault(i => i.Id == id);
 
-                var adjustmentHistory = _context.AdjustmentLogs
-                    .Where(l => l.InventoryItemId == id)
+                if (item == null)
+                    return ItemNotFoundResult(id);
+
+                ViewBag.AdjustmentHistory = item.AdjustmentLogs
                     .OrderByDescending(l => l.AdjustmentDate)
                     .Take(10)
                     .ToList();
 
-                ViewBag.AdjustmentHistory = adjustmentHistory;
+                ViewBag.DonationHistory = item.DonationLogs
+                    .OrderByDescending(d => d.DonationDate)
+                    .ToList();
+
                 return View(item);
             }
             catch (Exception ex)
@@ -513,9 +575,7 @@ namespace SafeFutureInventorySystem.Controllers
             try
             {
                 if (string.IsNullOrWhiteSpace(term))
-                {
-                    return new JsonResult(new System.Collections.Generic.List<object>());
-                }
+                    return new JsonResult(new List<object>());
 
                 var items = _context.InventoryItems
                     .Where(i => i.Name.Contains(term))
@@ -525,7 +585,9 @@ namespace SafeFutureInventorySystem.Controllers
                         id = i.Id,
                         label = i.Name,
                         value = i.Name,
-                        quantity = i.Quantity
+                        quantity = i.Quantity,
+                        category = i.Category ?? "Uncategorized",
+                        barcode = i.Barcode ?? ""
                     })
                     .ToList();
 
@@ -534,7 +596,7 @@ namespace SafeFutureInventorySystem.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error searching items with term {Term}", term);
-                return new JsonResult(new System.Collections.Generic.List<object>());
+                return new JsonResult(new List<object>());
             }
         }
 

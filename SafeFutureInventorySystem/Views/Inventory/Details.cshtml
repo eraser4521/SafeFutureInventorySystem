@@ -102,66 +102,62 @@
 
                     <hr class="my-4" />
 
-                    <!-- DONOR INFORMATION SECTION -->
-                    <h4 class="mb-3"><i class="fas fa-user-friends"></i> Donor Information</h4>
+                    <hr class="my-4" />
 
-                    <dl class="row">
-                        <dt class="col-sm-4">Donor Name:</dt>
-                        <dd class="col-sm-8">
-                            @if (!string.IsNullOrEmpty(Model.DonorName))
-                            {
-                                <i class="fas fa-user text-primary"></i> <strong>@Model.DonorName</strong>
-                            }
-                            else
-                            {
-                                <span class="text-muted">Not recorded</span>
-                            }
-                        </dd>
+                    <!-- DONATION HISTORY SECTION -->
+                    <h4 class="mb-3"><i class="fas fa-hand-holding-heart"></i> Donation History</h4>
 
-                        <dt class="col-sm-4">Donor Phone:</dt>
-                        <dd class="col-sm-8">
-                            @if (!string.IsNullOrEmpty(Model.DonorPhone))
-                            {
-                                <i class="fas fa-phone text-success"></i>
-                                <a href="tel:@Model.DonorPhone">@Model.DonorPhone</a>
-                            }
-                            else
-                            {
-                                <span class="text-muted">Not provided</span>
-                            }
-                        </dd>
+                    @{
+                        var donationHistory = ViewBag.DonationHistory as List<SafeFutureInventorySystem.Models.DonationLog>;
+                    }
 
-                        <dt class="col-sm-4">Donor Email:</dt>
-                        <dd class="col-sm-8">
-                            @if (!string.IsNullOrEmpty(Model.DonorEmail))
-                            {
-                                <i class="fas fa-envelope text-info"></i>
-                                <a href="mailto:@Model.DonorEmail">@Model.DonorEmail</a>
-                            }
-                            else
-                            {
-                                <span class="text-muted">Not provided</span>
-                            }
-                        </dd>
-                    </dl>
-
-                    <hr />
-
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-warning"
-                                onclick="openAdjustQuantityModal(@Model.Id, '@Model.Name', @Model.Quantity)">
-                            <i class="fas fa-edit"></i> Adjust Quantity
-                        </button>
-                        <a asp-action="QrCode" asp-route-id="@Model.Id" class="btn btn-secondary">
-                            <i class="fas fa-qrcode"></i> QR Code
-                        </a>
-                        <a asp-action="Index" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Back to List
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+                    @if (donationHistory != null && donationHistory.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered table-hover">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Qty Donated</th>
+                                        <th>Donor Name</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var d in donationHistory)
+                                    {
+                                        <tr>
+                                            <td>@d.DonationDate.ToString("MMM dd, yyyy")</td>
+                                            <td><span class="badge bg-success">+@d.QuantityDonated</span></td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(d.DonorName))
+                                                {
+                                                    <i class="fas fa-user text-primary"></i> 
+                                                    @d.DonorName
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">—</span>
+                                                }
+                                            </td>
+                                            <td><small class="text-muted">@(d.Notes ?? "—")</small></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-light fw-bold">
+                                        <td>Total</td>
+                                        <td><span class="badge bg-primary">@donationHistory.Sum(d => d.QuantityDonated) units</span></td>
+                                        <td colspan="4"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No donation history recorded for this item.</p>
+                    }
 
         <!-- Adjustment History -->
         <div class="col-md-4">

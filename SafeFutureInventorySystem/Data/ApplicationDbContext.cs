@@ -14,15 +14,16 @@ namespace SafeFutureInventorySystem.Data
 
         public DbSet<InventoryItem> InventoryItems { get; set; }
         public DbSet<InventoryAdjustmentLog> AdjustmentLogs { get; set; }
+        public DbSet<DonationLog> DonationLogs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
 
-            // Suppress the warning so we can use DateTime.Now in seed data
             optionsBuilder.ConfigureWarnings(warnings =>
                 warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
         }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -30,14 +31,25 @@ namespace SafeFutureInventorySystem.Data
             // Configure relationships
             modelBuilder.Entity<InventoryAdjustmentLog>()
                 .HasOne<InventoryItem>()
-                .WithMany()
+                .WithMany(i => i.AdjustmentLogs)
                 .HasForeignKey(l => l.InventoryItemId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Comprehensive seed data for testing all features
+            modelBuilder.Entity<DonationLog>()
+                .HasOne(d => d.InventoryItem)
+                .WithMany(i => i.DonationLogs)
+                .HasForeignKey(d => d.InventoryItemId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // ============================================================
+            // INVENTORY ITEMS SEED DATA
+            // NOTE: DonorName/Phone/Email removed — now tracked per-donation
+            //       Quantities reflect the SUM of all DonationLog entries
+            // ============================================================
             modelBuilder.Entity<InventoryItem>().HasData(
+
                 // ============================================
-                // EXPIRED ITEMS (Test "Expired" filter)
+                // EXPIRED ITEMS
                 // ============================================
                 new InventoryItem
                 {
@@ -46,12 +58,9 @@ namespace SafeFutureInventorySystem.Data
                     Description = "EXPIRED - Similac Advance, 12.4 oz",
                     Quantity = 15,
                     Barcode = "070074680002",
-                    ExpirationDate = DateTime.Now.AddDays(-30), // Expired 30 days ago
+                    ExpirationDate = DateTime.Now.AddDays(-30),
                     DateAdded = DateTime.Now.AddDays(-120),
-                    Category = "Baby Formula",
-                    DonorName = "Sarah Johnson",
-                    DonorPhone = "555-0101",
-                    DonorEmail = "sarah.j@email.com"
+                    Category = "Baby Formula"
                 },
                 new InventoryItem
                 {
@@ -60,12 +69,9 @@ namespace SafeFutureInventorySystem.Data
                     Description = "EXPIRED - Huggies Natural Care, 72 count",
                     Quantity = 8,
                     Barcode = "036000516517",
-                    ExpirationDate = DateTime.Now.AddDays(-15), // Expired 15 days ago
+                    ExpirationDate = DateTime.Now.AddDays(-15),
                     DateAdded = DateTime.Now.AddDays(-90),
-                    Category = "Baby Wipes",
-                    DonorName = "Michael Chen",
-                    DonorPhone = "555-0102",
-                    DonorEmail = "m.chen@email.com"
+                    Category = "Baby Wipes"
                 },
                 new InventoryItem
                 {
@@ -74,15 +80,13 @@ namespace SafeFutureInventorySystem.Data
                     Description = "EXPIRED - Boudreaux's Butt Paste, 4 oz",
                     Quantity = 3,
                     Barcode = "085898800015",
-                    ExpirationDate = DateTime.Now.AddDays(-60), // Expired 60 days ago
+                    ExpirationDate = DateTime.Now.AddDays(-60),
                     DateAdded = DateTime.Now.AddDays(-150),
-                    Category = "Baby Care",
-                    DonorName = "Jennifer Martinez",
-                    DonorPhone = "555-0103"
+                    Category = "Baby Care"
                 },
 
                 // ============================================
-                // EXPIRING SOON (Within 7 days - Test "Expiring Soon" filter)
+                // EXPIRING SOON
                 // ============================================
                 new InventoryItem
                 {
@@ -91,11 +95,9 @@ namespace SafeFutureInventorySystem.Data
                     Description = "EXPIRING SOON - Gentle powder, 32 oz",
                     Quantity = 45,
                     Barcode = "050000339877",
-                    ExpirationDate = DateTime.Now.AddDays(3), // Expires in 3 days
+                    ExpirationDate = DateTime.Now.AddDays(3),
                     DateAdded = DateTime.Now.AddDays(-60),
-                    Category = "Baby Formula",
-                    DonorName = "Robert Williams",
-                    DonorEmail = "r.williams@email.com"
+                    Category = "Baby Formula"
                 },
                 new InventoryItem
                 {
@@ -104,12 +106,9 @@ namespace SafeFutureInventorySystem.Data
                     Description = "EXPIRING SOON - 99.9% water, 540 count",
                     Quantity = 180,
                     Barcode = "859668006010",
-                    ExpirationDate = DateTime.Now.AddDays(5), // Expires in 5 days
+                    ExpirationDate = DateTime.Now.AddDays(5),
                     DateAdded = DateTime.Now.AddDays(-40),
-                    Category = "Baby Wipes",
-                    DonorName = "Lisa Anderson",
-                    DonorPhone = "555-0105",
-                    DonorEmail = "lisa.a@email.com"
+                    Category = "Baby Wipes"
                 },
                 new InventoryItem
                 {
@@ -118,14 +117,13 @@ namespace SafeFutureInventorySystem.Data
                     Description = "EXPIRING SOON - Stage 1, 4 oz jar",
                     Quantity = 22,
                     Barcode = "051000138255",
-                    ExpirationDate = DateTime.Now.AddDays(7), // Expires in 7 days
+                    ExpirationDate = DateTime.Now.AddDays(7),
                     DateAdded = DateTime.Now.AddDays(-50),
-                    Category = "Baby Food",
-                    DonorName = "Target Store #1234"
+                    Category = "Baby Food"
                 },
 
                 // ============================================
-                // EXPIRING THIS MONTH (8-30 days - Test "Expiring This Month" filter)
+                // EXPIRING THIS MONTH
                 // ============================================
                 new InventoryItem
                 {
@@ -134,11 +132,9 @@ namespace SafeFutureInventorySystem.Data
                     Description = "Expiring this month - 30.8 oz powder",
                     Quantity = 130,
                     Barcode = "070074682532",
-                    ExpirationDate = DateTime.Now.AddDays(25), // Expires in 25 days
+                    ExpirationDate = DateTime.Now.AddDays(25),
                     DateAdded = DateTime.Now.AddDays(-35),
-                    Category = "Baby Formula",
-                    DonorName = "David Thompson",
-                    DonorPhone = "555-0107"
+                    Category = "Baby Formula"
                 },
                 new InventoryItem
                 {
@@ -147,12 +143,9 @@ namespace SafeFutureInventorySystem.Data
                     Description = "Expiring this month - 504 count",
                     Quantity = 250,
                     Barcode = "037000830689",
-                    ExpirationDate = DateTime.Now.AddDays(20), // Expires in 20 days
+                    ExpirationDate = DateTime.Now.AddDays(20),
                     DateAdded = DateTime.Now.AddDays(-18),
-                    Category = "Baby Wipes",
-                    DonorName = "Emily Davis",
-                    DonorPhone = "555-0108",
-                    DonorEmail = "emily.d@email.com"
+                    Category = "Baby Wipes"
                 },
                 new InventoryItem
                 {
@@ -161,15 +154,13 @@ namespace SafeFutureInventorySystem.Data
                     Description = "Expiring this month - Liquid supplement",
                     Quantity = 68,
                     Barcode = "363824009001",
-                    ExpirationDate = DateTime.Now.AddDays(28), // Expires in 28 days
+                    ExpirationDate = DateTime.Now.AddDays(28),
                     DateAdded = DateTime.Now.AddDays(-45),
-                    Category = "Baby Health",
-                    DonorName = "James Wilson",
-                    DonorEmail = "j.wilson@email.com"
+                    Category = "Baby Health"
                 },
 
                 // ============================================
-                // GOOD CONDITION (More than 30 days - Test "Good" filter)
+                // GOOD CONDITION
                 // ============================================
                 new InventoryItem
                 {
@@ -180,10 +171,7 @@ namespace SafeFutureInventorySystem.Data
                     Barcode = "037000465911",
                     ExpirationDate = DateTime.Now.AddMonths(18),
                     DateAdded = DateTime.Now.AddDays(-30),
-                    Category = "Diapers",
-                    DonorName = "Patricia Moore",
-                    DonorPhone = "555-0110",
-                    DonorEmail = "patricia.m@email.com"
+                    Category = "Diapers"
                 },
                 new InventoryItem
                 {
@@ -194,9 +182,7 @@ namespace SafeFutureInventorySystem.Data
                     Barcode = "036000406481",
                     ExpirationDate = DateTime.Now.AddMonths(24),
                     DateAdded = DateTime.Now.AddDays(-25),
-                    Category = "Diapers",
-                    DonorName = "Walmart Store #5678",
-                    DonorPhone = "555-0111"
+                    Category = "Diapers"
                 },
                 new InventoryItem
                 {
@@ -207,9 +193,7 @@ namespace SafeFutureInventorySystem.Data
                     Barcode = "037000465928",
                     ExpirationDate = DateTime.Now.AddMonths(20),
                     DateAdded = DateTime.Now.AddDays(-20),
-                    Category = "Diapers",
-                    DonorName = "Christopher Taylor",
-                    DonorEmail = "chris.t@email.com"
+                    Category = "Diapers"
                 },
                 new InventoryItem
                 {
@@ -220,10 +204,7 @@ namespace SafeFutureInventorySystem.Data
                     Barcode = "036000406498",
                     ExpirationDate = DateTime.Now.AddMonths(22),
                     DateAdded = DateTime.Now.AddDays(-15),
-                    Category = "Diapers",
-                    DonorName = "Jessica Brown",
-                    DonorPhone = "555-0113",
-                    DonorEmail = "jessica.b@email.com"
+                    Category = "Diapers"
                 },
                 new InventoryItem
                 {
@@ -234,9 +215,7 @@ namespace SafeFutureInventorySystem.Data
                     Barcode = "037000465935",
                     ExpirationDate = DateTime.Now.AddMonths(19),
                     DateAdded = DateTime.Now.AddDays(-10),
-                    Category = "Diapers",
-                    DonorName = "Daniel Garcia",
-                    DonorPhone = "555-0114"
+                    Category = "Diapers"
                 },
                 new InventoryItem
                 {
@@ -247,8 +226,7 @@ namespace SafeFutureInventorySystem.Data
                     Barcode = "036000406504",
                     ExpirationDate = DateTime.Now.AddMonths(21),
                     DateAdded = DateTime.Now.AddDays(-8),
-                    Category = "Diapers",
-                    DonorName = "St. Mary's Church"
+                    Category = "Diapers"
                 },
                 new InventoryItem
                 {
@@ -259,10 +237,7 @@ namespace SafeFutureInventorySystem.Data
                     Barcode = "037000465942",
                     ExpirationDate = DateTime.Now.AddMonths(23),
                     DateAdded = DateTime.Now.AddDays(-5),
-                    Category = "Diapers",
-                    DonorName = "Matthew Rodriguez",
-                    DonorPhone = "555-0116",
-                    DonorEmail = "matt.r@email.com"
+                    Category = "Diapers"
                 },
                 new InventoryItem
                 {
@@ -273,9 +248,7 @@ namespace SafeFutureInventorySystem.Data
                     Barcode = "300871214415",
                     ExpirationDate = DateTime.Now.AddMonths(10),
                     DateAdded = DateTime.Now.AddDays(-28),
-                    Category = "Baby Formula",
-                    DonorName = "Ashley Lewis",
-                    DonorEmail = "ashley.l@email.com"
+                    Category = "Baby Formula"
                 },
                 new InventoryItem
                 {
@@ -286,9 +259,7 @@ namespace SafeFutureInventorySystem.Data
                     Barcode = "036000516500",
                     ExpirationDate = DateTime.Now.AddMonths(14),
                     DateAdded = DateTime.Now.AddDays(-22),
-                    Category = "Baby Wipes",
-                    DonorName = "Joshua Walker",
-                    DonorPhone = "555-0118"
+                    Category = "Baby Wipes"
                 },
                 new InventoryItem
                 {
@@ -299,10 +270,7 @@ namespace SafeFutureInventorySystem.Data
                     Barcode = "067981105001",
                     ExpirationDate = DateTime.Now.AddMonths(18),
                     DateAdded = DateTime.Now.AddDays(-14),
-                    Category = "Diapering",
-                    DonorName = "Amanda Hall",
-                    DonorPhone = "555-0119",
-                    DonorEmail = "amanda.h@email.com"
+                    Category = "Diapering"
                 },
                 new InventoryItem
                 {
@@ -313,12 +281,11 @@ namespace SafeFutureInventorySystem.Data
                     Barcode = "381371161423",
                     ExpirationDate = DateTime.Now.AddMonths(30),
                     DateAdded = DateTime.Now.AddDays(-17),
-                    Category = "Baby Care",
-                    DonorName = "Community Health Center"
+                    Category = "Baby Care"
                 },
 
                 // ============================================
-                // NO EXPIRATION DATE (Test "No Expiration" filter)
+                // NO EXPIRATION DATE
                 // ============================================
                 new InventoryItem
                 {
@@ -328,9 +295,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 70,
                     Barcode = "072239311004",
                     DateAdded = DateTime.Now.AddDays(-11),
-                    Category = "Feeding",
-                    DonorName = "Ryan Allen",
-                    DonorPhone = "555-0121"
+                    Category = "Feeding"
                 },
                 new InventoryItem
                 {
@@ -340,9 +305,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 125,
                     Barcode = "072239314012",
                     DateAdded = DateTime.Now.AddDays(-16),
-                    Category = "Feeding",
-                    DonorName = "Samantha Young",
-                    DonorEmail = "samantha.y@email.com"
+                    Category = "Feeding"
                 },
                 new InventoryItem
                 {
@@ -352,10 +315,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 90,
                     Barcode = "849854012345",
                     DateAdded = DateTime.Now.AddDays(-9),
-                    Category = "Feeding",
-                    DonorName = "Brandon King",
-                    DonorPhone = "555-0123",
-                    DonorEmail = "brandon.k@email.com"
+                    Category = "Feeding"
                 },
                 new InventoryItem
                 {
@@ -365,9 +325,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 160,
                     Barcode = "078742317298",
                     DateAdded = DateTime.Now.AddDays(-21),
-                    Category = "Clothing",
-                    DonorName = "Nicole Wright",
-                    DonorPhone = "555-0124"
+                    Category = "Clothing"
                 },
                 new InventoryItem
                 {
@@ -377,9 +335,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 105,
                     Barcode = "078742317305",
                     DateAdded = DateTime.Now.AddDays(-13),
-                    Category = "Clothing",
-                    DonorName = "Justin Scott",
-                    DonorEmail = "justin.s@email.com"
+                    Category = "Clothing"
                 },
                 new InventoryItem
                 {
@@ -389,10 +345,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 200,
                     Barcode = "849854023456",
                     DateAdded = DateTime.Now.AddDays(-6),
-                    Category = "Clothing",
-                    DonorName = "Megan Green",
-                    DonorPhone = "555-0126",
-                    DonorEmail = "megan.g@email.com"
+                    Category = "Clothing"
                 },
                 new InventoryItem
                 {
@@ -402,9 +355,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 80,
                     Barcode = "849854034567",
                     DateAdded = DateTime.Now.AddDays(-24),
-                    Category = "Clothing",
-                    DonorName = "Tyler Adams",
-                    DonorPhone = "555-0127"
+                    Category = "Clothing"
                 },
                 new InventoryItem
                 {
@@ -414,8 +365,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 65,
                     Barcode = "735363012010",
                     DateAdded = DateTime.Now.AddDays(-7),
-                    Category = "Diapering",
-                    DonorName = "Rachel Baker"
+                    Category = "Diapering"
                 },
                 new InventoryItem
                 {
@@ -425,10 +375,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 55,
                     Barcode = "849854045678",
                     DateAdded = DateTime.Now.AddDays(-4),
-                    Category = "Baby Care",
-                    DonorName = "Kevin Nelson",
-                    DonorPhone = "555-0129",
-                    DonorEmail = "kevin.n@email.com"
+                    Category = "Baby Care"
                 },
                 new InventoryItem
                 {
@@ -438,9 +385,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 45,
                     Barcode = "853689006133",
                     DateAdded = DateTime.Now.AddDays(-27),
-                    Category = "Baby Health",
-                    DonorName = "Lauren Carter",
-                    DonorEmail = "lauren.c@email.com"
+                    Category = "Baby Health"
                 },
                 new InventoryItem
                 {
@@ -450,9 +395,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 100,
                     Barcode = "849854056789",
                     DateAdded = DateTime.Now.AddDays(-26),
-                    Category = "Bedding",
-                    DonorName = "Jacob Mitchell",
-                    DonorPhone = "555-0131"
+                    Category = "Bedding"
                 },
                 new InventoryItem
                 {
@@ -462,10 +405,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 75,
                     Barcode = "849854067890",
                     DateAdded = DateTime.Now.AddDays(-15),
-                    Category = "Bedding",
-                    DonorName = "Kimberly Perez",
-                    DonorPhone = "555-0132",
-                    DonorEmail = "kim.p@email.com"
+                    Category = "Bedding"
                 },
                 new InventoryItem
                 {
@@ -475,8 +415,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 88,
                     Barcode = "849854078901",
                     DateAdded = DateTime.Now.AddDays(-12),
-                    Category = "Bathing",
-                    DonorName = "Austin Roberts"
+                    Category = "Bathing"
                 },
                 new InventoryItem
                 {
@@ -486,9 +425,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 150,
                     Barcode = "849854089012",
                     DateAdded = DateTime.Now.AddDays(-29),
-                    Category = "Bathing",
-                    DonorName = "Brittany Turner",
-                    DonorEmail = "brittany.t@email.com"
+                    Category = "Bathing"
                 },
                 new InventoryItem
                 {
@@ -498,9 +435,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 35,
                     Barcode = "849854090123",
                     DateAdded = DateTime.Now.AddDays(-31),
-                    Category = "Accessories",
-                    DonorName = "Costco Wholesale",
-                    DonorPhone = "555-0135"
+                    Category = "Accessories"
                 },
                 new InventoryItem
                 {
@@ -510,14 +445,11 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 50,
                     Barcode = "849854101234",
                     DateAdded = DateTime.Now.AddDays(-33),
-                    Category = "Baby Health",
-                    DonorName = "Zachary Phillips",
-                    DonorPhone = "555-0136",
-                    DonorEmail = "zach.p@email.com"
+                    Category = "Baby Health"
                 },
 
                 // ============================================
-                // ADDITIONAL ITEMS FOR PAGINATION TESTING (Items 37-60)
+                // ADDITIONAL ITEMS (37-60)
                 // ============================================
                 new InventoryItem
                 {
@@ -528,8 +460,7 @@ namespace SafeFutureInventorySystem.Data
                     Barcode = "732913441914",
                     ExpirationDate = DateTime.Now.AddMonths(15),
                     DateAdded = DateTime.Now.AddDays(-12),
-                    Category = "Diapers",
-                    DonorName = "Hannah Campbell"
+                    Category = "Diapers"
                 },
                 new InventoryItem
                 {
@@ -540,9 +471,7 @@ namespace SafeFutureInventorySystem.Data
                     Barcode = "381371161416",
                     ExpirationDate = DateTime.Now.AddMonths(24),
                     DateAdded = DateTime.Now.AddDays(-19),
-                    Category = "Baby Care",
-                    DonorName = "Nathan Parker",
-                    DonorPhone = "555-0138"
+                    Category = "Baby Care"
                 },
                 new InventoryItem
                 {
@@ -553,9 +482,7 @@ namespace SafeFutureInventorySystem.Data
                     Barcode = "381371161430",
                     ExpirationDate = DateTime.Now.AddMonths(26),
                     DateAdded = DateTime.Now.AddDays(-23),
-                    Category = "Baby Care",
-                    DonorName = "Alexis Evans",
-                    DonorEmail = "alexis.e@email.com"
+                    Category = "Baby Care"
                 },
                 new InventoryItem
                 {
@@ -566,10 +493,7 @@ namespace SafeFutureInventorySystem.Data
                     Barcode = "072239314029",
                     ExpirationDate = DateTime.Now.AddMonths(36),
                     DateAdded = DateTime.Now.AddDays(-8),
-                    Category = "Comfort",
-                    DonorName = "Samuel Edwards",
-                    DonorPhone = "555-0140",
-                    DonorEmail = "sam.e@email.com"
+                    Category = "Comfort"
                 },
                 new InventoryItem
                 {
@@ -579,8 +503,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 92,
                     Barcode = "849854112345",
                     DateAdded = DateTime.Now.AddDays(-42),
-                    Category = "Feeding",
-                    DonorName = "Grace Collins"
+                    Category = "Feeding"
                 },
                 new InventoryItem
                 {
@@ -591,9 +514,7 @@ namespace SafeFutureInventorySystem.Data
                     Barcode = "051000138262",
                     ExpirationDate = DateTime.Now.AddDays(45),
                     DateAdded = DateTime.Now.AddDays(-55),
-                    Category = "Baby Food",
-                    DonorName = "Benjamin Stewart",
-                    DonorPhone = "555-0142"
+                    Category = "Baby Food"
                 },
                 new InventoryItem
                 {
@@ -604,9 +525,7 @@ namespace SafeFutureInventorySystem.Data
                     Barcode = "051000138279",
                     ExpirationDate = DateTime.Now.AddDays(50),
                     DateAdded = DateTime.Now.AddDays(-48),
-                    Category = "Baby Food",
-                    DonorName = "Victoria Sanchez",
-                    DonorEmail = "victoria.s@email.com"
+                    Category = "Baby Food"
                 },
                 new InventoryItem
                 {
@@ -616,10 +535,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 78,
                     Barcode = "849854123456",
                     DateAdded = DateTime.Now.AddDays(-38),
-                    Category = "Feeding",
-                    DonorName = "Alexander Morris",
-                    DonorPhone = "555-0144",
-                    DonorEmail = "alex.m@email.com"
+                    Category = "Feeding"
                 },
                 new InventoryItem
                 {
@@ -629,9 +545,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 61,
                     Barcode = "849854134567",
                     DateAdded = DateTime.Now.AddDays(-52),
-                    Category = "Feeding",
-                    DonorName = "Sophia Rogers",
-                    DonorPhone = "555-0145"
+                    Category = "Feeding"
                 },
                 new InventoryItem
                 {
@@ -641,8 +555,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 103,
                     Barcode = "849854145678",
                     DateAdded = DateTime.Now.AddDays(-44),
-                    Category = "Baby Health",
-                    DonorName = "Elijah Reed"
+                    Category = "Baby Health"
                 },
                 new InventoryItem
                 {
@@ -653,10 +566,7 @@ namespace SafeFutureInventorySystem.Data
                     Barcode = "738443002151",
                     ExpirationDate = DateTime.Now.AddMonths(16),
                     DateAdded = DateTime.Now.AddDays(-65),
-                    Category = "Baby Care",
-                    DonorName = "Olivia Cook",
-                    DonorPhone = "555-0147",
-                    DonorEmail = "olivia.c@email.com"
+                    Category = "Baby Care"
                 },
                 new InventoryItem
                 {
@@ -666,9 +576,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 82,
                     Barcode = "037000120261",
                     DateAdded = DateTime.Now.AddDays(-71),
-                    Category = "Baby Care",
-                    DonorName = "Mason Morgan",
-                    DonorEmail = "mason.m@email.com"
+                    Category = "Baby Care"
                 },
                 new InventoryItem
                 {
@@ -678,9 +586,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 18,
                     Barcode = "849854156789",
                     DateAdded = DateTime.Now.AddDays(-88),
-                    Category = "Safety",
-                    DonorName = "Ava Bell",
-                    DonorPhone = "555-0149"
+                    Category = "Safety"
                 },
                 new InventoryItem
                 {
@@ -690,10 +596,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 234,
                     Barcode = "849854167890",
                     DateAdded = DateTime.Now.AddDays(-77),
-                    Category = "Safety",
-                    DonorName = "Lucas Murphy",
-                    DonorPhone = "555-0150",
-                    DonorEmail = "lucas.m@email.com"
+                    Category = "Safety"
                 },
                 new InventoryItem
                 {
@@ -703,8 +606,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 12,
                     Barcode = "849854178901",
                     DateAdded = DateTime.Now.AddDays(-95),
-                    Category = "Safety",
-                    DonorName = "Isabella Bailey"
+                    Category = "Safety"
                 },
                 new InventoryItem
                 {
@@ -714,9 +616,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 28,
                     Barcode = "849854189012",
                     DateAdded = DateTime.Now.AddDays(-102),
-                    Category = "Baby Health",
-                    DonorName = "Ethan Rivera",
-                    DonorPhone = "555-0152"
+                    Category = "Baby Health"
                 },
                 new InventoryItem
                 {
@@ -726,9 +626,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 144,
                     Barcode = "849854190123",
                     DateAdded = DateTime.Now.AddDays(-58),
-                    Category = "Feeding",
-                    DonorName = "Mia Cooper",
-                    DonorEmail = "mia.c@email.com"
+                    Category = "Feeding"
                 },
                 new InventoryItem
                 {
@@ -738,10 +636,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 22,
                     Barcode = "849854201234",
                     DateAdded = DateTime.Now.AddDays(-83),
-                    Category = "Bathing",
-                    DonorName = "Logan Richardson",
-                    DonorPhone = "555-0154",
-                    DonorEmail = "logan.r@email.com"
+                    Category = "Bathing"
                 },
                 new InventoryItem
                 {
@@ -751,9 +646,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 67,
                     Barcode = "849854212345",
                     DateAdded = DateTime.Now.AddDays(-69),
-                    Category = "Baby Care",
-                    DonorName = "Charlotte Cox",
-                    DonorPhone = "555-0155"
+                    Category = "Baby Care"
                 },
                 new InventoryItem
                 {
@@ -763,8 +656,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 98,
                     Barcode = "849854223456",
                     DateAdded = DateTime.Now.AddDays(-46),
-                    Category = "Diapering",
-                    DonorName = "Aiden Howard"
+                    Category = "Diapering"
                 },
                 new InventoryItem
                 {
@@ -774,10 +666,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 15,
                     Barcode = "849854234567",
                     DateAdded = DateTime.Now.AddDays(-110),
-                    Category = "Accessories",
-                    DonorName = "Amelia Ward",
-                    DonorPhone = "555-0157",
-                    DonorEmail = "amelia.w@email.com"
+                    Category = "Accessories"
                 },
                 new InventoryItem
                 {
@@ -787,9 +676,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 31,
                     Barcode = "849854245678",
                     DateAdded = DateTime.Now.AddDays(-98),
-                    Category = "Accessories",
-                    DonorName = "Liam Torres",
-                    DonorEmail = "liam.t@email.com"
+                    Category = "Accessories"
                 },
                 new InventoryItem
                 {
@@ -799,9 +686,7 @@ namespace SafeFutureInventorySystem.Data
                     Quantity = 176,
                     Barcode = "849854256789",
                     DateAdded = DateTime.Now.AddDays(-62),
-                    Category = "Accessories",
-                    DonorName = "Harper Peterson",
-                    DonorPhone = "555-0159"
+                    Category = "Accessories"
                 },
                 new InventoryItem
                 {
@@ -810,16 +695,238 @@ namespace SafeFutureInventorySystem.Data
                     Description = "Natural, benzocaine-free, 0.33 oz",
                     Quantity = 54,
                     Barcode = "363824012001",
-                    ExpirationDate = DateTime.Now.AddDays(2), // Expiring very soon!
+                    ExpirationDate = DateTime.Now.AddDays(2),
                     DateAdded = DateTime.Now.AddDays(-75),
-                    Category = "Baby Health",
-                    DonorName = "Noah Gray",
-                    DonorPhone = "555-0160",
-                    DonorEmail = "noah.g@email.com"
+                    Category = "Baby Health"
                 }
             );
 
-            // Seed some sample adjustment logs for testing
+            // ============================================================
+            // DONATION LOG SEED DATA
+            //
+            // Strategy:
+            //  - Every item gets at least 1 DonationLog (the original donor).
+            //  - Several high-volume items get 2-3 donations to demonstrate
+            //    the merge/accumulation feature is working correctly.
+            //  - Quantities across DonationLogs for an item ADD UP to the
+            //    item's total Quantity value.
+            //
+            // Items with multiple donations (to showcase the merge feature):
+            //   Id=10 (Pampers Newborn): 3 donors → 60+50+40 = 150
+            //   Id=11 (Huggies Size 1):  3 donors → 80+70+50 = 200
+            //   Id=17 (Enfamil):         2 donors → 100+45  = 145
+            //   Id=18 (Huggies Wipes):   3 donors → 100+80+40 = 220
+            //   Id=24 (Onesies 0-3M):    2 donors → 100+60  = 160
+            //   Id=42 (Sweet Potatoes):  2 donors → 100+85  = 185
+            //   Id=50 (Outlet Covers):   3 donors → 100+84+50 = 234
+            //   Id=54 (Baby Bath Tub):   2 donors → 12+10   = 22
+            // ============================================================
+            modelBuilder.Entity<DonationLog>().HasData(
+
+                // --- Id=1: Expired Baby Formula (15 units, 1 donor) ---
+                new DonationLog { Id = 1, InventoryItemId = 1, QuantityDonated = 15, DonationDate = DateTime.Now.AddDays(-120), DonorName = "Sarah Johnson",Notes = "Initial donation — item created." },
+
+                // --- Id=2: Expired Baby Wipes (8 units, 1 donor) ---
+                new DonationLog { Id = 2, InventoryItemId = 2, QuantityDonated = 8, DonationDate = DateTime.Now.AddDays(-90), DonorName = "Michael Chen", Notes = "Initial donation — item created." },
+
+                // --- Id=3: Expired Diaper Cream (3 units, 1 donor) ---
+                new DonationLog { Id = 3, InventoryItemId = 3, QuantityDonated = 3, DonationDate = DateTime.Now.AddDays(-150), DonorName = "Jennifer Martinez", Notes = "Initial donation — item created." },
+
+                // --- Id=4: Gerber Good Start Formula (45 units, 1 donor) ---
+                new DonationLog { Id = 4, InventoryItemId = 4, QuantityDonated = 45, DonationDate = DateTime.Now.AddDays(-60), DonorName = "Robert Williams", Notes = "Initial donation — item created." },
+
+                // --- Id=5: WaterWipes Baby Wipes (180 units, 1 donor) ---
+                new DonationLog { Id = 5, InventoryItemId = 5, QuantityDonated = 180, DonationDate = DateTime.Now.AddDays(-40), DonorName = "Lisa Anderson", Notes = "Initial donation — item created." },
+
+                // --- Id=6: Organic Baby Food - Peas (22 units, 1 donor) ---
+                new DonationLog { Id = 6, InventoryItemId = 6, QuantityDonated = 22, DonationDate = DateTime.Now.AddDays(-50), DonorName = "Target Store #1234", Notes = "Initial donation — item created." },
+
+                // --- Id=7: Similac Pro-Advance Formula (130 units, 1 donor) ---
+                new DonationLog { Id = 7, InventoryItemId = 7, QuantityDonated = 130, DonationDate = DateTime.Now.AddDays(-35), DonorName = "David Thompson", Notes = "Initial donation — item created." },
+
+                // --- Id=8: Pampers Sensitive Wipes (250 units, 1 donor) ---
+                new DonationLog { Id = 8, InventoryItemId = 8, QuantityDonated = 250, DonationDate = DateTime.Now.AddDays(-18), DonorName = "Emily Davis",  Notes = "Initial donation — item created." },
+
+                // --- Id=9: Baby Vitamin D Drops (68 units, 1 donor) ---
+                new DonationLog { Id = 9, InventoryItemId = 9, QuantityDonated = 68, DonationDate = DateTime.Now.AddDays(-45), DonorName = "James Wilson", Notes = "Initial donation — item created." },
+
+                // --- Id=10: Pampers Newborn Diapers (150 units, 3 donors) ---
+                // Demonstrates the merge feature: 60 + 50 + 40 = 150
+                new DonationLog { Id = 10, InventoryItemId = 10, QuantityDonated = 60, DonationDate = DateTime.Now.AddDays(-30), DonorName = "Patricia Moore",Notes = "Initial donation — item created." },
+                new DonationLog { Id = 11, InventoryItemId = 10, QuantityDonated = 50, DonationDate = DateTime.Now.AddDays(-18), DonorName = "Walmart Store #5678",Notes = "Merged into existing stock. Previous qty: 60" },
+                new DonationLog { Id = 12, InventoryItemId = 10, QuantityDonated = 40, DonationDate = DateTime.Now.AddDays(-7), DonorName = "St. Mary's Church", Notes = "Merged into existing stock. Previous qty: 110" },
+
+                // --- Id=11: Huggies Size 1 Diapers (200 units, 3 donors) ---
+                // 80 + 70 + 50 = 200
+                new DonationLog { Id = 13, InventoryItemId = 11, QuantityDonated = 80, DonationDate = DateTime.Now.AddDays(-25), DonorName = "Christopher Taylor",  Notes = "Initial donation — item created." },
+                new DonationLog { Id = 14, InventoryItemId = 11, QuantityDonated = 70, DonationDate = DateTime.Now.AddDays(-14), DonorName = "Jessica Brown", Notes = "Merged into existing stock. Previous qty: 80" },
+                new DonationLog { Id = 15, InventoryItemId = 11, QuantityDonated = 50, DonationDate = DateTime.Now.AddDays(-3), DonorName = "Community Health Center", Notes = "Merged into existing stock. Previous qty: 150" },
+
+                // --- Id=12: Pampers Size 2 Diapers (180 units, 1 donor) ---
+                new DonationLog { Id = 16, InventoryItemId = 12, QuantityDonated = 180, DonationDate = DateTime.Now.AddDays(-20), DonorName = "Daniel Garcia",  Notes = "Initial donation — item created." },
+
+                // --- Id=13: Huggies Size 3 Diapers (165 units, 1 donor) ---
+                new DonationLog { Id = 17, InventoryItemId = 13, QuantityDonated = 165, DonationDate = DateTime.Now.AddDays(-15), DonorName = "Matthew Rodriguez", Notes = "Initial donation — item created." },
+
+                // --- Id=14: Pampers Size 4 Diapers (140 units, 1 donor) ---
+                new DonationLog { Id = 18, InventoryItemId = 14, QuantityDonated = 140, DonationDate = DateTime.Now.AddDays(-10), DonorName = "Ashley Lewis",  Notes = "Initial donation — item created." },
+
+                // --- Id=15: Huggies Size 5 Diapers (120 units, 1 donor) ---
+                new DonationLog { Id = 19, InventoryItemId = 15, QuantityDonated = 120, DonationDate = DateTime.Now.AddDays(-8), DonorName = "Hannah Campbell", Notes = "Initial donation — item created." },
+
+                // --- Id=16: Pampers Size 6 Diapers (95 units, 1 donor) ---
+                new DonationLog { Id = 20, InventoryItemId = 16, QuantityDonated = 95, DonationDate = DateTime.Now.AddDays(-5), DonorName = "Nathan Parker", Notes = "Initial donation — item created." },
+
+                // --- Id=17: Enfamil NeuroPro Formula (145 units, 2 donors) ---
+                // 100 + 45 = 145
+                new DonationLog { Id = 21, InventoryItemId = 17, QuantityDonated = 100, DonationDate = DateTime.Now.AddDays(-28), DonorName = "Alexis Evans",  Notes = "Initial donation — item created." },
+                new DonationLog { Id = 22, InventoryItemId = 17, QuantityDonated = 45, DonationDate = DateTime.Now.AddDays(-10), DonorName = "Samuel Edwards",  Notes = "Merged into existing stock. Previous qty: 100" },
+
+                // --- Id=18: Huggies Natural Care Wipes (220 units, 3 donors) ---
+                // 100 + 80 + 40 = 220
+                new DonationLog { Id = 23, InventoryItemId = 18, QuantityDonated = 100, DonationDate = DateTime.Now.AddDays(-22), DonorName = "Joshua Walker", Notes = "Initial donation — item created." },
+                new DonationLog { Id = 24, InventoryItemId = 18, QuantityDonated = 80, DonationDate = DateTime.Now.AddDays(-12), DonorName = "Grace Collins", Notes = "Merged into existing stock. Previous qty: 100" },
+                new DonationLog { Id = 25, InventoryItemId = 18, QuantityDonated = 40, DonationDate = DateTime.Now.AddDays(-4), DonorName = "Benjamin Stewart",  Notes = "Merged into existing stock. Previous qty: 180" },
+
+                // --- Id=19: Diaper Rash Cream (85 units, 1 donor) ---
+                new DonationLog { Id = 26, InventoryItemId = 19, QuantityDonated = 85, DonationDate = DateTime.Now.AddDays(-14), DonorName = "Amanda Hall",  Notes = "Initial donation — item created." },
+
+                // --- Id=20: Baby Shampoo & Body Wash (135 units, 1 donor) ---
+                new DonationLog { Id = 27, InventoryItemId = 20, QuantityDonated = 135, DonationDate = DateTime.Now.AddDays(-17), DonorName = "Community Health Center", Notes = "Initial donation — item created." },
+
+                // --- Id=21: Baby Bottles 8oz (70 units, 1 donor) ---
+                new DonationLog { Id = 28, InventoryItemId = 21, QuantityDonated = 70, DonationDate = DateTime.Now.AddDays(-11), DonorName = "Ryan Allen", Notes = "Initial donation — item created." },
+
+                // --- Id=22: Bottle Nipples - Slow Flow (125 units, 1 donor) ---
+                new DonationLog { Id = 29, InventoryItemId = 22, QuantityDonated = 125, DonationDate = DateTime.Now.AddDays(-16), DonorName = "Samantha Young", Notes = "Initial donation — item created." },
+
+                // --- Id=23: Burp Cloths (90 units, 1 donor) ---
+                new DonationLog { Id = 30, InventoryItemId = 23, QuantityDonated = 90, DonationDate = DateTime.Now.AddDays(-9), DonorName = "Brandon King",  Notes = "Initial donation — item created." },
+
+                // --- Id=24: Onesies 0-3 Months (160 units, 2 donors) ---
+                // 100 + 60 = 160
+                new DonationLog { Id = 31, InventoryItemId = 24, QuantityDonated = 100, DonationDate = DateTime.Now.AddDays(-21), DonorName = "Nicole Wright", Notes = "Initial donation — item created." },
+                new DonationLog { Id = 32, InventoryItemId = 24, QuantityDonated = 60, DonationDate = DateTime.Now.AddDays(-9), DonorName = "Justin Scott",  Notes = "Merged into existing stock. Previous qty: 100" },
+
+                // --- Id=25: Baby Sleepers 3-6 Months (105 units, 1 donor) ---
+                new DonationLog { Id = 33, InventoryItemId = 25, QuantityDonated = 105, DonationDate = DateTime.Now.AddDays(-13), DonorName = "Megan Green",  Notes = "Initial donation — item created." },
+
+                // --- Id=26: Baby Socks (200 units, 1 donor) ---
+                new DonationLog { Id = 34, InventoryItemId = 26, QuantityDonated = 200, DonationDate = DateTime.Now.AddDays(-6), DonorName = "Tyler Adams",  Notes = "Initial donation — item created." },
+
+                // --- Id=27: Baby Mittens (80 units, 1 donor) ---
+                new DonationLog { Id = 35, InventoryItemId = 27, QuantityDonated = 80, DonationDate = DateTime.Now.AddDays(-24), DonorName = "Rachel Baker", Notes = "Initial donation — item created." },
+
+                // --- Id=28: Disposable Changing Pads (65 units, 1 donor) ---
+                new DonationLog { Id = 36, InventoryItemId = 28, QuantityDonated = 65, DonationDate = DateTime.Now.AddDays(-7), DonorName = "Kevin Nelson", Notes = "Initial donation — item created." },
+
+                // --- Id=29: Baby Nail Clippers (55 units, 1 donor) ---
+                new DonationLog { Id = 37, InventoryItemId = 29, QuantityDonated = 55, DonationDate = DateTime.Now.AddDays(-4), DonorName = "Lauren Carter",  Notes = "Initial donation — item created." },
+
+                // --- Id=30: Nasal Aspirator (45 units, 1 donor) ---
+                new DonationLog { Id = 38, InventoryItemId = 30, QuantityDonated = 45, DonationDate = DateTime.Now.AddDays(-27), DonorName = "Jacob Mitchell", Notes = "Initial donation — item created." },
+
+                // --- Id=31: Swaddle Blankets (100 units, 1 donor) ---
+                new DonationLog { Id = 39, InventoryItemId = 31, QuantityDonated = 100, DonationDate = DateTime.Now.AddDays(-26), DonorName = "Kimberly Perez", Notes = "Initial donation — item created." },
+
+                // --- Id=32: Crib Sheets (75 units, 1 donor) ---
+                new DonationLog { Id = 40, InventoryItemId = 32, QuantityDonated = 75, DonationDate = DateTime.Now.AddDays(-15), DonorName = "Austin Roberts", Notes = "Initial donation — item created." },
+
+                // --- Id=33: Baby Hooded Towels (88 units, 1 donor) ---
+                new DonationLog { Id = 41, InventoryItemId = 33, QuantityDonated = 88, DonationDate = DateTime.Now.AddDays(-12), DonorName = "Brittany Turner",  Notes = "Initial donation — item created." },
+
+                // --- Id=34: Baby Washcloths (150 units, 1 donor) ---
+                new DonationLog { Id = 42, InventoryItemId = 34, QuantityDonated = 150, DonationDate = DateTime.Now.AddDays(-29), DonorName = "Costco Wholesale", Notes = "Initial donation — item created." },
+
+                // --- Id=35: Diaper Bags (35 units, 1 donor) ---
+                new DonationLog { Id = 43, InventoryItemId = 35, QuantityDonated = 35, DonationDate = DateTime.Now.AddDays(-31), DonorName = "Zachary Phillips", Notes = "Initial donation — item created." },
+
+                // --- Id=36: Baby Thermometer (50 units, 1 donor) ---
+                new DonationLog { Id = 44, InventoryItemId = 36, QuantityDonated = 50, DonationDate = DateTime.Now.AddDays(-33), DonorName = "Victoria Sanchez",  Notes = "Initial donation — item created." },
+
+                // --- Id=37: Seventh Generation Size 1 Diapers (75 units, 1 donor) ---
+                new DonationLog { Id = 45, InventoryItemId = 37, QuantityDonated = 75, DonationDate = DateTime.Now.AddDays(-12), DonorName = "Alexander Morris",  Notes = "Initial donation — item created." },
+
+                // --- Id=38: Baby Powder (110 units, 1 donor) ---
+                new DonationLog { Id = 46, InventoryItemId = 38, QuantityDonated = 110, DonationDate = DateTime.Now.AddDays(-19), DonorName = "Sophia Rogers", Notes = "Initial donation — item created." },
+
+                // --- Id=39: Baby Lotion (115 units, 1 donor) ---
+                new DonationLog { Id = 47, InventoryItemId = 39, QuantityDonated = 115, DonationDate = DateTime.Now.AddDays(-23), DonorName = "Elijah Reed", Notes = "Initial donation — item created." },
+
+                // --- Id=40: Baby Pacifiers (140 units, 1 donor) ---
+                new DonationLog { Id = 48, InventoryItemId = 40, QuantityDonated = 140, DonationDate = DateTime.Now.AddDays(-8), DonorName = "Olivia Cook",  Notes = "Initial donation — item created." },
+
+                // --- Id=41: Baby Bibs (92 units, 1 donor) ---
+                new DonationLog { Id = 49, InventoryItemId = 41, QuantityDonated = 92, DonationDate = DateTime.Now.AddDays(-42), DonorName = "Mason Morgan", Notes = "Initial donation — item created." },
+
+                // --- Id=42: Baby Food - Sweet Potatoes (185 units, 2 donors) ---
+                // 100 + 85 = 185
+                new DonationLog { Id = 50, InventoryItemId = 42, QuantityDonated = 100, DonationDate = DateTime.Now.AddDays(-55), DonorName = "Ava Bell",  Notes = "Initial donation — item created." },
+                new DonationLog { Id = 51, InventoryItemId = 42, QuantityDonated = 85, DonationDate = DateTime.Now.AddDays(-22), DonorName = "Lucas Murphy",Notes = "Merged into existing stock. Previous qty: 100" },
+
+                // --- Id=43: Baby Food - Carrots (167 units, 1 donor) ---
+                new DonationLog { Id = 52, InventoryItemId = 43, QuantityDonated = 167, DonationDate = DateTime.Now.AddDays(-48), DonorName = "Isabella Bailey", Notes = "Initial donation — item created." },
+
+                // --- Id=44: Baby Spoons (78 units, 1 donor) ---
+                new DonationLog { Id = 53, InventoryItemId = 44, QuantityDonated = 78, DonationDate = DateTime.Now.AddDays(-38), DonorName = "Ethan Rivera", Notes = "Initial donation — item created." },
+
+                // --- Id=45: Baby Bowls (61 units, 1 donor) ---
+                new DonationLog { Id = 54, InventoryItemId = 45, QuantityDonated = 61, DonationDate = DateTime.Now.AddDays(-52), DonorName = "Mia Cooper", Notes = "Initial donation — item created." },
+
+                // --- Id=46: Teething Toys (103 units, 1 donor) ---
+                new DonationLog { Id = 55, InventoryItemId = 46, QuantityDonated = 103, DonationDate = DateTime.Now.AddDays(-44), DonorName = "Charlotte Cox",  Notes = "Initial donation — item created." },
+
+                // --- Id=47: Baby Sunscreen (47 units, 1 donor) ---
+                new DonationLog { Id = 56, InventoryItemId = 47, QuantityDonated = 47, DonationDate = DateTime.Now.AddDays(-65), DonorName = "Aiden Howard", Notes = "Initial donation — item created." },
+
+                // --- Id=48: Baby Laundry Detergent (82 units, 1 donor) ---
+                new DonationLog { Id = 57, InventoryItemId = 48, QuantityDonated = 82, DonationDate = DateTime.Now.AddDays(-71), DonorName = "Amelia Ward",  Notes = "Initial donation — item created." },
+
+                // --- Id=49: Baby Safety Gates (18 units, 1 donor) ---
+                new DonationLog { Id = 58, InventoryItemId = 49, QuantityDonated = 18, DonationDate = DateTime.Now.AddDays(-88), DonorName = "Liam Torres",  Notes = "Initial donation — item created." },
+
+                // --- Id=50: Outlet Covers (234 units, 3 donors) ---
+                // 100 + 84 + 50 = 234
+                new DonationLog { Id = 59, InventoryItemId = 50, QuantityDonated = 100, DonationDate = DateTime.Now.AddDays(-77), DonorName = "Harper Peterson", Notes = "Initial donation — item created." },
+                new DonationLog { Id = 60, InventoryItemId = 50, QuantityDonated = 84, DonationDate = DateTime.Now.AddDays(-40), DonorName = "Noah Gray",Notes = "Merged into existing stock. Previous qty: 100" },
+                new DonationLog { Id = 61, InventoryItemId = 50, QuantityDonated = 50, DonationDate = DateTime.Now.AddDays(-10), DonorName = "Costco Wholesale", Notes = "Merged into existing stock. Previous qty: 184" },
+
+                // --- Id=51: Baby Monitor (12 units, 1 donor) ---
+                new DonationLog { Id = 62, InventoryItemId = 51, QuantityDonated = 12, DonationDate = DateTime.Now.AddDays(-95), DonorName = "Patricia Moore", Notes = "Initial donation — item created." },
+
+                // --- Id=52: Baby Humidifier (28 units, 1 donor) ---
+                new DonationLog { Id = 63, InventoryItemId = 52, QuantityDonated = 28, DonationDate = DateTime.Now.AddDays(-102), DonorName = "Ryan Allen", Notes = "Initial donation — item created." },
+
+                // --- Id=53: Nursing Pads (144 units, 1 donor) ---
+                new DonationLog { Id = 64, InventoryItemId = 53, QuantityDonated = 144, DonationDate = DateTime.Now.AddDays(-58), DonorName = "Lisa Anderson", Notes = "Initial donation — item created." },
+
+                // --- Id=54: Baby Bath Tub (22 units, 2 donors) ---
+                // 12 + 10 = 22  ← This is the item shown in your screenshot
+                new DonationLog { Id = 65, InventoryItemId = 54, QuantityDonated = 12, DonationDate = DateTime.Now.AddDays(-83), DonorName = "Logan Richardson", Notes = "Initial donation — item created." },
+                new DonationLog { Id = 66, InventoryItemId = 54, QuantityDonated = 10, DonationDate = DateTime.Now.AddDays(-31), DonorName = "James Wilson",  Notes = "Merged into existing stock. Previous qty: 12" },
+
+                // --- Id=55: Baby Hair Brush Set (67 units, 1 donor) ---
+                new DonationLog { Id = 67, InventoryItemId = 55, QuantityDonated = 67, DonationDate = DateTime.Now.AddDays(-69), DonorName = "Samantha Young", Notes = "Initial donation — item created." },
+
+                // --- Id=56: Diaper Pail Refills (98 units, 1 donor) ---
+                new DonationLog { Id = 68, InventoryItemId = 56, QuantityDonated = 98, DonationDate = DateTime.Now.AddDays(-46), DonorName = "Brandon King", Notes = "Initial donation — item created." },
+
+                // --- Id=57: Baby Carrier (15 units, 1 donor) ---
+                new DonationLog { Id = 69, InventoryItemId = 57, QuantityDonated = 15, DonationDate = DateTime.Now.AddDays(-110), DonorName = "Emily Davis",  Notes = "Initial donation — item created." },
+
+                // --- Id=58: Stroller Rain Cover (31 units, 1 donor) ---
+                new DonationLog { Id = 70, InventoryItemId = 58, QuantityDonated = 31, DonationDate = DateTime.Now.AddDays(-98), DonorName = "David Thompson",  Notes = "Initial donation — item created." },
+
+                // --- Id=59: Baby Hangers (176 units, 1 donor) ---
+                new DonationLog { Id = 71, InventoryItemId = 59, QuantityDonated = 176, DonationDate = DateTime.Now.AddDays(-62), DonorName = "Target Store #1234", Notes = "Initial donation — item created." },
+
+                // --- Id=60: Teething Gel (54 units, 1 donor) ---
+                new DonationLog { Id = 72, InventoryItemId = 60, QuantityDonated = 54, DonationDate = DateTime.Now.AddDays(-75), DonorName = "Noah Gray", Notes = "Initial donation — item created." }
+            );
+
+            // ============================================================
+            // ADJUSTMENT LOG SEED DATA (unchanged)
+            // ============================================================
             modelBuilder.Entity<InventoryAdjustmentLog>().HasData(
                 new InventoryAdjustmentLog
                 {

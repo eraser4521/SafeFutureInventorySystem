@@ -21,9 +21,25 @@
                                 <h4 class="mb-3"><i class="fas fa-box"></i> Item Information</h4>
 
                                 <div class="form-group">
-                                    <label asp-for="Name" class="control-label">Item Name <span class="text-danger">*</span></label>
-                                    <input asp-for="Name" class="form-control" placeholder="e.g., Pampers Size 3 Diapers" required />
+                                    <label asp-for="Name" class="control-label">
+                                        Item Name <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="position-relative">
+                                        <input asp-for="Name" id="itemNameInput" class="form-control"
+                                               placeholder="e.g., Pampers Size 3 Diapers"
+                                               autocomplete="off" required />
+                                        <!-- Suggestion dropdown rendered here by JS -->
+                                        <ul id="nameSuggestions"
+                                            class="list-group shadow"
+                                            style="display:none; position:absolute; z-index:1000;
+                                            width:100%; max-height:260px; overflow-y:auto;
+                                            top:100%; left:0;"></ul>
+                                    </div>
                                     <span asp-validation-for="Name" class="text-danger"></span>
+                                    <small id="mergeWarning" class="text-warning font-weight-bold" style="display:none;">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        An item with this name already exists — submitting will merge the quantity into it.
+                                    </small>
                                 </div>
 
                                 <div class="form-group">
@@ -59,7 +75,7 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label asp-for="Quantity" class="control-label">Quantity <span class="text-danger">*</span></label>
-                                            <input asp-for="Quantity" class="form-control" type="number" min="0"
+                                            <input asp-for="Quantity" class="form-control" type="number" min="1"
                                                    placeholder="0" required />
                                             <span asp-validation-for="Quantity" class="text-danger"></span>
                                             <small class="form-text text-muted">Must be a positive number</small>
@@ -84,35 +100,22 @@
                             </div>
 
                             <!-- DONOR INFORMATION SECTION -->
+                            <!-- These use plain name="" attributes — NOT asp-for -->
+                            <!-- They are received as separate parameters in the controller -->
                             <div class="col-md-6">
                                 <h4 class="mb-3"><i class="fas fa-user-plus"></i> Donor Information</h4>
 
                                 <div class="form-group">
-                                    <label asp-for="DonorName" class="control-label">Donor Name</label>
-                                    <input asp-for="DonorName" class="form-control"
+                                    <label class="control-label">Donor Name</label>
+                                    <input type="text" name="DonorName" class="form-control"
                                            placeholder="Enter donor's full name or organization" />
-                                    <span asp-validation-for="DonorName" class="text-danger"></span>
                                 </div>
-
-                                <div class="form-group">
-                                    <label asp-for="DonorPhone" class="control-label">Donor Phone</label>
-                                    <input asp-for="DonorPhone" type="tel" class="form-control"
-                                           placeholder="555-0123" />
-                                    <span asp-validation-for="DonorPhone" class="text-danger"></span>
-                                    <small class="form-text text-muted">Format: 555-0123</small>
-                                </div>
-
-                                <div class="form-group">
-                                    <label asp-for="DonorEmail" class="control-label">Donor Email</label>
-                                    <input asp-for="DonorEmail" type="email" class="form-control"
-                                           placeholder="donor@email.com" />
-                                    <span asp-validation-for="DonorEmail" class="text-danger"></span>
-                                </div>
-
-                                <div class="alert alert-info mt-4">
+                                <div class="alert alert-info mt-3">
                                     <i class="fas fa-info-circle"></i>
-                                    <strong>Note:</strong> Donor information is optional but helps track donations.
-                                    Providing at least a donor name is recommended.
+                                    <strong>Duplicate Detection:</strong> If an item with the same
+                                    <strong>barcode</strong> or the same <strong>name + category</strong>
+                                    already exists, this donation will be merged into the existing stock
+                                    automatically — no duplicate entry will be created.
                                 </div>
                             </div>
                         </div>
@@ -140,20 +143,132 @@
     }
 
     <script>
-        // Prevent non-numeric input in quantity field
         document.querySelector('input[name="Quantity"]').addEventListener('keypress', function(e) {
-            // Only allow numbers
             if (e.which < 48 || e.which > 57) {
                 e.preventDefault();
                 return false;
             }
         });
 
-        // Prevent negative numbers
         document.querySelector('input[name="Quantity"]').addEventListener('input', function(e) {
             if (this.value < 0) {
                 this.value = 0;
             }
         });
+
+        // ── Live name autocomplete with merge warning ──────────────────────────
+        (function () {
+            const input       = document.getElementById('itemNameInput');
+            const dropdown    = document.getElementById('nameSuggestions');
+            const mergeWarn   = document.getElementById('mergeWarning');
+            let debounceTimer = null;
+            let suppressBlur  = false;
+
+            function clearDropdown() {
+                dropdown.innerHTML = '';
+                dropdown.style.display = 'none';
+            }
+
+            function checkExactMatch(name) {
+                // Show merge warning if typed name exactly matches a suggestion label
+                const items = dropdown.querySelectorAll('li[data-name]');
+                let exact = false;
+                items.forEach(li => {
+                    if (li.dataset.name.toLowerCase() === name.toLowerCase()) exact = true;
+                });
+                mergeWarn.style.display = exact ? 'inline-block' : 'none';
+            }
+
+            function fetchSuggestions(term) {
+                if (!term || term.length < 2) {
+                    clearDropdown();
+                    mergeWarn.style.display = 'none';
+                    return;
+                }
+
+                fetch('/Inventory/SearchItems?term=' + encodeURIComponent(term))
+                    .then(r => r.json())
+                    .then(results => {
+                        clearDropdown();
+                        if (!results || results.length === 0) {
+                            mergeWarn.style.display = 'none';
+                            return;
+                        }
+
+                        results.forEach(item => {
+                            const li = document.createElement('li');
+                            li.className = 'list-group-item list-group-item-action py-2 px-3';
+                            li.dataset.name = item.label;
+                            li.innerHTML =
+                                `<div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>${item.label}</strong>
+                                        <small class="text-muted ml-2">${item.category}</small>
+                                    </div>
+                                    <span class="badge badge-primary badge-pill">${item.quantity} units</span>
+                                </div>
+                                ${item.barcode ? `<small class="text-muted"><i class="fas fa-barcode"></i> ${item.barcode}</small>` : ''}`;
+
+                            li.addEventListener('mousedown', () => { suppressBlur = true; });
+                            li.addEventListener('click', () => {
+                                input.value = item.label;
+                                clearDropdown();
+                                mergeWarn.style.display = 'inline-block';
+                                suppressBlur = false;
+                                input.focus();
+                            });
+
+                            dropdown.appendChild(li);
+                        });
+
+                        dropdown.style.display = 'block';
+                        checkExactMatch(term);
+                    })
+                    .catch(() => clearDropdown());
+            }
+
+            input.addEventListener('input', function () {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => fetchSuggestions(this.value.trim()), 250);
+            });
+
+            input.addEventListener('keydown', function (e) {
+                const items = dropdown.querySelectorAll('li');
+                const active = dropdown.querySelector('li.active');
+                let idx = Array.from(items).indexOf(active);
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (active) active.classList.remove('active');
+                    const next = items[Math.min(idx + 1, items.length - 1)];
+                    if (next) next.classList.add('active');
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (active) active.classList.remove('active');
+                    const prev = items[Math.max(idx - 1, 0)];
+                    if (prev) prev.classList.add('active');
+                } else if (e.key === 'Enter' && active) {
+                    e.preventDefault();
+                    input.value = active.dataset.name;
+                    clearDropdown();
+                    mergeWarn.style.display = 'inline-block';
+                } else if (e.key === 'Escape') {
+                    clearDropdown();
+                }
+            });
+
+            input.addEventListener('blur', function () {
+                if (!suppressBlur) {
+                    setTimeout(clearDropdown, 150);
+                }
+                suppressBlur = false;
+            });
+
+            // Re-check merge warning when user manually finishes typing
+            input.addEventListener('change', function () {
+                checkExactMatch(this.value.trim());
+            });
+        })();
+
     </script>
 }

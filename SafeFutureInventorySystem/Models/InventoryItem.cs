@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace SafeFutureInventorySystem.Models
@@ -30,22 +31,10 @@ namespace SafeFutureInventorySystem.Models
 
         public string? Category { get; set; }
 
-        // NEW: Donor tracking
-        [StringLength(200)]
-        [Display(Name = "Donor Name")]
-        public string? DonorName { get; set; }
+        // Navigation collections
+        public List<DonationLog> DonationLogs { get; set; } = new();
+        public List<InventoryAdjustmentLog> AdjustmentLogs { get; set; } = new();
 
-        [StringLength(15)]
-        [Display(Name = "Donor Phone")]
-        [Phone]
-        public string? DonorPhone { get; set; }
-
-        [StringLength(200)]
-        [Display(Name = "Donor Email")]
-        [EmailAddress]
-        public string? DonorEmail { get; set; }
-
-        // Computed property for expiration status
         public string ExpirationStatus
         {
             get

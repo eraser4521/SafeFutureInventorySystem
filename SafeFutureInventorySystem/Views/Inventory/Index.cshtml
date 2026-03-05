@@ -197,20 +197,26 @@
                                     <td>@item.Name</td>
                                     <td>@(item.Description ?? "N/A")</td>
 
-                                    <!-- NEW: DONOR INFORMATION CELL -->
+                                    <!-- DONOR INFORMATION CELL — shows most recent donor from DonationLogs -->
                                     <td>
-                                        @if (!string.IsNullOrEmpty(item.DonorName))
+                                        @{
+                                            var latestDonation = item.DonationLogs?
+                                            .OrderByDescending(d => d.DonationDate)
+                                            .FirstOrDefault();
+                                        }
+                                        @if (latestDonation != null && !string.IsNullOrEmpty(latestDonation.DonorName))
                                         {
                                             <div>
                                                 <i class="fas fa-user text-primary"></i>
-                                                <strong>@item.DonorName</strong>
+                                                <strong>@latestDonation.DonorName</strong>
                                             </div>
-                                            @if (!string.IsNullOrEmpty(item.DonorPhone))
+                                            @if (item.DonationLogs.Count > 1)
                                             {
-                                                <small class="text-muted">
-                                                    <i class="fas fa-phone"></i> @item.DonorPhone
+                                                <small class="text-info">
+                                                    <i class="fas fa-layer-group"></i> @item.DonationLogs.Count donors
                                                 </small>
                                             }
+                                         
                                         }
                                         else
                                         {
