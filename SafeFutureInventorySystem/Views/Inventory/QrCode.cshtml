@@ -3,11 +3,42 @@
     ViewData["Title"] = "Item QR Code";
 }
 
-<div class="text-center">
-    <h2>QR Code for @Model.Name</h2>
-    <p>Quantity: @Model.Quantity</p>
-    <img src="@Url.Action("QrCodeImage", "Inventory", new { id = Model.Id })" alt="QR Code for @Model.Name" />
-    <div class="mt-2">
-        <a class="btn btn-outline-secondary" href="@Url.Action("QrCodeImage", "Inventory", new { id = Model.Id })">Download PNG</a>
+<div class="container qr-page">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h2 class="mb-2">QR Code</h2>
+                    <p class="text-muted mb-4">
+                        Scan to open details for <strong>@Model.Name</strong>
+                    </p>
+
+                    <div class="qr-image-wrap mb-3">
+                        <img class="qr-image"
+                             src="@Url.Action("QrCodeImage", "Inventory", new { id = Model.Id })"
+                             alt="QR Code for @Model.Name" />
+                    </div>
+
+                    <div class="small text-muted mb-4">
+                        Item ID: @Model.Id | Quantity: @Model.Quantity
+                    </div>
+
+                    <div class="d-flex flex-wrap justify-content-center gap-2">
+                        <a class="btn btn-primary"
+                           href="@Url.Action("QrCodeImage", "Inventory", new { id = Model.Id })"
+                           download="qrcode-@(Model.Id).png">
+                            Download PNG
+                        </a>
+                        <button class="btn btn-secondary" type="button" onclick="window.print()">
+                            Print
+                        </button>
+                        <a class="btn btn-outline-secondary"
+                           href="@Url.Action("Details", "Inventory", new { id = Model.Id })">
+                            Back to Item
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

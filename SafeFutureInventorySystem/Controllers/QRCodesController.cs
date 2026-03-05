@@ -43,10 +43,4 @@ public class QRCodesController : Controller
         var pngBytes = QrCodeHelper.GeneratePng(value);
         return File(pngBytes, "image/png");
     }
-
-    private List<InventoryItem> LoadInventory()
-    {
-        return _context.InventoryItems.ToList();
-    }
-
 }

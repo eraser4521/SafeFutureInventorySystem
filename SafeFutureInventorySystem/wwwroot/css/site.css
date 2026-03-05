@@ -238,6 +238,27 @@ h2, .page-title {
     padding: 1.5rem;
 }
 
+/* QR page */
+.qr-page .card {
+    max-width: 620px;
+    margin: 0 auto;
+}
+
+.qr-image-wrap {
+    display: inline-block;
+    padding: 1rem;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid var(--sf-border-gray);
+}
+
+.qr-image {
+    width: 280px;
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
 /* Form Controls */
 .form-control {
     border: 2px solid var(--sf-border-gray);
