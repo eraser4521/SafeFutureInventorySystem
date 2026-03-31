@@ -2,8 +2,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SafeFutureInventorySystem.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace SafeFutureInventorySystem.Controllers
@@ -18,7 +20,6 @@ namespace SafeFutureInventorySystem.Controllers
             _userManager = userManager;
         }
 
-        // GET: /Admin
         public async Task<IActionResult> Index()
         {
             var users = _userManager.Users.ToList();
@@ -38,7 +39,8 @@ namespace SafeFutureInventorySystem.Controllers
                     Id = u.Id,
                     Email = u.Email ?? "",
                     Name = name,
-                    Role = role
+                    Role = role,
+                    MustChangePassword = u.MustChangePassword
                 });
             }
 
@@ -50,17 +52,12 @@ namespace SafeFutureInventorySystem.Controllers
             return View(model);
         }
 
-        // =========================
-        // CREATE USER - GET
-        // =========================
+        [HttpGet]
         public IActionResult Create()
         {
             return View(new CreateUserVM());
         }
 
-        // =========================
-        // CREATE USER - POST
-        // =========================
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateUserVM vm)
@@ -71,14 +68,19 @@ namespace SafeFutureInventorySystem.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            vm.Email = (vm.Email ?? "").Trim();
+            vm.FirstName = (vm.FirstName ?? "").Trim();
+            vm.LastName = (vm.LastName ?? "").Trim();
+            vm.Role = (vm.Role == "Admin") ? "Admin" : "Volunteer";
+
             if (string.IsNullOrWhiteSpace(vm.Email))
                 ModelState.AddModelError("", "Email is required.");
 
-            if (string.IsNullOrWhiteSpace(vm.Password) || vm.Password.Length < 6)
-                ModelState.AddModelError("", "Password must be at least 6 characters.");
+            if (string.IsNullOrWhiteSpace(vm.FirstName))
+                ModelState.AddModelError("", "First name is required.");
 
-            if (vm.Password != vm.ConfirmPassword)
-                ModelState.AddModelError("", "Passwords do not match.");
+            if (string.IsNullOrWhiteSpace(vm.LastName))
+                ModelState.AddModelError("", "Last name is required.");
 
             if (!ModelState.IsValid)
                 return View(vm);
@@ -90,15 +92,21 @@ namespace SafeFutureInventorySystem.Controllers
                 return View(vm);
             }
 
+            var tempCode = GenerateTemporaryCode();
+
             var user = new ApplicationUser
             {
                 UserName = vm.Email,
                 Email = vm.Email,
-                FirstName = vm.FirstName ?? "",
-                LastName = vm.LastName ?? ""
+                EmailConfirmed = true,
+                FirstName = vm.FirstName,
+                LastName = vm.LastName,
+                MustChangePassword = true,
+                PasswordSetByAdmin = true,
+                TemporaryPasswordIssuedAtUtc = DateTime.UtcNow
             };
 
-            var result = await _userManager.CreateAsync(user, vm.Password);
+            var result = await _userManager.CreateAsync(user, tempCode);
 
             if (!result.Succeeded)
             {
@@ -108,21 +116,24 @@ namespace SafeFutureInventorySystem.Controllers
                 return View(vm);
             }
 
-            var role = (vm.Role == "Admin") ? "Admin" : "Volunteer";
-            await _userManager.AddToRoleAsync(user, role);
+            await _userManager.AddToRoleAsync(user, vm.Role);
 
             TempData["Success"] = "User created successfully.";
+            TempData["GeneratedPassword"] = $"Temporary code for {user.Email}: {tempCode}";
+
             return RedirectToAction(nameof(Index));
         }
 
-        // =========================
-        // EDIT USER - GET
-        // =========================
+        [HttpGet]
         public async Task<IActionResult> Edit(string id)
         {
             id = (id ?? "").Trim();
+
             if (string.IsNullOrWhiteSpace(id))
+            {
+                TempData["Error"] = "Invalid user.";
                 return RedirectToAction(nameof(Index));
+            }
 
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
@@ -147,9 +158,6 @@ namespace SafeFutureInventorySystem.Controllers
             return View(vm);
         }
 
-        // =========================
-        // EDIT USER - POST
-        // =========================
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(AdminEditUserVM vm)
@@ -160,6 +168,20 @@ namespace SafeFutureInventorySystem.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            vm.Email = (vm.Email ?? "").Trim();
+            vm.FirstName = (vm.FirstName ?? "").Trim();
+            vm.LastName = (vm.LastName ?? "").Trim();
+            vm.NewRole = (vm.NewRole == "Admin") ? "Admin" : "Volunteer";
+
+            if (string.IsNullOrWhiteSpace(vm.Email))
+                ModelState.AddModelError("", "Email is required.");
+
+            if (string.IsNullOrWhiteSpace(vm.FirstName))
+                ModelState.AddModelError("", "First name is required.");
+
+            if (string.IsNullOrWhiteSpace(vm.LastName))
+                ModelState.AddModelError("", "Last name is required.");
+
             var user = await _userManager.FindByIdAsync(vm.Id);
             if (user == null)
             {
@@ -167,18 +189,46 @@ namespace SafeFutureInventorySystem.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            var duplicate = await _userManager.FindByEmailAsync(vm.Email);
+            if (duplicate != null && duplicate.Id != user.Id)
+                ModelState.AddModelError("", "Another user already uses that email.");
+
             var me = await _userManager.GetUserAsync(User);
             var isMe = me != null && me.Id == user.Id;
 
-            // ROLE CHANGE
             var rolesNow = await _userManager.GetRolesAsync(user);
             var isAdminNow = rolesNow.Contains("Admin");
-            var wantRole = (vm.NewRole == "Admin") ? "Admin" : "Volunteer";
+            var wantRole = vm.NewRole;
 
             if (isMe && isAdminNow && wantRole != "Admin")
+                ModelState.AddModelError("", "You cannot remove Admin from your own account.");
+
+            if (isAdminNow && wantRole != "Admin")
             {
-                TempData["Error"] = "You cannot remove Admin from your own account.";
-                return RedirectToAction(nameof(Edit), new { id = user.Id });
+                var admins = await _userManager.GetUsersInRoleAsync("Admin");
+                if (admins.Count <= 1)
+                    ModelState.AddModelError("", "You cannot remove Admin from the last remaining admin.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                vm.CurrentRole = isAdminNow ? "Admin" : "Volunteer";
+                return View(vm);
+            }
+
+            user.Email = vm.Email;
+            user.UserName = vm.Email;
+            user.FirstName = vm.FirstName;
+            user.LastName = vm.LastName;
+
+            var updateResult = await _userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+            {
+                foreach (var e in updateResult.Errors)
+                    ModelState.AddModelError("", e.Description);
+
+                vm.CurrentRole = isAdminNow ? "Admin" : "Volunteer";
+                return View(vm);
             }
 
             if (wantRole == "Admin" && !isAdminNow)
@@ -188,64 +238,61 @@ namespace SafeFutureInventorySystem.Controllers
             }
             else if (wantRole == "Volunteer" && isAdminNow)
             {
-                var admins = await _userManager.GetUsersInRoleAsync("Admin");
-                if (admins.Count <= 1)
-                {
-                    TempData["Error"] = "You cannot remove Admin from the last remaining admin.";
-                    return RedirectToAction(nameof(Edit), new { id = user.Id });
-                }
-
                 await _userManager.RemoveFromRoleAsync(user, "Admin");
                 await _userManager.AddToRoleAsync(user, "Volunteer");
-            }
-
-            // PASSWORD RESET (admin sets directly)
-            var changingPw =
-                !string.IsNullOrWhiteSpace(vm.NewPassword) ||
-                !string.IsNullOrWhiteSpace(vm.ConfirmPassword);
-
-            if (changingPw)
-            {
-                if (string.IsNullOrWhiteSpace(vm.NewPassword) || vm.NewPassword.Length < 6)
-                    ModelState.AddModelError("", "Password must be at least 6 characters.");
-
-                if (vm.NewPassword != vm.ConfirmPassword)
-                    ModelState.AddModelError("", "Passwords do not match.");
-
-                if (!ModelState.IsValid)
-                {
-                    var rolesAgain = await _userManager.GetRolesAsync(user);
-                    vm.CurrentRole = rolesAgain.Contains("Admin") ? "Admin" : "Volunteer";
-                    vm.Email = user.Email ?? "";
-                    vm.FirstName = user.FirstName ?? "";
-                    vm.LastName = user.LastName ?? "";
-                    return View(vm);
-                }
-
-                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var resetResult = await _userManager.ResetPasswordAsync(user, token, vm.NewPassword);
-
-                if (!resetResult.Succeeded)
-                {
-                    foreach (var e in resetResult.Errors)
-                        ModelState.AddModelError("", e.Description);
-
-                    var rolesAgain2 = await _userManager.GetRolesAsync(user);
-                    vm.CurrentRole = rolesAgain2.Contains("Admin") ? "Admin" : "Volunteer";
-                    vm.Email = user.Email ?? "";
-                    vm.FirstName = user.FirstName ?? "";
-                    vm.LastName = user.LastName ?? "";
-                    return View(vm);
-                }
             }
 
             TempData["Success"] = "User updated.";
             return RedirectToAction(nameof(Index));
         }
 
-        // =========================
-        // DELETE USER
-        // =========================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(string id)
+        {
+            id = (id ?? "").Trim();
+
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                TempData["Error"] = "Invalid user.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                TempData["Error"] = "User not found.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (await _userManager.IsInRoleAsync(user, "Admin"))
+            {
+                TempData["Error"] = "Admin accounts cannot be reset from this page.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var tempCode = GenerateTemporaryCode();
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, tempCode);
+
+            if (!result.Succeeded)
+            {
+                TempData["Error"] = "Could not reset password.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            user.MustChangePassword = true;
+            user.PasswordSetByAdmin = true;
+            user.TemporaryPasswordIssuedAtUtc = DateTime.UtcNow;
+
+            await _userManager.UpdateAsync(user);
+
+            TempData["Success"] = "Temporary code generated.";
+            TempData["GeneratedPassword"] = $"Temporary code for {user.Email}: {tempCode}";
+
+            return RedirectToAction(nameof(Index));
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string id)
@@ -274,12 +321,8 @@ namespace SafeFutureInventorySystem.Controllers
 
             if (await _userManager.IsInRoleAsync(user, "Admin"))
             {
-                var admins = await _userManager.GetUsersInRoleAsync("Admin");
-                if (admins.Count <= 1)
-                {
-                    TempData["Error"] = "You cannot delete the last remaining admin.";
-                    return RedirectToAction(nameof(Index));
-                }
+                TempData["Error"] = "Admin accounts cannot be deleted from this page.";
+                return RedirectToAction(nameof(Index));
             }
 
             var result = await _userManager.DeleteAsync(user);
@@ -287,9 +330,12 @@ namespace SafeFutureInventorySystem.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-    }
 
-    // ========= VIEW MODELS =========
+        private static string GenerateTemporaryCode()
+        {
+            return RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
+        }
+    }
 
     public class AdminUserRow
     {
@@ -297,6 +343,7 @@ namespace SafeFutureInventorySystem.Controllers
         public string Email { get; set; } = "";
         public string Name { get; set; } = "";
         public string Role { get; set; } = "";
+        public bool MustChangePassword { get; set; }
     }
 
     public class AdminEditUserVM
@@ -305,12 +352,8 @@ namespace SafeFutureInventorySystem.Controllers
         public string Email { get; set; } = "";
         public string FirstName { get; set; } = "";
         public string LastName { get; set; } = "";
-
         public string CurrentRole { get; set; } = "";
         public string NewRole { get; set; } = "Volunteer";
-
-        public string NewPassword { get; set; } = "";
-        public string ConfirmPassword { get; set; } = "";
     }
 
     public class CreateUserVM
@@ -318,8 +361,6 @@ namespace SafeFutureInventorySystem.Controllers
         public string Email { get; set; } = "";
         public string FirstName { get; set; } = "";
         public string LastName { get; set; } = "";
-        public string Password { get; set; } = "";
-        public string ConfirmPassword { get; set; } = "";
         public string Role { get; set; } = "Volunteer";
     }
 }
