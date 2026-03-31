@@ -11,7 +11,9 @@ namespace SafeFutureInventorySystem.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager)
+        public AccountController(
+            SignInManager<ApplicationUser> signInManager,
+            UserManager<ApplicationUser> userManager)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -20,15 +22,26 @@ namespace SafeFutureInventorySystem.Controllers
         [HttpGet, AllowAnonymous]
         public IActionResult Login(string? returnUrl = null)
         {
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+                return RedirectToAction("Index", "Inventory");
+
             ViewBag.ReturnUrl = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
             return View("Login");
         }
 
         [HttpPost, AllowAnonymous]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string email, string password, string? returnUrl = null)
         {
             email = (email ?? "").Trim();
             password = (password ?? "").Trim();
+
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+            {
+                ViewBag.Error = "Email and password are required.";
+                ViewBag.ReturnUrl = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
+                return View("Login");
+            }
 
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
@@ -38,7 +51,19 @@ namespace SafeFutureInventorySystem.Controllers
                 return View("Login");
             }
 
-            var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
+            var result = await _signInManager.PasswordSignInAsync(
+                user,
+                password,
+                isPersistent: false,
+                lockoutOnFailure: true);
+
+            if (result.IsLockedOut)
+            {
+                ViewBag.Error = "This account is temporarily locked. Try again later.";
+                ViewBag.ReturnUrl = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
+                return View("Login");
+            }
+
             if (!result.Succeeded)
             {
                 ViewBag.Error = "Invalid email or password.";
@@ -46,8 +71,80 @@ namespace SafeFutureInventorySystem.Controllers
                 return View("Login");
             }
 
+            if (user.MustChangePassword)
+                return RedirectToAction(nameof(ForceChangePassword));
+
             if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
                 return Redirect(returnUrl);
+
+            return RedirectToAction("Index", "Inventory");
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> ForceChangePassword()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return RedirectToAction(nameof(Login));
+
+            if (!user.MustChangePassword)
+                return RedirectToAction("Index", "Inventory");
+
+            ViewBag.Email = user.Email ?? "";
+            return View("ForceChangePassword");
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForceChangePassword(string newPassword, string confirmPassword)
+        {
+            newPassword = (newPassword ?? "").Trim();
+            confirmPassword = (confirmPassword ?? "").Trim();
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return RedirectToAction(nameof(Login));
+
+            if (!user.MustChangePassword)
+                return RedirectToAction("Index", "Inventory");
+
+            ViewBag.Email = user.Email ?? "";
+
+            if (string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
+            {
+                ViewBag.Error = "All fields are required.";
+                return View("ForceChangePassword");
+            }
+
+            if (newPassword.Length < 6)
+            {
+                ViewBag.Error = "New password must be at least 6 characters.";
+                return View("ForceChangePassword");
+            }
+
+            if (newPassword != confirmPassword)
+            {
+                ViewBag.Error = "Passwords do not match.";
+                return View("ForceChangePassword");
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+
+            if (!result.Succeeded)
+            {
+                ViewBag.Error = "Could not update password.";
+                return View("ForceChangePassword");
+            }
+
+            user.MustChangePassword = false;
+            user.PasswordSetByAdmin = false;
+            user.TemporaryPasswordIssuedAtUtc = null;
+
+            await _userManager.UpdateAsync(user);
+            await _signInManager.RefreshSignInAsync(user);
 
             return RedirectToAction("Index", "Inventory");
         }
@@ -55,76 +152,33 @@ namespace SafeFutureInventorySystem.Controllers
         [HttpGet, AllowAnonymous]
         public IActionResult Register()
         {
-            return View("Register");
+            TempData["Error"] = "Self registration is disabled. Please contact an admin.";
+            return RedirectToAction(nameof(Login));
         }
 
         [HttpPost, AllowAnonymous]
-        public async Task<IActionResult> Register(string firstName, string lastName, string email, string password, string confirmPassword)
+        [ValidateAntiForgeryToken]
+        public IActionResult Register(string firstName, string lastName, string email, string password, string confirmPassword)
         {
-            firstName = (firstName ?? "").Trim();
-            lastName = (lastName ?? "").Trim();
-            email = (email ?? "").Trim();
-            password = (password ?? "").Trim();
-            confirmPassword = (confirmPassword ?? "").Trim();
-
-            if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName))
-            {
-                ViewBag.Error = "First and last name are required.";
-                return View("Register");
-            }
-
-            if (password != confirmPassword)
-            {
-                ViewBag.Error = "Passwords do not match.";
-                return View("Register");
-            }
-
-            var existing = await _userManager.FindByEmailAsync(email);
-            if (existing != null)
-            {
-                ViewBag.Error = "That email is already registered.";
-                return View("Register");
-            }
-
-            var user = new ApplicationUser
-            {
-                UserName = email,
-                Email = email,
-                EmailConfirmed = true,
-                FirstName = firstName,
-                LastName = lastName
-            };
-
-            var create = await _userManager.CreateAsync(user, password);
-
-            if (!create.Succeeded)
-            {
-                ViewBag.Error = "Could not create account. Try a stronger password.";
-                return View("Register");
-            }
-
-            await _userManager.AddToRoleAsync(user, "Volunteer");
-
-            await _signInManager.SignInAsync(user, false);
-            return RedirectToAction("Index", "Inventory");
+            TempData["Error"] = "Self registration is disabled. Please contact an admin.";
+            return RedirectToAction(nameof(Login));
         }
 
-        // NAVBAR LOGOUT (LINK)
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> LogoutLink()
         {
             await _signInManager.SignOutAsync();
-            return RedirectToAction("Login", "Account");
+            return RedirectToAction(nameof(Login));
         }
 
-        // Optional: POST logout
         [Authorize]
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            return RedirectToAction("Login", "Account");
+            return RedirectToAction(nameof(Login));
         }
     }
 }

@@ -4,60 +4,133 @@
     ViewData["Title"] = "Create User";
 }
 
-<div class="container py-4" style="max-width: 800px;">
-    <h2 class="mb-3">Create New User</h2>
+<div class="page-wrap">
+    <div class="form-card">
 
-    <form asp-action="Create" method="post">
-        @Html.AntiForgeryToken()
+        <h2>Create User</h2>
+        <p class="subtitle">
+            A 5 digit temporary code will be generated automatically after you create the account.
+        </p>
 
-        <div class="card shadow-sm mb-3">
-            <div class="card-body">
+        <form asp-action="Create" asp-controller="Admin" method="post">
+            @Html.AntiForgeryToken()
 
-                <div class="row g-3">
-
-                    <div class="col-md-6">
-                        <label class="form-label">First Name</label>
-                        <input class="form-control" asp-for="FirstName" required />
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Last Name</label>
-                        <input class="form-control" asp-for="LastName" required />
-                    </div>
-
-                    <div class="col-md-12">
-                        <label class="form-label">Email</label>
-                        <input class="form-control" asp-for="Email" type="email" required />
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Password</label>
-                        <input class="form-control" asp-for="Password" type="password" required />
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Confirm Password</label>
-                        <input class="form-control" asp-for="ConfirmPassword" type="password" required />
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Role</label>
-                        <select class="form-select" asp-for="Role">
-                            <option value="Volunteer">Volunteer</option>
-                            <option value="Admin">Admin</option>
-                        </select>
-                    </div>
-
-                </div>
-
-                <div class="text-danger mt-3">
-                    @Html.ValidationSummary()
-                </div>
-
+            <div class="field">
+                <label>First Name</label>
+                <input asp-for="FirstName" />
             </div>
-        </div>
 
-        <button type="submit" class="btn btn-primary px-4">Create User</button>
-        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
-    </form>
+            <div class="field">
+                <label>Last Name</label>
+                <input asp-for="LastName" />
+            </div>
+
+            <div class="field">
+                <label>Email</label>
+                <input asp-for="Email" />
+            </div>
+
+            <div class="field">
+                <label>Role</label>
+                <select asp-for="Role">
+                    <option value="Volunteer">Volunteer</option>
+                    <option value="Admin">Admin</option>
+                </select>
+            </div>
+
+            <div class="btn-row">
+                <button type="submit" class="btn-main">Create User</button>
+                <a asp-action="Index" asp-controller="Admin" class="btn-back">Back</a>
+            </div>
+        </form>
+
+    </div>
 </div>
+
+<style>
+    .page-wrap {
+        min-height: 80vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .form-card {
+        width: 100%;
+        max-width: 650px;
+        background: white;
+        padding: 40px;
+        border-radius: 18px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+        margin-bottom: 8px;
+        font-weight: 700;
+    }
+
+    .subtitle {
+        color: #6c757d;
+        font-size: 0.95rem;
+        margin-bottom: 25px;
+    }
+
+    .field {
+        margin-bottom: 18px;
+    }
+
+    .field label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+        color: #555;
+    }
+
+    .field input,
+    .field select {
+        width: 100%;
+        height: 48px;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        padding: 0 12px;
+        font-size: 0.95rem;
+        background: #f8fafc;
+    }
+
+    .field input:focus,
+    .field select:focus {
+        outline: none;
+        border-color: #4A90E2;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(74,144,226,0.1);
+    }
+
+    .btn-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .btn-main {
+        background: #4A90E2;
+        color: white;
+        border: none;
+        padding: 12px 18px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn-main:hover {
+        background: #3f7fd1;
+    }
+
+    .btn-back {
+        background: #6c757d;
+        color: white;
+        padding: 12px 18px;
+        border-radius: 10px;
+        text-decoration: none;
+    }
+</style>
