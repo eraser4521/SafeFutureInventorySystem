@@ -14,81 +14,82 @@
         </button>
     </div>
 }
+<!-- ── Page Title ── -->
+<div class="page-title-bar">
+    <h2>Inventory Management</h2>
+</div>
 
-<div class="container-fluid">
-    <h2>
-        <i class="fas fa-boxes"></i> Inventory Management
-    </h2>
+<!-- ── Compact Filter Bar ── -->
+<div class="filter-bar-card">
+    <form method="get" asp-action="Index" id="filterForm">
+        <div class="filter-row">
 
-    <!-- Search and Filter Section -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="get" asp-action="Index" class="form-inline" id="filterForm">
-                <div class="row w-100">
-                    <!-- USER STORY 4: Search by Name -->
-                    <div class="col-md-4 mb-3">
-                        <div class="input-group w-100">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text">
-                                    <i class="fas fa-search"></i>
-                                </span>
-                            </div>
-                            <input type="text" name="searchTerm" class="form-control"
-                                   placeholder="Search by name or description..."
-                                   value="@Model.SearchTerm" id="searchInput" />
-                        </div>
+            <!-- Search -->
+            <div class="filter-item">
+                <label>Search</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
                     </div>
-
-                    <!-- USER STORY 2: Filter by Expiration -->
-                    <div class="col-md-3 mb-3">
-                        <select name="expirationFilter" class="form-control w-100">
-                            <option value="">All Items</option>
-                            <option value="Expired" selected="@(Model.ExpirationFilter == "Expired")">Expired</option>
-                            <option value="ExpiringSoon" selected="@(Model.ExpirationFilter == "ExpiringSoon")">Expiring Soon (7 days)</option>
-                            <option value="ExpiringThisMonth" selected="@(Model.ExpirationFilter == "ExpiringThisMonth")">Expiring This Month (30 days)</option>
-                            <option value="Good" selected="@(Model.ExpirationFilter == "Good")">Good Condition</option>
-                            <option value="NoExpiration" selected="@(Model.ExpirationFilter == "NoExpiration")">No Expiration Date</option>
-                        </select>
-                    </div>
-
-                    <!-- Date Range Filter -->
-                    <div class="col-md-2 mb-3">
-                        <input type="date" name="fromDate" class="form-control"
-                               value="@Model.FromDate?.ToString("yyyy-MM-dd")" placeholder="From Date" />
-                    </div>
-
-                    <div class="col-md-2 mb-3">
-                        <input type="date" name="toDate" class="form-control"
-                               value="@Model.ToDate?.ToString("yyyy-MM-dd")" placeholder="To Date" />
-                    </div>
-
-                    <div class="col-md-2 mb-3">
-                        <button type="submit" class="btn btn-primary btn-block">
-                            <i class="fas fa-filter"></i> Filter
-                        </button>
-                    </div>
+                    <input type="text" name="searchTerm" class="form-control"
+                           placeholder="Name or description..."
+                           value="@Model.SearchTerm" id="searchInput" />
                 </div>
+            </div>
 
-                <!-- NEW: Page Size Selector -->
-                <div class="row w-100 mt-2">
-                    <div class="col-md-3">
-                        <label>Items per page:</label>
-                        <select name="pageSize" class="form-control" onchange="this.form.submit()">
-                            <option value="5" selected="@(Model.PageSize == 5)">5</option>
-                            <option value="10" selected="@(Model.PageSize == 10)">10</option>
-                            <option value="25" selected="@(Model.PageSize == 25)">25</option>
-                            <option value="50" selected="@(Model.PageSize == 50)">50</option>
-                            <option value="100" selected="@(Model.PageSize == 100)">100</option>
-                        </select>
-                    </div>
-                </div>
+            <!-- Expiration Filter -->
+            <div class="filter-item">
+                <label>Expiration Status</label>
+                <select name="expirationFilter" class="form-control">
+                    <option value="">All Items</option>
+                    <option value="Expired" selected="@(Model.ExpirationFilter == "Expired")">Expired</option>
+                    <option value="ExpiringSoon" selected="@(Model.ExpirationFilter == "ExpiringSoon")">Expiring Soon (7 days)</option>
+                    <option value="ExpiringThisMonth" selected="@(Model.ExpirationFilter == "ExpiringThisMonth")">Expiring This Month</option>
+                    <option value="Good" selected="@(Model.ExpirationFilter == "Good")">Good Condition</option>
+                    <option value="NoExpiration" selected="@(Model.ExpirationFilter == "NoExpiration")">No Expiration</option>
+                </select>
+            </div>
 
-                <!-- Hidden fields to preserve state -->
-                <input type="hidden" name="sortBy" value="@Model.SortBy" />
-                <input type="hidden" name="sortOrder" value="@Model.SortOrder" />
-            </form>
+            <!-- From Date -->
+            <div class="filter-item-sm">
+                <label>From Date</label>
+                <input type="date" name="fromDate" class="form-control"
+                       value="@Model.FromDate?.ToString("yyyy-MM-dd")" />
+            </div>
+
+            <!-- To Date -->
+            <div class="filter-item-sm">
+                <label>To Date</label>
+                <input type="date" name="toDate" class="form-control"
+                       value="@Model.ToDate?.ToString("yyyy-MM-dd")" />
+            </div>
+
+            <!-- Items Per Page -->
+            <div class="filter-item-xs">
+                <label>Per Page</label>
+                <select name="pageSize" class="form-control" onchange="this.form.submit()">
+                    <option value="5" selected="@(Model.PageSize == 5)">5</option>
+                    <option value="10" selected="@(Model.PageSize == 10)">10</option>
+                    <option value="25" selected="@(Model.PageSize == 25)">25</option>
+                    <option value="50" selected="@(Model.PageSize == 50)">50</option>
+                    <option value="100" selected="@(Model.PageSize == 100)">100</option>
+                </select>
+            </div>
+
+            <!-- Filter Button -->
+            <div class="filter-btn">
+                <label style="visibility:hidden;">Go</label>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+            </div>
+
         </div>
-    </div>
+
+        <input type="hidden" name="sortBy" value="@Model.SortBy" />
+        <input type="hidden" name="sortOrder" value="@Model.SortOrder" />
+    </form>
+</div>
 
     <!-- Action Buttons -->
     <div class="mb-3">
@@ -102,16 +103,16 @@
             <i class="fas fa-trash"></i> Remove Selected (<span id="selectedCount">0</span>)
         </button>
 
-        <!-- Export Buttons -->
-        <div class="btn-group" role="group">
-            <button type="button" class="btn btn-danger" id="exportPdfBtn">
-                <i class="fas fa-file-pdf"></i> Export to PDF
-            </button>
-            <button type="button" class="btn btn-info" id="exportCsvBtn">
-                <i class="fas fa-file-csv"></i> Export to CSV
-            </button>
-        </div>
+        <!-- SELECTED items PDF export -->
+        <button type="button" class="btn btn-danger" id="exportSelectedPdfBtn">
+            <i class="fas fa-file-pdf"></i> Export to PDF
+        </button>
+
+        <button type="button" class="btn btn-info" id="exportCsvBtn">
+            <i class="fas fa-file-csv"></i> Export to CSV
+        </button>
     </div>
+   </div>
 
     <!-- Inventory Table -->
     <div class="card">
@@ -523,24 +524,46 @@
             }
         });
 
-        // NEW: Export to PDF with current filters
-        $('#exportPdfBtn').click(function() {
-            var searchTerm = '@Model.SearchTerm';
-            var expirationFilter = '@Model.ExpirationFilter';
-            var fromDate = '@Model.FromDate?.ToString("yyyy-MM-dd")';
-            var toDate = '@Model.ToDate?.ToString("yyyy-MM-dd")';
-            var sortBy = '@Model.SortBy';
-            var sortOrder = '@Model.SortOrder';
+                // Table "Export to PDF" → exports only selected items
+        $('#exportSelectedPdfBtn').click(function () {
+            var selectedIds = [];
+            $('.item-checkbox:checked').each(function () {
+                selectedIds.push(parseInt($(this).val()));
+            });
 
-            var url = '@Url.Action("ExportInventoryPdf", "Inventory")' +
-                '?searchTerm=' + encodeURIComponent(searchTerm) +
-                '&expirationFilter=' + encodeURIComponent(expirationFilter) +
-                '&fromDate=' + encodeURIComponent(fromDate) +
-                '&toDate=' + encodeURIComponent(toDate) +
-                '&sortBy=' + encodeURIComponent(sortBy) +
-                '&sortOrder=' + encodeURIComponent(sortOrder);
+            if (selectedIds.length === 0) {
+                alert('Please select at least one item to export.');
+                return;
+            }
 
-            window.location.href = url;
+            var btn = document.getElementById('exportSelectedPdfBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+            btn.disabled = true;
+
+            $.ajax({
+                url: '@Url.Action("ExportSelectedItemsPdf", "Inventory")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(selectedIds),
+                xhrFields: { responseType: 'blob' },
+                success: function (data) {
+                    var url = window.URL.createObjectURL(data);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'Selected_Items_' + new Date().toISOString().slice(0, 10) + '.pdf';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    btn.innerHTML = '<i class="fas fa-file-pdf"></i> Export to PDF';
+                    btn.disabled = false;
+                },
+                error: function () {
+                    alert('Error generating PDF. Please try again.');
+                    btn.innerHTML = '<i class="fas fa-file-pdf"></i> Export to PDF';
+                    btn.disabled = false;
+                }
+            });
         });
 
         // Export to CSV

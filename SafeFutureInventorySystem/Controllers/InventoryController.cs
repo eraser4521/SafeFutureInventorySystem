@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -40,8 +40,7 @@ namespace SafeFutureInventorySystem.Controllers
                 {
                     query = query.Where(i =>
                         i.Name.Contains(searchTerm) ||
-                        (i.Description != null && i.Description.Contains(searchTerm)) ||
-                        (i.Barcode != null && i.Barcode.Contains(searchTerm)));
+                        (i.Description != null && i.Description.Contains(searchTerm))); 
                 }
 
                 if (!string.IsNullOrWhiteSpace(expirationFilter))
@@ -231,7 +230,7 @@ namespace SafeFutureInventorySystem.Controllers
                     _context.SaveChanges();
 
                     TempData["SuccessMessage"] =
-                        $"'{existing.Name}' already exists � {item.Quantity} unit(s) merged into existing stock (new total: {existing.Quantity}).";
+                        $"'{existing.Name}' already exists — {item.Quantity} unit(s) merged into existing stock (new total: {existing.Quantity}).";
                     return RedirectToAction(nameof(Details), new { id = existing.Id });
                 }
                 else
@@ -247,7 +246,7 @@ namespace SafeFutureInventorySystem.Controllers
                         QuantityDonated = item.Quantity,
                         DonationDate = DateTime.Now,
                         DonorName = DonorName,
-                        Notes = "Initial donation � item created."
+                        Notes = "Initial donation — item created."
                     });
 
                     _context.SaveChanges();
@@ -373,13 +372,19 @@ namespace SafeFutureInventorySystem.Controllers
             }
         }
 
+        // ── FULL INVENTORY EXPORT (Header "Create PDF" button) ──────────────────────
         [HttpGet]
-        [Route("Export")]
-        public IActionResult ExportInventoryPdf()
+        [Route("Inventory/ExportFullPdf")]
+        public IActionResult ExportFullInventoryPdf()
         {
             try
             {
-                var items = _context.InventoryItems.OrderBy(i => i.Name).ToList();
+                var items = _context.InventoryItems
+                    .Include(i => i.DonationLogs)
+                    .Include(i => i.AdjustmentLogs)
+                    .OrderBy(i => i.Category)
+                    .ThenBy(i => i.Name)
+                    .ToList();
 
                 if (!items.Any())
                 {
@@ -389,95 +394,307 @@ namespace SafeFutureInventorySystem.Controllers
 
                 using (MemoryStream memoryStream = new MemoryStream())
                 {
-                    Document document = new Document(PageSize.A4.Rotate(), 10, 10, 10, 10);
+                    Document document = new Document(PageSize.A4.Rotate(), 15, 15, 15, 15);
                     PdfWriter writer = PdfWriter.GetInstance(document, memoryStream);
                     document.Open();
 
-                    PdfPTable titleTable = new PdfPTable(1);
-                    titleTable.WidthPercentage = 100;
-                    PdfPCell titleCell = new PdfPCell(new Phrase("Inventory Report",
-                        FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 16, BaseColor.WHITE)))
-                    {
-                        HorizontalAlignment = Element.ALIGN_CENTER,
-                        Padding = 10,
-                        BackgroundColor = new BaseColor(0, 51, 102)
-                    };
-                    titleTable.AddCell(titleCell);
-                    document.Add(titleTable);
+                    // ── Header Banner ──
+                    PdfPTable headerTable = new PdfPTable(2);
+                    headerTable.WidthPercentage = 100;
+                    headerTable.SetWidths(new float[] { 55, 45 });
 
-                    Paragraph dateParagraph = new Paragraph($"Generated on: {DateTime.Now:yyyy-MM-dd HH:mm:ss}",
-                        FontFactory.GetFont(FontFactory.HELVETICA, 10))
+                    headerTable.AddCell(new PdfPCell(new Phrase("Safe Future Foundation\nComplete Inventory Report",
+                        FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 14, BaseColor.WHITE)))
                     {
-                        Alignment = Element.ALIGN_RIGHT,
-                        SpacingAfter = 20
-                    };
-                    document.Add(dateParagraph);
+                        BackgroundColor = new BaseColor(30, 80, 140),
+                        Padding = 12,
+                        Border = PdfPCell.NO_BORDER
+                    });
+                    headerTable.AddCell(new PdfPCell(new Phrase(
+                        $"Generated: {DateTime.Now:MMMM dd, yyyy  HH:mm:ss}\nTotal Items: {items.Count}    Total Units: {items.Sum(i => i.Quantity)}",
+                        FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.WHITE)))
+                    {
+                        BackgroundColor = new BaseColor(30, 80, 140),
+                        Padding = 12,
+                        HorizontalAlignment = Element.ALIGN_RIGHT,
+                        Border = PdfPCell.NO_BORDER
+                    });
+                    document.Add(headerTable);
+                    document.Add(new Paragraph("\n"));
 
+                    // ── Main Table ──
                     PdfPTable table = new PdfPTable(8);
                     table.WidthPercentage = 100;
-                    table.SetWidths(new float[] { 10, 18, 18, 10, 12, 12, 12, 12 });
+                    table.SetWidths(new float[] { 6, 16, 18, 8, 12, 12, 14, 14 });
 
-                    string[] headers = { "ID", "Name", "Description", "Quantity", "Category", "Barcode", "Expiration Date", "Date Added" };
+                    string[] headers = { "ID", "Name", "Description", "Qty", "Category", "Expiration", "Date Added", "Donor" };
+                    bool altHeader = false;
                     foreach (string header in headers)
                     {
-                        PdfPCell headerCell = new PdfPCell(new Phrase(header,
-                            FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 10, BaseColor.WHITE)))
+                        table.AddCell(new PdfPCell(new Phrase(header,
+                            FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 9, BaseColor.WHITE)))
                         {
-                            BackgroundColor = new BaseColor(0, 102, 204),
+                            BackgroundColor = altHeader ? new BaseColor(58, 120, 202) : new BaseColor(46, 100, 176),
                             HorizontalAlignment = Element.ALIGN_CENTER,
-                            Padding = 8
-                        };
-                        table.AddCell(headerCell);
+                            Padding = 7,
+                            BorderColor = new BaseColor(255, 255, 255),
+                            BorderWidth = 0.5f
+                        });
+                        altHeader = !altHeader;
                     }
 
+                    bool altRow = false;
                     foreach (var item in items)
                     {
-                        table.AddCell(new PdfPCell(new Phrase(item.Id.ToString(),
-                            FontFactory.GetFont(FontFactory.HELVETICA, 9)))
-                        { Padding = 6 });
-                        table.AddCell(new PdfPCell(new Phrase(item.Name,
-                            FontFactory.GetFont(FontFactory.HELVETICA, 9)))
-                        { Padding = 6 });
-                        table.AddCell(new PdfPCell(new Phrase(item.Description ?? "",
-                            FontFactory.GetFont(FontFactory.HELVETICA, 9)))
-                        { Padding = 6 });
-                        table.AddCell(new PdfPCell(new Phrase(item.Quantity.ToString(),
-                            FontFactory.GetFont(FontFactory.HELVETICA, 9)))
-                        { Padding = 6, HorizontalAlignment = Element.ALIGN_CENTER });
-                        table.AddCell(new PdfPCell(new Phrase(item.Category ?? "",
-                            FontFactory.GetFont(FontFactory.HELVETICA, 9)))
-                        { Padding = 6 });
-                        table.AddCell(new PdfPCell(new Phrase(item.Barcode ?? "",
-                            FontFactory.GetFont(FontFactory.HELVETICA, 9)))
-                        { Padding = 6 });
-                        table.AddCell(new PdfPCell(new Phrase(item.ExpirationDate?.ToString("yyyy-MM-dd") ?? "N/A",
-                            FontFactory.GetFont(FontFactory.HELVETICA, 9)))
-                        { Padding = 6, HorizontalAlignment = Element.ALIGN_CENTER });
-                        table.AddCell(new PdfPCell(new Phrase(item.DateAdded.ToString("yyyy-MM-dd"),
-                            FontFactory.GetFont(FontFactory.HELVETICA, 9)))
-                        { Padding = 6 });
-                    }
+                        var rowBg = altRow ? new BaseColor(240, 246, 255) : BaseColor.WHITE;
+                        var lastDonor = item.DonationLogs?.OrderByDescending(d => d.DonationDate)
+                            .FirstOrDefault()?.DonorName ?? "—";
 
+                        table.AddCell(new PdfPCell(new Phrase(item.Id.ToString(),
+                            FontFactory.GetFont(FontFactory.HELVETICA, 8)))
+                        { Padding = 5, HorizontalAlignment = Element.ALIGN_CENTER, BackgroundColor = rowBg });
+                        table.AddCell(new PdfPCell(new Phrase(item.Name,
+                            FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 8)))
+                        { Padding = 5, BackgroundColor = rowBg });
+                        table.AddCell(new PdfPCell(new Phrase(item.Description ?? "—",
+                            FontFactory.GetFont(FontFactory.HELVETICA, 8)))
+                        { Padding = 5, BackgroundColor = rowBg });
+                        table.AddCell(new PdfPCell(new Phrase(item.Quantity.ToString(),
+                            FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 9)))
+                        { Padding = 5, HorizontalAlignment = Element.ALIGN_CENTER, BackgroundColor = new BaseColor(230, 245, 255) });
+                        table.AddCell(new PdfPCell(new Phrase(item.Category ?? "Uncategorized",
+                            FontFactory.GetFont(FontFactory.HELVETICA, 8)))
+                        { Padding = 5, BackgroundColor = rowBg });
+                        table.AddCell(new PdfPCell(new Phrase(
+                            item.ExpirationDate?.ToString("yyyy-MM-dd") ?? "No Expiration",
+                            FontFactory.GetFont(FontFactory.HELVETICA, 8)))
+                        { Padding = 5, HorizontalAlignment = Element.ALIGN_CENTER, BackgroundColor = rowBg });
+                        table.AddCell(new PdfPCell(new Phrase(item.DateAdded.ToString("yyyy-MM-dd"),
+                            FontFactory.GetFont(FontFactory.HELVETICA, 8)))
+                        { Padding = 5, BackgroundColor = rowBg });
+                        table.AddCell(new PdfPCell(new Phrase(lastDonor,
+                            FontFactory.GetFont(FontFactory.HELVETICA, 8)))
+                        { Padding = 5, BackgroundColor = rowBg });
+
+                        altRow = !altRow;
+                    }
                     document.Add(table);
 
-                    Paragraph summary = new Paragraph($"\nTotal Items: {items.Count}",
-                        FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 11))
+                    // ── Summary by Category ──
+                    document.Add(new Paragraph("\n"));
+                    PdfPTable summaryTable = new PdfPTable(2);
+                    summaryTable.WidthPercentage = 45;
+                    summaryTable.HorizontalAlignment = Element.ALIGN_LEFT;
+                    summaryTable.SpacingAfter = 15;
+
+                    summaryTable.AddCell(new PdfPCell(new Phrase("INVENTORY SUMMARY BY CATEGORY",
+                        FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 10, BaseColor.WHITE)))
                     {
-                        SpacingBefore = 20
-                    };
-                    document.Add(summary);
+                        BackgroundColor = new BaseColor(46, 100, 176),
+                        Padding = 7,
+                        Colspan = 2,
+                        HorizontalAlignment = Element.ALIGN_CENTER
+                    });
+
+                    foreach (var cat in items.GroupBy(i => i.Category ?? "Uncategorized")
+                        .OrderByDescending(g => g.Sum(i => i.Quantity)))
+                    {
+                        summaryTable.AddCell(new PdfPCell(new Phrase(cat.Key,
+                            FontFactory.GetFont(FontFactory.HELVETICA, 9)))
+                        { Padding = 5 });
+                        summaryTable.AddCell(new PdfPCell(new Phrase(
+                            $"{cat.Count()} items  ({cat.Sum(i => i.Quantity)} units)",
+                            FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 9)))
+                        { Padding = 5, HorizontalAlignment = Element.ALIGN_RIGHT });
+                    }
+                    document.Add(summaryTable);
+
+                    // ── Tax Footer ──
+                    document.Add(new Paragraph(
+                        "This report is for internal record-keeping and may be used for tax and audit purposes. " +
+                        "All donation information is documented for tax deductibility verification.",
+                        FontFactory.GetFont(FontFactory.HELVETICA_OBLIQUE, 8))
+                    {
+                        Alignment = Element.ALIGN_CENTER,
+                        SpacingBefore = 10
+                    });
 
                     document.Close();
-                    byte[] pdfBytes = memoryStream.ToArray();
-                    string fileName = $"Inventory_Export_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-                    return File(pdfBytes, "application/pdf", fileName);
+                    return File(memoryStream.ToArray(), "application/pdf",
+                        $"Inventory_Complete_{DateTime.Now:yyyyMMdd_HHmmss}.pdf");
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error exporting inventory to PDF.");
+                _logger.LogError(ex, "Error exporting full inventory to PDF.");
                 TempData["error"] = "Error exporting inventory. Please try again.";
                 return RedirectToAction("Index");
+            }
+        }
+
+        // ── SELECTED ITEMS EXPORT (Table "Export to PDF" button) ────────────────────
+        [HttpPost]
+        [Route("Inventory/ExportSelectedPdf")]
+        public IActionResult ExportSelectedItemsPdf([FromBody] int[] selectedIds)
+        {
+            try
+            {
+                if (selectedIds == null || selectedIds.Length == 0)
+                    return new JsonResult(new { success = false, message = "No items selected for export" });
+
+                var items = _context.InventoryItems
+                    .Include(i => i.DonationLogs)
+                    .Include(i => i.AdjustmentLogs)
+                    .Where(i => selectedIds.Contains(i.Id))
+                    .OrderBy(i => i.Name)
+                    .ToList();
+
+                if (!items.Any())
+                    return new JsonResult(new { success = false, message = "Selected items not found" });
+
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    Document document = new Document(PageSize.A4, 20, 20, 20, 20);
+                    PdfWriter writer = PdfWriter.GetInstance(document, memoryStream);
+                    document.Open();
+
+                    // ── Report Header ──
+                    document.Add(new Paragraph("Safe Future Foundation",
+                        FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 18, new BaseColor(30, 80, 140)))
+                    { Alignment = Element.ALIGN_CENTER });
+
+                    document.Add(new Paragraph("Selected Items Detailed Report",
+                        FontFactory.GetFont(FontFactory.HELVETICA, 13, new BaseColor(80, 80, 80)))
+                    { Alignment = Element.ALIGN_CENTER, SpacingAfter = 5 });
+
+                    document.Add(new Paragraph(
+                        $"Generated: {DateTime.Now:MMMM dd, yyyy  HH:mm:ss}  |  " +
+                        $"Items: {items.Count}  |  Total Units: {items.Sum(i => i.Quantity)}",
+                        FontFactory.GetFont(FontFactory.HELVETICA, 9))
+                    { Alignment = Element.ALIGN_CENTER, SpacingAfter = 20 });
+
+                    // ── One card-style block per item ──
+                    foreach (var item in items)
+                    {
+                        // Item title row
+                        PdfPTable titleRow = new PdfPTable(2);
+                        titleRow.WidthPercentage = 100;
+                        titleRow.SetWidths(new float[] { 65, 35 });
+                        titleRow.SpacingBefore = 10;
+
+                        titleRow.AddCell(new PdfPCell(new Phrase($"  #{item.Id}  {item.Name}",
+                            FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 12, BaseColor.WHITE)))
+                        {
+                            BackgroundColor = new BaseColor(46, 100, 176),
+                            Padding = 9,
+                            Border = PdfPCell.NO_BORDER,
+                            VerticalAlignment = Element.ALIGN_MIDDLE
+                        });
+
+                        string expLabel = item.ExpirationDate.HasValue
+                            ? (item.ExpirationDate.Value < DateTime.Now ? "⚠ EXPIRED" : item.ExpirationDate.Value.ToString("yyyy-MM-dd"))
+                            : "No Expiration";
+                        var expBg = item.ExpirationDate.HasValue && item.ExpirationDate.Value < DateTime.Now
+                            ? new BaseColor(180, 30, 30) : new BaseColor(46, 100, 176);
+
+                        titleRow.AddCell(new PdfPCell(new Phrase($"Expiration: {expLabel}",
+                            FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 10, BaseColor.WHITE)))
+                        {
+                            BackgroundColor = expBg,
+                            Padding = 9,
+                            Border = PdfPCell.NO_BORDER,
+                            HorizontalAlignment = Element.ALIGN_RIGHT,
+                            VerticalAlignment = Element.ALIGN_MIDDLE
+                        });
+                        document.Add(titleRow);
+
+                        // Item details grid
+                        PdfPTable details = new PdfPTable(4);
+                        details.WidthPercentage = 100;
+                        details.SpacingAfter = 5;
+
+                        var fields = new List<(string, string)>
+                {
+                    ("Description", item.Description ?? "—"),
+                    ("Category",    item.Category ?? "Uncategorized"),
+                    ("Quantity",    item.Quantity.ToString()),
+                    ("Date Added",  item.DateAdded.ToString("yyyy-MM-dd")),
+                    ("Last Updated",item.LastUpdated?.ToString("yyyy-MM-dd HH:mm") ?? "Never"),
+                    ("Donors",      (item.DonationLogs?.Count ?? 0).ToString()),
+                    ("Adjustments", (item.AdjustmentLogs?.Count ?? 0).ToString())
+                };
+
+                        foreach (var (label, val) in fields)
+                        {
+                            details.AddCell(new PdfPCell(new Phrase(label + ":",
+                                FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 9)))
+                            { BackgroundColor = new BaseColor(237, 244, 255), Padding = 5 });
+                            details.AddCell(new PdfPCell(new Phrase(val,
+                                FontFactory.GetFont(FontFactory.HELVETICA, 9)))
+                            { Padding = 5 });
+                        }
+                        document.Add(details);
+
+                        // Donation History sub-table
+                        if (item.DonationLogs?.Any() == true)
+                        {
+                            document.Add(new Paragraph("Donation History",
+                                FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 10))
+                            { SpacingBefore = 6, SpacingAfter = 4 });
+
+                            PdfPTable donTable = new PdfPTable(4);
+                            donTable.WidthPercentage = 100;
+                            donTable.SetWidths(new float[] { 20, 15, 25, 40 });
+                            donTable.SpacingAfter = 4;
+
+                            foreach (string h in new[] { "Date", "Qty", "Donor", "Notes" })
+                            {
+                                donTable.AddCell(new PdfPCell(new Phrase(h,
+                                    FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 8, BaseColor.WHITE)))
+                                {
+                                    BackgroundColor = new BaseColor(140, 170, 210),
+                                    Padding = 4,
+                                    HorizontalAlignment = Element.ALIGN_CENTER
+                                });
+                            }
+
+                            foreach (var d in item.DonationLogs.OrderByDescending(d => d.DonationDate).Take(10))
+                            {
+                                donTable.AddCell(new PdfPCell(new Phrase(d.DonationDate.ToString("yyyy-MM-dd"),
+                                    FontFactory.GetFont(FontFactory.HELVETICA, 8)))
+                                { Padding = 4 });
+                                donTable.AddCell(new PdfPCell(new Phrase($"+{d.QuantityDonated}",
+                                    FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 8)))
+                                { Padding = 4, HorizontalAlignment = Element.ALIGN_CENTER });
+                                donTable.AddCell(new PdfPCell(new Phrase(d.DonorName ?? "—",
+                                    FontFactory.GetFont(FontFactory.HELVETICA, 8)))
+                                { Padding = 4 });
+                                donTable.AddCell(new PdfPCell(new Phrase(d.Notes ?? "—",
+                                    FontFactory.GetFont(FontFactory.HELVETICA, 7)))
+                                { Padding = 4 });
+                            }
+                            document.Add(donTable);
+                        }
+
+                        document.Add(new Paragraph("\n"));
+                    }
+
+                    // ── Footer ──
+                    document.Add(new Paragraph(
+                        "This detailed report includes donation history for tax and audit purposes. " +
+                        "All information is documented and can be verified through the system.",
+                        FontFactory.GetFont(FontFactory.HELVETICA_OBLIQUE, 8))
+                    { Alignment = Element.ALIGN_CENTER, SpacingBefore = 15 });
+
+                    document.Close();
+                    return File(memoryStream.ToArray(), "application/pdf",
+                        $"Selected_Items_{DateTime.Now:yyyyMMdd_HHmmss}.pdf");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting selected items to PDF.");
+                return new JsonResult(new { success = false, message = "Error generating PDF. Please try again." });
             }
         }
 
@@ -499,7 +716,7 @@ namespace SafeFutureInventorySystem.Controllers
                 using (TextWriter writer = new StreamWriter(memoryStream, System.Text.Encoding.UTF8))
                 {
                     // Write CSV headers
-                    string[] headers = { "ID", "Name", "Description", "Quantity", "Category", "Barcode", "Expiration Date", "Date Added" };
+                    string[] headers = { "ID", "Name", "Description", "Quantity", "Category", "Expiration Date", "Date Added" };
                     writer.WriteLine(string.Join(",", headers.Select(h => $"\"{h}\"")));
 
                     // Write data rows
@@ -512,7 +729,6 @@ namespace SafeFutureInventorySystem.Controllers
                             $"\"{item.Description ?? ""}\"",
                             item.Quantity.ToString(),
                             $"\"{item.Category ?? ""}\"",
-                            $"\"{item.Barcode ?? ""}\"",
                             item.ExpirationDate?.ToString("yyyy-MM-dd") ?? "N/A",
                             item.DateAdded.ToString("yyyy-MM-dd")
                         };
@@ -557,7 +773,6 @@ namespace SafeFutureInventorySystem.Controllers
                         name = item.Name,
                         quantity = item.Quantity,
                         description = item.Description,
-                        barcode = item.Barcode,
                         expirationStatus = item.ExpirationStatus
                     }
                 });
@@ -586,8 +801,7 @@ namespace SafeFutureInventorySystem.Controllers
                         label = i.Name,
                         value = i.Name,
                         quantity = i.Quantity,
-                        category = i.Category ?? "Uncategorized",
-                        barcode = i.Barcode ?? ""
+                        category = i.Category ?? "Uncategorized"
                     })
                     .ToList();
 

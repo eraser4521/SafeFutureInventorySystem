@@ -81,14 +81,6 @@
                                             <small class="form-text text-muted">Must be a positive number</small>
                                         </div>
                                     </div>
-
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label asp-for="Barcode" class="control-label">Barcode</label>
-                                            <input asp-for="Barcode" class="form-control" placeholder="e.g., 037000465911" />
-                                            <span asp-validation-for="Barcode" class="text-danger"></span>
-                                        </div>
-                                    </div>
                                 </div>
 
                                 <div class="form-group">
@@ -110,12 +102,12 @@
                                     <input type="text" name="DonorName" class="form-control"
                                            placeholder="Enter donor's full name or organization" />
                                 </div>
-                                <div class="alert alert-info mt-3">
-                                    <i class="fas fa-info-circle"></i>
-                                    <strong>Duplicate Detection:</strong> If an item with the same
-                                    <strong>barcode</strong> or the same <strong>name + category</strong>
-                                    already exists, this donation will be merged into the existing stock
-                                    automatically — no duplicate entry will be created.
+                                <div class="alert alert-info mt-3" style="display: block; font-size: 0.9rem; line-height: 1.6;">
+                                    <p class="mb-0">
+                                        <i class="fas fa-info-circle"></i>
+                                        <strong>Duplicate Detection:</strong> If an item with the same <strong>name</strong> already exists, 
+                                        this donation will be merged into the existing stock automatically — no duplicate entry will be created.
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -199,15 +191,15 @@
                             const li = document.createElement('li');
                             li.className = 'list-group-item list-group-item-action py-2 px-3';
                             li.dataset.name = item.label;
-                            li.innerHTML =
+                                li.innerHTML =
                                 `<div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <strong>${item.label}</strong>
                                         <small class="text-muted ml-2">${item.category}</small>
                                     </div>
                                     <span class="badge badge-primary badge-pill">${item.quantity} units</span>
-                                </div>
-                                ${item.barcode ? `<small class="text-muted"><i class="fas fa-barcode"></i> ${item.barcode}</small>` : ''}`;
+                                </div>`;
+                                
 
                             li.addEventListener('mousedown', () => { suppressBlur = true; });
                             li.addEventListener('click', () => {

@@ -27,7 +27,7 @@
         <img src="~/images/safe-future-logo.png"
              alt="Safe Future Foundation"
              class="logo-image" />
-        <div class="logo-text">Safe Future Foundation</div>
+        <div class="logo-text"></div>
     </div>
 
     <div class="header-actions">
@@ -37,11 +37,12 @@
             <i class="fas fa-home"></i> Inventory Page
         </a>
 
-        <button type="button"
-                class="btn btn-primary btn-header"
-                onclick="alert('PDF export coming soon!')">
-            <i class="fas fa-file-pdf"></i> Create PDF
-        </button>
+        <a href="@Url.Action("ExportFullInventoryPdf", "Inventory")"
+            class="btn btn-primary btn-header">
+                <i class="fas fa-file-pdf"></i> Create PDF
+        </a>
+            
+        
 
         <button type="button"
                 class="btn btn-primary btn-header">
