@@ -303,7 +303,7 @@ h5 {
     border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 16px;
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16);
-    padding: 1rem 1.1rem;
+    padding: 1rem;
     margin-bottom: 1.25rem;
 }
 
@@ -1758,7 +1758,7 @@ hr.my-4 {
     border-radius: var(--sf-radius-lg);
     box-shadow: var(--sf-shadow-sm);
     border: 1px solid var(--sf-border-light);
-    padding: 1rem 1.25rem;
+    padding: 1rem;
     margin-bottom: 1.25rem;
 }
 
@@ -1918,7 +1918,7 @@ hr.my-4 {
 }
 
 .inventory-table-card .card-body {
-    padding: 0 !important;
+    padding: 0 16px !important;
     overflow: visible !important;
 }
 
@@ -1934,6 +1934,21 @@ hr.my-4 {
 .inventory-table-card .table {
     width: 100%;
     margin-bottom: 0;
+}
+
+.inventory-table-card .table thead th:first-child,
+.inventory-table-card .table tbody td:first-child {
+    width: 52px;
+    text-align: center;
+    vertical-align: middle;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+}
+
+.inventory-table-card .table thead th:first-child input[type="checkbox"],
+.inventory-table-card .table tbody td:first-child input[type="checkbox"] {
+    display: block;
+    margin: 0 auto;
 }
 
 .inventory-actions-cell {
