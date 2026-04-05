@@ -4,60 +4,77 @@
     ViewData["Title"] = "Edit User";
 }
 
-<div class="container mt-4" style="max-width: 700px;">
-    <h2 class="mb-4">Edit User</h2>
+<div class="page-title-bar">
+    <h2>Edit User</h2>
+</div>
 
-    @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
-    {
-        <div asp-validation-summary="All" class="alert alert-danger mb-4"></div>
-    }
-
-    <form asp-action="Edit" asp-controller="Admin" method="post" class="mb-4">
-        @Html.AntiForgeryToken()
-        <input asp-for="Id" type="hidden" />
-
-        <div class="mb-3">
-            <label class="form-label fw-semibold">First Name</label>
-            <input asp-for="FirstName" class="form-control" />
+<div class="admin-form-shell">
+    <div class="admin-form-card">
+        <div class="admin-form-intro">
+            <div class="admin-form-eyebrow">Account Settings</div>
+            <h3>Update user access and profile details</h3>
+            <p>Role changes and login-code recovery tools are managed here for staff accounts.</p>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Last Name</label>
-            <input asp-for="LastName" class="form-control" />
-        </div>
+        @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
+        {
+            <div asp-validation-summary="All" class="alert alert-danger mb-4"></div>
+        }
 
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Email</label>
-            <input asp-for="Email" class="form-control" />
-        </div>
-
-        <div class="mb-4">
-            <label class="form-label fw-semibold">Role</label>
-            <select asp-for="NewRole" class="form-select">
-                <option value="Volunteer">Volunteer</option>
-                <option value="Admin">Admin</option>
-            </select>
-        </div>
-
-        <div class="d-flex gap-2 mb-4">
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-            <a asp-action="Index" asp-controller="Admin" class="btn btn-secondary">Back</a>
-        </div>
-    </form>
-
-    @if (Model.NewRole != "Admin" && Model.CurrentRole != "Admin")
-    {
-        <hr class="my-4" />
-
-        <h5 class="fw-bold">Reset Login Code</h5>
-        <p class="text-muted mb-3">
-            This generates a new 6 digit temporary code and forces the user to create a new password on next login.
-        </p>
-
-        <form asp-action="ResetPassword" asp-controller="Admin" method="post">
+        <form asp-action="Edit" asp-controller="Admin" method="post" class="admin-form-grid">
             @Html.AntiForgeryToken()
-            <input type="hidden" name="id" value="@Model.Id" />
-            <button type="submit" class="btn btn-warning">Generate New 6 Digit Code</button>
+            <input asp-for="Id" type="hidden" />
+
+            <div class="form-group">
+                <label asp-for="FirstName" class="admin-form-label"></label>
+                <input asp-for="FirstName" class="form-control admin-form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="LastName" class="admin-form-label"></label>
+                <input asp-for="LastName" class="form-control admin-form-control" />
+            </div>
+
+            <div class="form-group admin-form-span">
+                <label asp-for="Email" class="admin-form-label"></label>
+                <input asp-for="Email" class="form-control admin-form-control" />
+            </div>
+
+            <div class="form-group admin-form-span">
+                <label asp-for="NewRole" class="admin-form-label">Role</label>
+                <select asp-for="NewRole" class="form-control admin-form-control">
+                    <option value="Volunteer">Volunteer</option>
+                    <option value="Admin">Admin</option>
+                </select>
+            </div>
+
+            <div class="admin-form-actions admin-form-span">
+                <a asp-action="Index" asp-controller="Admin" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
         </form>
-    }
+
+        @if (Model.NewRole != "Admin" && Model.CurrentRole != "Admin")
+        {
+            <div class="admin-secondary-card">
+                <div>
+                    <div class="admin-form-eyebrow">Recovery Tool</div>
+                    <h4>Reset Login Code</h4>
+                    <p>This generates a new 6 digit temporary code and forces the user to create a new password on next login.</p>
+                </div>
+
+                <form asp-action="ResetPassword" asp-controller="Admin" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-key"></i> Generate New 6 Digit Code
+                    </button>
+                </form>
+            </div>
+        }
+    </div>
 </div>

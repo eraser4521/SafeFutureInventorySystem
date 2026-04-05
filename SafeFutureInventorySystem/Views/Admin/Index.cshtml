@@ -4,96 +4,112 @@
     ViewData["Title"] = "Admin";
 }
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div class="page-title-bar">
-            <h2>Admin</h2>
-        </div>
-        <a asp-action="Create" asp-controller="Admin" class="btn btn-primary">Create User</a>
+<div class="page-title-bar">
+    <h2>Admin Controls</h2>
+</div>
+
+<div class="admin-hero-card">
+    <div>
+        <div class="admin-hero-eyebrow">Access Management</div>
+        <h3>Manage staff access and recovery tools.</h3>
+        <p>Admins can create users, update permissions, and reset login codes while keeping volunteer access separate from system controls.</p>
     </div>
+    <div class="admin-hero-actions">
+        <a asp-action="Create" asp-controller="Admin" class="btn btn-success">
+            <i class="fas fa-user-plus"></i> Create User
+        </a>
+    </div>
+</div>
 
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success">@TempData["Success"]</div>
-    }
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success admin-alert">@TempData["Success"]</div>
+}
 
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger">@TempData["Error"]</div>
-    }
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger admin-alert">@TempData["Error"]</div>
+}
 
-    @if (TempData["GeneratedPassword"] != null)
-    {
-        <div class="alert alert-warning">
-            <strong>@TempData["GeneratedPassword"]</strong>
+@if (TempData["GeneratedPassword"] != null)
+{
+    <div class="alert alert-warning admin-alert">
+        <strong>@TempData["GeneratedPassword"]</strong>
+    </div>
+}
+
+<div class="card admin-table-card">
+    <div class="card-header admin-table-header">
+        <div>
+            <div class="admin-table-eyebrow">User Directory</div>
+            <h3>User Accounts</h3>
         </div>
-    }
-
-    <div class="table-responsive">
-        <table class="table table-bordered table-striped align-middle">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Password Status</th>
-                    <th style="width: 320px;">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var user in Model)
-                {
+        <div class="admin-table-meta">@Model.Count account@(Model.Count == 1 ? "" : "s")</div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle mb-0">
+                <thead>
                     <tr>
-                        <td>@user.Name</td>
-                        <td>@user.Email</td>
-                        <td>@user.Role</td>
-                        <td>
-                            @if (user.MustChangePassword)
-                            {
-                                <span class="badge bg-warning text-dark">Must Set Password</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-success">Active</span>
-                            }
-                        </td>
-                        <td>
-                            <!-- FORCE SINGLE ROW BUTTONS -->
-                            <div style="display:flex; gap:8px; flex-wrap:nowrap; align-items:center;">
-                                
-                                <a asp-action="Edit" asp-controller="Admin" asp-route-id="@user.Id"
-                                   class="btn btn-sm btn-outline-primary">
-                                    Edit
-                                </a>
-
-                                @if (user.Role != "Admin")
-                                {
-                                    <form asp-action="ResetPassword" asp-controller="Admin" method="post" style="margin:0;">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="id" value="@user.Id" />
-                                        <button type="submit" class="btn btn-sm btn-outline-warning">
-                                            Reset Code
-                                        </button>
-                                    </form>
-                                }
-
-                                @if (user.Role != "Admin")
-                                {
-                                    <form asp-action="Delete" asp-controller="Admin" method="post" style="margin:0;"
-                                          onsubmit="return confirm('Delete this user?');">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="id" value="@user.Id" />
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            Delete
-                                        </button>
-                                    </form>
-                                }
-
-                            </div>
-                        </td>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Password Status</th>
+                        <th class="admin-actions-col">Actions</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td class="font-weight-bold">@user.Name</td>
+                            <td>@user.Email</td>
+                            <td>
+                                <span class="badge @(user.Role == "Admin" ? "badge-warning text-dark" : "badge-info")">@user.Role</span>
+                            </td>
+                            <td>
+                                @if (user.MustChangePassword)
+                                {
+                                    <span class="badge badge-warning text-dark">Must Set Password</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-success">Active</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="admin-actions-row">
+                                    <a asp-action="Edit" asp-controller="Admin" asp-route-id="@user.Id" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-user-edit"></i> Edit
+                                    </a>
+
+                                    @if (user.Role != "Admin")
+                                    {
+                                        <form asp-action="ResetPassword" asp-controller="Admin" method="post" class="admin-inline-form">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@user.Id" />
+                                            <button type="submit" class="btn btn-sm btn-outline-warning">
+                                                <i class="fas fa-key"></i> Reset Code
+                                            </button>
+                                        </form>
+                                    }
+
+                                    @if (user.Role != "Admin")
+                                    {
+                                        <form asp-action="Delete" asp-controller="Admin" method="post" class="admin-inline-form" onsubmit="return confirm('Delete this user?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@user.Id" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash-alt"></i> Delete
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>

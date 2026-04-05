@@ -129,20 +129,35 @@
                 <h5 class="mb-0"><i class="fas fa-history"></i> Recently Updated</h5>
             </div>
             <div class="card-body p-0">
-                @if (Model.RecentItems.Any())
+                @if (Model.RecentActivity.Any())
                 {
                     <ul class="list-group list-group-flush dashboard-recent-list">
-                        @foreach (var item in Model.RecentItems)
+                        @foreach (var activity in Model.RecentActivity)
                         {
                             <li class="list-group-item">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <div class="font-weight-bold">@item.Name</div>
+                                        <div class="font-weight-bold">@activity.ItemName</div>
+                                        <div class="mb-1">
+                                            @if (activity.ActivityType == "Donation")
+                                            {
+                                                <span class="badge badge-success">@activity.ActivityType</span>
+                                            }
+                                            else if (activity.ActivityType == "Metadata Update")
+                                            {
+                                                <span class="badge badge-info text-white">@activity.ActivityType</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-primary">@activity.ActivityType</span>
+                                            }
+                                        </div>
+                                        <small class="text-muted d-block">@activity.Summary</small>
                                         <small class="text-muted">
-                                            Updated @(item.LastUpdated ?? item.DateAdded).ToString("MMM dd, yyyy h:mm tt")
+                                            @activity.PerformedBy on @activity.ActivityDate.ToString("MMM dd, yyyy h:mm tt")
                                         </small>
                                     </div>
-                                    <a asp-controller="Inventory" asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">
+                                    <a asp-controller="Inventory" asp-action="Details" asp-route-id="@activity.InventoryItemId" class="btn btn-sm btn-outline-primary">
                                         View
                                     </a>
                                 </div>

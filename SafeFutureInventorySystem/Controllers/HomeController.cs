@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SafeFutureInventorySystem.Data;
 using SafeFutureInventorySystem.Models;
+using System.Globalization;
 
 namespace SafeFutureInventorySystem.Controllers
 {
@@ -29,6 +30,36 @@ namespace SafeFutureInventorySystem.Controllers
             var items = _context.InventoryItems
                 .Include(i => i.DonationLogs)
                 .Include(i => i.AdjustmentLogs)
+                .AsSplitQuery()
+                .ToList();
+
+            var recentActivity = items
+                .SelectMany(item =>
+                {
+                    var adjustmentEvents = item.AdjustmentLogs.Select(log => new HomeDashboardActivityItem
+                    {
+                        InventoryItemId = item.Id,
+                        ItemName = item.Name,
+                        ActivityDate = log.AdjustmentDate,
+                        ActivityType = log.OldQuantity == log.NewQuantity ? "Metadata Update" : "Quantity Update",
+                        Summary = log.Reason ?? "Inventory updated",
+                        PerformedBy = string.IsNullOrWhiteSpace(log.AdjustedBy) ? "System" : log.AdjustedBy
+                    });
+
+                    var donationEvents = item.DonationLogs.Select(log => new HomeDashboardActivityItem
+                    {
+                        InventoryItemId = item.Id,
+                        ItemName = item.Name,
+                        ActivityDate = log.DonationDate,
+                        ActivityType = "Donation",
+                        Summary = BuildDonationSummary(log),
+                        PerformedBy = string.IsNullOrWhiteSpace(log.DonorName) ? "Unknown donor" : log.DonorName
+                    });
+
+                    return adjustmentEvents.Concat(donationEvents);
+                })
+                .OrderByDescending(activity => activity.ActivityDate)
+                .Take(6)
                 .ToList();
 
             var viewModel = new HomeDashboardViewModel
@@ -48,11 +79,7 @@ namespace SafeFutureInventorySystem.Controllers
                     .ThenBy(i => i.Name)
                     .Take(6)
                     .ToList(),
-                RecentItems = items
-                    .OrderByDescending(i => i.LastUpdated ?? i.DateAdded)
-                    .ThenByDescending(i => i.DateAdded)
-                    .Take(5)
-                    .ToList()
+                RecentActivity = recentActivity
             };
 
             return View(viewModel);
@@ -61,6 +88,17 @@ namespace SafeFutureInventorySystem.Controllers
         public IActionResult Privacy()
         {
             return View();
+        }
+
+        private static string BuildDonationSummary(DonationLog log)
+        {
+            var summary = $"Donated {log.QuantityDonated} unit{(log.QuantityDonated == 1 ? "" : "s")}";
+            if (!string.IsNullOrWhiteSpace(log.Notes))
+            {
+                summary += $": {log.Notes}";
+            }
+
+            return summary;
         }
 
 
