@@ -114,29 +114,6 @@
                     </table>
                 </div>
                 <div class="card-footer details-footer">
-                    <form asp-action="UpdateLowStockThreshold" method="post" class="threshold-edit-form">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="id" value="@Model.Id" />
-                        <input type="hidden" name="searchTerm" value="@returnSearchTerm" />
-                        <input type="hidden" name="expirationFilter" value="@returnExpirationFilter" />
-                        <input type="hidden" name="fromDate" value="@returnFromDate?.ToString("yyyy-MM-dd")" />
-                        <input type="hidden" name="toDate" value="@returnToDate?.ToString("yyyy-MM-dd")" />
-                        <input type="hidden" name="sortBy" value="@returnSortBy" />
-                        <input type="hidden" name="sortOrder" value="@returnSortOrder" />
-                        <input type="hidden" name="page" value="@returnPage" />
-                        <input type="hidden" name="pageSize" value="@returnPageSize" />
-                        <label for="lowStockThresholdInput" class="mb-0">Low-Stock Threshold</label>
-                        <input id="lowStockThresholdInput"
-                               name="lowStockThreshold"
-                               type="number"
-                               min="0"
-                               class="form-control form-control-sm"
-                               value="@Model.LowStockThreshold" />
-                        <button type="submit" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-save"></i> Save Threshold
-                        </button>
-                    </form>
-
                     <div class="details-footer-actions">
                         <a asp-action="Index"
                            asp-route-searchTerm="@returnSearchTerm"
@@ -157,6 +134,22 @@
                                 onclick="openAdjustQuantityModal(@Model.Id, '@Model.Name', @Model.Quantity)">
                             <i class="fas fa-edit"></i> Adjust Quantity
                         </button>
+                        @if (User != null && User.IsInRole("Admin"))
+                        {
+                            <a asp-action="Edit"
+                               asp-route-id="@Model.Id"
+                               asp-route-searchTerm="@returnSearchTerm"
+                               asp-route-expirationFilter="@returnExpirationFilter"
+                               asp-route-fromDate="@returnFromDate?.ToString("yyyy-MM-dd")"
+                               asp-route-toDate="@returnToDate?.ToString("yyyy-MM-dd")"
+                               asp-route-sortBy="@returnSortBy"
+                               asp-route-sortOrder="@returnSortOrder"
+                               asp-route-page="@returnPage"
+                               asp-route-pageSize="@returnPageSize"
+                               class="btn btn-primary btn-sm">
+                                <i class="fas fa-pen"></i> Edit Item
+                            </a>
+                        }
                     </div>
                 </div>
             </div>
@@ -174,13 +167,21 @@
                         <ul class="list-group list-group-flush">
                             @foreach (var log in adjustmentHistory)
                             {
+                                var isMetadataOnlyLog = log.OldQuantity == log.NewQuantity;
                                 <li class="list-group-item py-2">
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <span>
-                                            <span class="badge bg-secondary">@log.OldQuantity</span>
-                                            <i class="fas fa-arrow-right text-muted mx-1" style="font-size:0.7rem"></i>
-                                            <span class="badge bg-primary">@log.NewQuantity</span>
-                                        </span>
+                                        @if (isMetadataOnlyLog)
+                                        {
+                                            <span class="badge bg-info text-white">Metadata Update</span>
+                                        }
+                                        else
+                                        {
+                                            <span>
+                                                <span class="badge bg-secondary">@log.OldQuantity</span>
+                                                <i class="fas fa-arrow-right text-muted mx-1" style="font-size:0.7rem"></i>
+                                                <span class="badge bg-primary">@log.NewQuantity</span>
+                                            </span>
+                                        }
                                         <small class="text-muted">@log.AdjustmentDate.ToString("MM/dd/yy")</small>
                                     </div>
                                     <small class="text-muted d-block mt-1">@log.Reason — <em>@log.AdjustedBy</em></small>

@@ -112,16 +112,16 @@ The delivered application provides the core technical foundation for these needs
 | Search and view product information | Implemented | Search, filters, sorting, and details pages are available. |
 | Simple login protection | Implemented | ASP.NET Identity with role-based access and login flow is active. |
 | Upload inventory information | Planned | Upload/import workflow is a recommended next enhancement. |
-| Low-stock alerts and monitoring | Implemented | Per-item low-stock thresholds, detail-page editing, low/no-stock indicators, summary cards, export visibility, and low/no-stock filtering are available. |
+| Low-stock alerts and monitoring | Implemented | Per-item low-stock thresholds, admin-managed editing, low/no-stock indicators, summary cards, export visibility, and low/no-stock filtering are available. |
 | Reports and summaries | Implemented (core) | PDF and CSV reporting available; richer dashboards can be added. |
 
 ## Current Solution Highlights [Business + Technical]
 
 - Secure account system with Admin and Volunteer roles.
 - Inventory management with duplicate-merge logic for cleaner stock records.
-- Donation and adjustment logs for operational traceability.
+- Donation and adjustment logs for operational traceability, including metadata edits.
 - Expiration-state awareness for proactive stock management.
-- Low-stock threshold tracking with detail-page editing, alert visibility, and stock summary cards.
+- Low-stock threshold tracking with admin-managed editing, alert visibility, and stock summary cards.
 - QR code generation for direct scan-to-item workflows.
 - Batch printable QR labels for selected inventory items.
 - PDF, CSV, and Excel export for reporting.
@@ -272,6 +272,13 @@ When staff adds an item:
 ### Adjustment and Audit Trail
 
 - Quantity changes are logged with old/new values, reason, timestamp, and user context.
+- Admin metadata edits are also recorded in recent adjustment history for auditability.
+
+### Item Details and Editing
+
+- Item details pages show current status, threshold, donation history, and recent adjustments.
+- Admins can open a dedicated edit page to update item metadata such as name, description, category, expiration date, and low-stock threshold.
+- Volunteers can review item details but cannot access the item metadata edit flow.
 
 ### Exports
 

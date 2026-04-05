@@ -328,6 +328,221 @@ namespace SafeFutureInventorySystem.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
+        public IActionResult Edit(int id, string searchTerm, string expirationFilter,
+            DateTime? fromDate, DateTime? toDate, string sortBy = "Name",
+            string sortOrder = "asc", int page = 1, int pageSize = 10)
+        {
+            try
+            {
+                var item = _context.InventoryItems.FirstOrDefault(i => i.Id == id);
+                if (item == null)
+                    return ItemNotFoundResult(id);
+
+                ViewBag.ReturnSearchTerm = searchTerm;
+                ViewBag.ReturnExpirationFilter = expirationFilter;
+                ViewBag.ReturnFromDate = fromDate;
+                ViewBag.ReturnToDate = toDate;
+                ViewBag.ReturnSortBy = sortBy;
+                ViewBag.ReturnSortOrder = sortOrder;
+                ViewBag.ReturnPage = page;
+                ViewBag.ReturnPageSize = pageSize;
+
+                return View(item);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading edit page for item {ItemId}", id);
+                return BuildErrorResult("We couldn't load this inventory item for editing.", ex.ToString(), 500);
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public IActionResult Edit(int id, string name, string description, string category, int quantity, DateTime? expirationDate,
+            int lowStockThreshold, string searchTerm, string expirationFilter,
+            DateTime? fromDate, DateTime? toDate, string sortBy = "Name",
+            string sortOrder = "asc", int page = 1, int pageSize = 10)
+        {
+            try
+            {
+                var item = _context.InventoryItems.FirstOrDefault(i => i.Id == id);
+                if (item == null)
+                    return ItemNotFoundResult(id);
+
+                name = name?.Trim() ?? string.Empty;
+
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    ModelState.AddModelError(nameof(InventoryItem.Name), "Item Name is required.");
+
+                    var invalidModel = new InventoryItem
+                    {
+                        Id = item.Id,
+                        Name = name,
+                        Description = description,
+                        Category = category,
+                        Quantity = quantity,
+                        ExpirationDate = expirationDate,
+                        LowStockThreshold = lowStockThreshold,
+                        DateAdded = item.DateAdded,
+                        LastUpdated = item.LastUpdated,
+                        Barcode = item.Barcode,
+                        DonationLogs = item.DonationLogs,
+                        AdjustmentLogs = item.AdjustmentLogs
+                    };
+
+                    ViewBag.ReturnSearchTerm = searchTerm;
+                    ViewBag.ReturnExpirationFilter = expirationFilter;
+                    ViewBag.ReturnFromDate = fromDate;
+                    ViewBag.ReturnToDate = toDate;
+                    ViewBag.ReturnSortBy = sortBy;
+                    ViewBag.ReturnSortOrder = sortOrder;
+                    ViewBag.ReturnPage = page;
+                    ViewBag.ReturnPageSize = pageSize;
+
+                    return View(invalidModel);
+                }
+
+                if (quantity < 0)
+                {
+                    ModelState.AddModelError(nameof(InventoryItem.Quantity), "Quantity cannot be negative.");
+
+                    var invalidModel = new InventoryItem
+                    {
+                        Id = item.Id,
+                        Name = name,
+                        Description = description,
+                        Category = category,
+                        Quantity = quantity,
+                        ExpirationDate = expirationDate,
+                        LowStockThreshold = lowStockThreshold,
+                        DateAdded = item.DateAdded,
+                        LastUpdated = item.LastUpdated,
+                        Barcode = item.Barcode,
+                        DonationLogs = item.DonationLogs,
+                        AdjustmentLogs = item.AdjustmentLogs
+                    };
+
+                    ViewBag.ReturnSearchTerm = searchTerm;
+                    ViewBag.ReturnExpirationFilter = expirationFilter;
+                    ViewBag.ReturnFromDate = fromDate;
+                    ViewBag.ReturnToDate = toDate;
+                    ViewBag.ReturnSortBy = sortBy;
+                    ViewBag.ReturnSortOrder = sortOrder;
+                    ViewBag.ReturnPage = page;
+                    ViewBag.ReturnPageSize = pageSize;
+
+                    return View(invalidModel);
+                }
+
+                if (lowStockThreshold < 0)
+                {
+                    ModelState.AddModelError(nameof(InventoryItem.LowStockThreshold), "Low-stock threshold cannot be negative.");
+
+                    var invalidModel = new InventoryItem
+                    {
+                        Id = item.Id,
+                        Name = name,
+                        Description = description,
+                        Category = category,
+                        Quantity = quantity,
+                        ExpirationDate = expirationDate,
+                        LowStockThreshold = lowStockThreshold,
+                        DateAdded = item.DateAdded,
+                        LastUpdated = item.LastUpdated,
+                        Barcode = item.Barcode,
+                        DonationLogs = item.DonationLogs,
+                        AdjustmentLogs = item.AdjustmentLogs
+                    };
+
+                    ViewBag.ReturnSearchTerm = searchTerm;
+                    ViewBag.ReturnExpirationFilter = expirationFilter;
+                    ViewBag.ReturnFromDate = fromDate;
+                    ViewBag.ReturnToDate = toDate;
+                    ViewBag.ReturnSortBy = sortBy;
+                    ViewBag.ReturnSortOrder = sortOrder;
+                    ViewBag.ReturnPage = page;
+                    ViewBag.ReturnPageSize = pageSize;
+
+                    return View(invalidModel);
+                }
+
+                var changeNotes = new List<string>();
+                var oldQuantity = item.Quantity;
+
+                if (item.Quantity != quantity)
+                {
+                    changeNotes.Add($"Quantity: {item.Quantity} -> {quantity}");
+                }
+
+                if (!string.Equals(item.Name, name, StringComparison.Ordinal))
+                {
+                    changeNotes.Add($"Name: '{item.Name}' -> '{name}'");
+                }
+
+                if (!string.Equals(item.Description ?? string.Empty, description ?? string.Empty, StringComparison.Ordinal))
+                {
+                    changeNotes.Add("Description updated");
+                }
+
+                if (!string.Equals(item.Category ?? string.Empty, category ?? string.Empty, StringComparison.Ordinal))
+                {
+                    changeNotes.Add($"Category: '{(string.IsNullOrWhiteSpace(item.Category) ? "None" : item.Category)}' -> '{(string.IsNullOrWhiteSpace(category) ? "None" : category)}'");
+                }
+
+                if (item.ExpirationDate != expirationDate)
+                {
+                    changeNotes.Add($"Expiration: '{FormatDateForLog(item.ExpirationDate)}' -> '{FormatDateForLog(expirationDate)}'");
+                }
+
+                if (item.LowStockThreshold != lowStockThreshold)
+                {
+                    changeNotes.Add($"Low-stock threshold: {item.LowStockThreshold} -> {lowStockThreshold}");
+                }
+
+                item.Name = name;
+                item.Description = description;
+                item.Category = category;
+                item.Quantity = quantity;
+                item.ExpirationDate = expirationDate;
+                item.LowStockThreshold = lowStockThreshold;
+                item.LastUpdated = DateTime.Now;
+
+                if (changeNotes.Count > 0)
+                {
+                    _context.AdjustmentLogs.Add(new InventoryAdjustmentLog
+                    {
+                        InventoryItemId = item.Id,
+                        OldQuantity = oldQuantity,
+                        NewQuantity = quantity,
+                        Reason = "Item metadata updated: " + string.Join("; ", changeNotes),
+                        AdjustmentDate = DateTime.Now,
+                        AdjustedBy = User.Identity?.Name ?? "Admin"
+                    });
+                }
+
+                _context.SaveChanges();
+
+                TempData["SuccessMessage"] = changeNotes.Count > 0
+                    ? $"Item '{item.Name}' updated successfully."
+                    : $"No changes were made to '{item.Name}'.";
+                return RedirectToAction(nameof(Details), new { id, searchTerm, expirationFilter, fromDate, toDate, sortBy, sortOrder, page, pageSize });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating item metadata for item {ItemId}", id);
+                TempData["error"] = "We couldn't update this item.";
+                return RedirectToAction(nameof(Edit), new { id, searchTerm, expirationFilter, fromDate, toDate, sortBy, sortOrder, page, pageSize });
+            }
+        }
+
+        private static string FormatDateForLog(DateTime? date)
+        {
+            return date.HasValue ? date.Value.ToString("MM/dd/yyyy") : "None";
+        }
+
         [HttpPost]
         public JsonResult AdjustQuantity(int id, int newQuantity, string reason)
         {

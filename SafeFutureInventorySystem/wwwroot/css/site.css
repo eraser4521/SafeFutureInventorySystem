@@ -294,6 +294,44 @@ h5 {
     background: linear-gradient(135deg, #4a90e2 0%, #2f6db5 100%);
 }
 
+.metadata-edit-form .form-group {
+    margin-bottom: 1.15rem;
+}
+
+.metadata-readonly-block {
+    background: rgba(74, 144, 226, 0.08);
+    border: 1px solid rgba(74, 144, 226, 0.18);
+    border-radius: 12px;
+    padding: 1rem 1.05rem;
+    margin-top: 1.75rem;
+}
+
+.metadata-readonly-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid rgba(58, 90, 160, 0.1);
+}
+
+.metadata-readonly-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.metadata-readonly-label {
+    color: var(--sf-text-secondary);
+    font-weight: 600;
+}
+
+.metadata-edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+}
+
 /* ── Cards ──────────────────────────────────────────────── */
 .card {
     background: rgba(248, 250, 253, 0.92);
