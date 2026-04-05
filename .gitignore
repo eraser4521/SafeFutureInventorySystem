@@ -2,6 +2,7 @@
 bin/
 obj/
 build-verify/
+*.log
 
 # Rider / ReSharper
 /packages/
