@@ -103,6 +103,10 @@
             <i class="fas fa-trash"></i> Remove Selected (<span id="selectedCount">0</span>)
         </button>
 
+        <button type="button" class="btn btn-secondary" id="printQrLabelsBtn" disabled>
+            <i class="fas fa-qrcode"></i> Print Selected QR Labels (<span id="qrSelectedCount">0</span>)
+        </button>
+
         <!-- SELECTED items PDF export -->
         <button type="button" class="btn btn-danger" id="exportSelectedPdfBtn">
             <i class="fas fa-file-pdf"></i> Export to PDF
@@ -111,8 +115,11 @@
         <button type="button" class="btn btn-info" id="exportCsvBtn">
             <i class="fas fa-file-csv"></i> Export to CSV
         </button>
+
+        <button type="button" class="btn btn-success" id="exportExcelBtn">
+            <i class="fas fa-file-excel"></i> Export to Excel
+        </button>
     </div>
-   </div>
 
     <!-- Inventory Table -->
     <div class="card">
@@ -479,10 +486,22 @@
             });
         });
 
+        function getSelectedItemIds() {
+            var selectedIds = [];
+
+            $('.item-checkbox:checked').each(function() {
+                selectedIds.push(parseInt($(this).val()));
+            });
+
+            return selectedIds;
+        }
+
         function updateSelectedCount() {
             var count = $('.item-checkbox:checked').length;
             $('#selectedCount').text(count);
+            $('#qrSelectedCount').text(count);
             $('#removeSelectedBtn').prop('disabled', count === 0);
+            $('#printQrLabelsBtn').prop('disabled', count === 0);
         }
 
         // Ensure the adjust modal can always be closed
@@ -492,11 +511,7 @@
 
         // USER STORY 1: Remove selected items
         $('#removeSelectedBtn').click(function() {
-            var selectedIds = [];
-
-            $('.item-checkbox:checked').each(function() {
-                selectedIds.push(parseInt($(this).val()));
-            });
+            var selectedIds = getSelectedItemIds();
 
             if (selectedIds.length === 0) {
                 alert('Please select items to remove.');
@@ -526,10 +541,7 @@
 
                 // Table "Export to PDF" → exports only selected items
         $('#exportSelectedPdfBtn').click(function () {
-            var selectedIds = [];
-            $('.item-checkbox:checked').each(function () {
-                selectedIds.push(parseInt($(this).val()));
-            });
+            var selectedIds = getSelectedItemIds();
 
             if (selectedIds.length === 0) {
                 alert('Please select at least one item to export.');
@@ -566,6 +578,21 @@
             });
         });
 
+        $('#printQrLabelsBtn').click(function () {
+            var selectedIds = getSelectedItemIds();
+
+            if (selectedIds.length === 0) {
+                alert('Please select at least one item to print QR labels.');
+                return;
+            }
+
+            var query = selectedIds.map(function(id) {
+                return 'ids=' + encodeURIComponent(id);
+            }).join('&');
+
+            window.location.href = '@Url.Action("BatchLabels", "QRCodes")' + '?' + query;
+        });
+
         // Export to CSV
         $('#exportCsvBtn').click(function() {
             var searchTerm = '@Model.SearchTerm';
@@ -584,6 +611,10 @@
                 '&sortOrder=' + encodeURIComponent(sortOrder);
 
             window.location.href = url;
+        });
+
+        $('#exportExcelBtn').click(function() {
+            window.location.href = '@Url.Action("ExportInventoryExcel", "Inventory")';
         });
 
         // USER STORY 3: Open adjust quantity modal

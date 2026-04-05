@@ -62,7 +62,8 @@ dotnet run --project SafeFutureInventorySystem
 - Create or merge an inventory item.
 - Open item details and confirm QR generation.
 - Scan QR on mobile and verify the item details page opens.
-- Export inventory as CSV and PDF.
+- Print selected QR labels from the inventory list.
+- Export inventory as CSV, PDF, and Excel.
 
 ## Executive Summary [Business]
 
@@ -104,10 +105,10 @@ The delivered application provides the core technical foundation for these needs
 | Requested Capability | Status | Notes |
 |---|---|---|
 | Mobile and desktop accessibility | Implemented | Responsive ASP.NET MVC web app available through browser on desktop and phone. |
-| Generate QR code labels with human-readable context | Implemented (core) | QR generation is implemented and resolves to item details pages. Printable label workflow can be expanded for bulk label sheets. |
+| Generate QR code labels with human-readable context | Implemented | QR generation is implemented, resolves to item details pages, and supports batch printable QR label sheets for selected items. |
 | Add product info with QR linkage | Implemented | Item creation and persistence are in place with associated QR generation. |
 | Scan QR to open product page and act | Implemented | QR points to item details route where users can review and manage item data. |
-| Download all inventory data | Implemented (partial) | CSV and PDF exports are available. Full DB dump endpoint not yet implemented. |
+| Download all inventory data | Implemented (partial) | CSV, PDF, and Excel exports are available. Full DB dump endpoint not yet implemented. |
 | Search and view product information | Implemented | Search, filters, sorting, and details pages are available. |
 | Simple login protection | Implemented | ASP.NET Identity with role-based access and login flow is active. |
 | Upload inventory information | Planned | Upload/import workflow is a recommended next enhancement. |
@@ -121,7 +122,8 @@ The delivered application provides the core technical foundation for these needs
 - Donation and adjustment logs for operational traceability.
 - Expiration-state awareness for proactive stock management.
 - QR code generation for direct scan-to-item workflows.
-- PDF and CSV export for reporting.
+- Batch printable QR labels for selected inventory items.
+- PDF, CSV, and Excel export for reporting.
 - Centralized error handling and logging support.
 
 ## Branding and Logo Assets [Business + Technical]
@@ -142,7 +144,7 @@ If preferred, this README image can be switched to any of the alternatives above
 - SQLite
 - ZXing.Net and SkiaSharp (QR generation)
 - iTextSharp (PDF export)
-- EPPlus dependency included (future Excel workflow)
+- EPPlus (Excel export)
 
 ## Architecture Overview [Technical]
 
@@ -272,12 +274,25 @@ When staff adds an item:
 
 - PDF inventory report endpoint
 - CSV inventory export endpoint
+- Excel inventory export endpoint
 
 ## QR and Scan Flow [Business + Technical]
 
 - QR code values are generated for item details links.
 - Scan opens the associated item details page.
 - URL generation supports configured public base URL or request-host fallback.
+- Staff can select multiple items from the inventory list and print a batch QR label sheet.
+- Batch QR labels support multiple print layouts and label templates for denser or more detailed sheets.
+- Batch QR labels support named stock presets and PDF export for print-ready sharing.
+
+### Batch QR Label Workflow
+
+1. Open the inventory list.
+2. Select one or more items using the table checkboxes.
+3. Click `Print Selected QR Labels`.
+4. The app routes to the QR batch label page and passes the selected item IDs as query parameters.
+5. Choose the preferred stock preset, label template, and print layout.
+6. Print the sheet directly or export the batch as PDF.
 
 ## Deployment and Production Readiness Notes [Technical]
 
@@ -296,7 +311,7 @@ Status key: Complete, In Progress, Planned
 - Authentication and role-based access: Complete
 - Centralized error handling and logging: Complete
 - QR-based item traceability: Complete
-- Export for reporting (CSV/PDF): Complete
+- Export for reporting (CSV/PDF/Excel): Complete
 - Password policy hardening for production: Planned
 - Migration-based deployment strategy: Planned
 - Full endpoint authorization audit: In Progress
@@ -364,16 +379,14 @@ Suggested location for these assets:
 
 - Inventory upload/import is not implemented yet.
 - Low-stock threshold alerting is not implemented yet.
-- Excel export endpoint is not implemented yet, though EPPlus dependency exists.
 - Rich operational dashboards and KPI summaries can be expanded further.
 
 ## Recommended Next Phase [Business + Technical]
 
 1. Add CSV/Excel inventory import with validation and dry-run preview.
 2. Add low-stock thresholds, alert notifications, and dashboard widgets.
-3. Add printable QR label templates with item text and batch generation.
-4. Add production security hardening and comprehensive automated tests.
-5. Add role-specific reporting views for board and grant reporting support.
+3. Add production security hardening and comprehensive automated tests.
+4. Add role-specific reporting views for board and grant reporting support.
 
 ## Impact Statement [Business]
 

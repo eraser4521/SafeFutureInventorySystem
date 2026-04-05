@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using OfficeOpenXml;
 using SafeFutureInventorySystem.Data;
 using SafeFutureInventorySystem.Helpers;
 using SafeFutureInventorySystem.Models;
@@ -15,6 +17,7 @@ using iTextSharp.text.pdf;
 
 namespace SafeFutureInventorySystem.Controllers
 {
+    [Authorize]
     public class InventoryController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -751,6 +754,97 @@ namespace SafeFutureInventorySystem.Controllers
 
         [HttpGet]
         [Route("ExportExcel")]
+        public IActionResult ExportInventoryExcel()
+        {
+            try
+            {
+                var items = _context.InventoryItems
+                    .Include(i => i.DonationLogs)
+                    .Include(i => i.AdjustmentLogs)
+                    .OrderBy(i => i.Name)
+                    .ToList();
+
+                if (!items.Any())
+                {
+                    TempData["error"] = "No inventory items to export.";
+                    return RedirectToAction("Index");
+                }
+
+                ExcelPackage.License.SetNonCommercialOrganization("Safe Future Foundation");
+
+                using var package = new ExcelPackage();
+                var worksheet = package.Workbook.Worksheets.Add("Inventory");
+
+                var headers = new[]
+                {
+                    "ID",
+                    "Name",
+                    "Description",
+                    "Quantity",
+                    "Category",
+                    "Barcode",
+                    "Expiration Date",
+                    "Status",
+                    "Date Added",
+                    "Last Updated",
+                    "Latest Donor",
+                    "Donation Count",
+                    "Adjustment Count"
+                };
+
+                for (var col = 0; col < headers.Length; col++)
+                {
+                    worksheet.Cells[1, col + 1].Value = headers[col];
+                }
+
+                using (var headerRange = worksheet.Cells[1, 1, 1, headers.Length])
+                {
+                    headerRange.Style.Font.Bold = true;
+                    headerRange.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    headerRange.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(46, 100, 176));
+                    headerRange.Style.Font.Color.SetColor(System.Drawing.Color.White);
+                }
+
+                for (var rowIndex = 0; rowIndex < items.Count; rowIndex++)
+                {
+                    var item = items[rowIndex];
+                    var row = rowIndex + 2;
+                    var latestDonation = item.DonationLogs
+                        .OrderByDescending(d => d.DonationDate)
+                        .FirstOrDefault();
+
+                    worksheet.Cells[row, 1].Value = item.Id;
+                    worksheet.Cells[row, 2].Value = item.Name;
+                    worksheet.Cells[row, 3].Value = item.Description;
+                    worksheet.Cells[row, 4].Value = item.Quantity;
+                    worksheet.Cells[row, 5].Value = item.Category;
+                    worksheet.Cells[row, 6].Value = item.Barcode;
+                    worksheet.Cells[row, 7].Value = item.ExpirationDate?.ToString("yyyy-MM-dd");
+                    worksheet.Cells[row, 8].Value = item.ExpirationStatus;
+                    worksheet.Cells[row, 9].Value = item.DateAdded.ToString("yyyy-MM-dd");
+                    worksheet.Cells[row, 10].Value = item.LastUpdated?.ToString("yyyy-MM-dd HH:mm");
+                    worksheet.Cells[row, 11].Value = latestDonation?.DonorName;
+                    worksheet.Cells[row, 12].Value = item.DonationLogs.Count;
+                    worksheet.Cells[row, 13].Value = item.AdjustmentLogs.Count;
+                }
+
+                worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+                worksheet.View.FreezePanes(2, 1);
+
+                var excelBytes = package.GetAsByteArray();
+                var fileName = $"Inventory_Export_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                return File(
+                    excelBytes,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting inventory to Excel.");
+                TempData["error"] = "Error exporting inventory to Excel. Please try again.";
+                return RedirectToAction("Index");
+            }
+        }
 
 
         [HttpGet]

@@ -1,0 +1,360 @@
+@model IReadOnlyList<SafeFutureInventorySystem.Models.InventoryItem>
+
+@{
+    ViewData["Title"] = "QR Label Sheet";
+}
+
+<style>
+    .qr-label-page {
+        max-width: 1240px;
+        margin: 0 auto;
+    }
+
+    .qr-label-header {
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .qr-label-header p {
+        color: #5b6b84;
+        margin: 0.5rem 0 0;
+    }
+
+    .qr-label-toolbar {
+        display: flex;
+        gap: 1rem;
+        justify-content: space-between;
+        align-items: end;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+        padding: 1rem 1.25rem;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(28, 35, 51, 0.08);
+        border-radius: 16px;
+    }
+
+    .qr-label-controls {
+        display: flex;
+        gap: 0.85rem;
+        flex-wrap: wrap;
+        align-items: end;
+    }
+
+    .qr-control {
+        min-width: 190px;
+    }
+
+    .qr-control label {
+        display: block;
+        margin-bottom: 0.35rem;
+        font-weight: 700;
+        color: #223047;
+    }
+
+    .qr-control small {
+        display: block;
+        margin-top: 0.35rem;
+        color: #66758f;
+    }
+
+    .qr-label-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .qr-label-grid {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .cols-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .cols-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .cols-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .qr-label-card {
+        background: #fff;
+        border: 1px solid #dbe4f0;
+        border-radius: 16px;
+        padding: 1rem;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(28, 35, 51, 0.08);
+        break-inside: avoid;
+        min-height: 100%;
+    }
+
+    .qr-label-card img {
+        width: 180px;
+        height: 180px;
+        object-fit: contain;
+        margin-bottom: 0.75rem;
+    }
+
+    .qr-label-name {
+        font-weight: 700;
+        font-size: 1.05rem;
+        line-height: 1.35;
+        margin-bottom: 0.35rem;
+        color: #1d2940;
+    }
+
+    .qr-label-meta {
+        color: #4f5d75;
+        font-size: 0.92rem;
+        line-height: 1.5;
+    }
+
+    .qr-label-extra {
+        margin-top: 0.5rem;
+        color: #5f6e87;
+        font-size: 0.85rem;
+        line-height: 1.45;
+    }
+
+    .template-compact .qr-label-card {
+        padding: 0.8rem;
+    }
+
+    .template-compact .qr-label-card img {
+        width: 150px;
+        height: 150px;
+        margin-bottom: 0.5rem;
+    }
+
+    .template-compact .qr-label-name {
+        font-size: 0.95rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .template-compact .qr-label-meta {
+        font-size: 0.84rem;
+    }
+
+    .template-compact .qr-label-extra {
+        display: none;
+    }
+
+    .template-standard .qr-label-extra {
+        display: none;
+    }
+
+    .template-detailed .qr-label-card {
+        padding: 1.1rem;
+    }
+
+    .template-detailed .qr-label-card img {
+        width: 170px;
+        height: 170px;
+    }
+
+    @@media (max-width: 992px) {
+        .cols-4 {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .cols-2,
+        .cols-3,
+        .cols-4 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .qr-control {
+            min-width: 160px;
+        }
+    }
+
+    @@media (max-width: 560px) {
+        .cols-2,
+        .cols-3,
+        .cols-4 {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media print {
+        header,
+        .qr-label-toolbar {
+            display: none !important;
+        }
+
+        body,
+        .container,
+        .qr-label-page {
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .qr-label-header {
+            margin-bottom: 0.5rem;
+        }
+
+        .qr-label-header p {
+            font-size: 0.9rem;
+        }
+
+        .qr-label-grid {
+            gap: 0.45rem;
+        }
+
+        .qr-label-card {
+            box-shadow: none;
+            border-color: #b8c6db;
+            border-radius: 8px;
+            padding: 0.7rem;
+        }
+    }
+</style>
+
+<div class="qr-label-page">
+    <div class="qr-label-header">
+        <div class="page-title-bar">
+            <h2>QR Label Sheet</h2>
+        </div>
+        <p>@Model.Count selected item(s). Choose a template and print layout before printing.</p>
+    </div>
+
+    <div class="qr-label-toolbar">
+        <div class="qr-label-controls">
+            <div class="qr-control">
+                <label for="labelPreset">Stock Preset</label>
+                <select id="labelPreset" class="form-control">
+                    <option value="avery5160">Avery 5160 / 3-Up Address Labels</option>
+                    <option value="two-up-large">2-Up Large Labels</option>
+                    <option value="four-up-compact">4-Up Compact Labels</option>
+                </select>
+                <small>Named presets apply a print layout commonly used for label stock.</small>
+            </div>
+
+            <div class="qr-control">
+                <label for="labelTemplate">Label Template</label>
+                <select id="labelTemplate" class="form-control">
+                    <option value="template-standard">Standard</option>
+                    <option value="template-compact">Compact</option>
+                    <option value="template-detailed">Detailed</option>
+                </select>
+                <small>Controls how much item text appears on each label.</small>
+            </div>
+
+            <div class="qr-control">
+                <label for="labelColumns">Print Layout</label>
+                <select id="labelColumns" class="form-control">
+                    <option value="cols-3">3 Across</option>
+                    <option value="cols-2">2 Across</option>
+                    <option value="cols-4">4 Across</option>
+                </select>
+                <small>Use this to match your paper or label stock spacing.</small>
+            </div>
+        </div>
+
+        <div class="qr-label-actions">
+            <button type="button" class="btn btn-primary" onclick="window.print()">
+                <i class="fas fa-print"></i> Print Labels
+            </button>
+            <button type="button" class="btn btn-success" id="exportPdfBtn">
+                <i class="fas fa-file-pdf"></i> Export PDF
+            </button>
+            <a class="btn btn-outline-secondary" href="@Url.Action("Index", "Inventory")">
+                <i class="fas fa-arrow-left"></i> Back to Inventory
+            </a>
+        </div>
+    </div>
+
+    <div id="qrLabelGrid" class="qr-label-grid cols-3 template-standard">
+        @foreach (var item in Model)
+        {
+            <article class="qr-label-card">
+                <img src="@Url.Action("ImageForItem", "QRCodes", new { inventoryItemId = item.Id })"
+                     alt="QR Code for @item.Name" />
+                <div class="qr-label-name">@item.Name</div>
+                <div class="qr-label-meta">
+                    <div>Item ID: @item.Id</div>
+                    <div>Qty: @item.Quantity</div>
+                    <div>@(item.Category ?? "Uncategorized")</div>
+                </div>
+                <div class="qr-label-extra">
+                    <div>@(item.Description ?? "No description provided")</div>
+                    <div>
+                        Expiration:
+                        @(item.ExpirationDate?.ToString("yyyy-MM-dd") ?? "None")
+                    </div>
+                </div>
+            </article>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var grid = document.getElementById('qrLabelGrid');
+            var presetSelect = document.getElementById('labelPreset');
+            var templateSelect = document.getElementById('labelTemplate');
+            var columnsSelect = document.getElementById('labelColumns');
+            var exportPdfBtn = document.getElementById('exportPdfBtn');
+            var itemIds = [@Html.Raw(string.Join(", ", Model.Select(i => i.Id)))];
+            var templateClasses = ['template-compact', 'template-standard', 'template-detailed'];
+            var columnClasses = ['cols-2', 'cols-3', 'cols-4'];
+
+            function applyPreset() {
+                switch (presetSelect.value) {
+                    case 'two-up-large':
+                        columnsSelect.value = 'cols-2';
+                        if (templateSelect.value === 'template-compact') {
+                            templateSelect.value = 'template-standard';
+                        }
+                        break;
+                    case 'four-up-compact':
+                        columnsSelect.value = 'cols-4';
+                        if (templateSelect.value === 'template-detailed') {
+                            templateSelect.value = 'template-compact';
+                        }
+                        break;
+                    default:
+                        columnsSelect.value = 'cols-3';
+                        break;
+                }
+            }
+
+            function applyLabelSettings() {
+                grid.classList.remove.apply(grid.classList, templateClasses);
+                grid.classList.remove.apply(grid.classList, columnClasses);
+                grid.classList.add(templateSelect.value);
+                grid.classList.add(columnsSelect.value);
+            }
+
+            function buildIdsQuery() {
+                return itemIds.map(function (id) {
+                    return 'ids=' + encodeURIComponent(id);
+                }).join('&');
+            }
+
+            presetSelect.addEventListener('change', function () {
+                applyPreset();
+                applyLabelSettings();
+            });
+            templateSelect.addEventListener('change', applyLabelSettings);
+            columnsSelect.addEventListener('change', applyLabelSettings);
+            exportPdfBtn.addEventListener('click', function () {
+                var url = '@Url.Action("ExportBatchLabelsPdf", "QRCodes")' +
+                    '?' + buildIdsQuery() +
+                    '&template=' + encodeURIComponent(templateSelect.value) +
+                    '&preset=' + encodeURIComponent(presetSelect.value);
+                window.location.href = url;
+            });
+
+            applyPreset();
+            applyLabelSettings();
+        })();
+    </script>
+}
