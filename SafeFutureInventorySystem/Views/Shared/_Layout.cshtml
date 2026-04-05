@@ -10,6 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - SafeFutureInventorySystem</title>
 
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico" asp-append-version="true" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SafeFutureInventorySystem.styles.css" asp-append-version="true" />
@@ -23,7 +24,7 @@
 <body data-no-taghelper="true">
 
 <header class="page-header">
-    <a href="@Url.Action("Index", "Inventory")" class="logo-container">
+    <a href="@Url.Action("Index", "Home")" class="logo-container">
         <img src="~/images/safe-future-logo.png"
              alt="Safe Future Foundation"
              class="logo-image" />
@@ -32,9 +33,14 @@
 
     <div class="header-actions">
 
+        <a href="@Url.Action("Index", "Home")"
+           class="btn btn-primary btn-header">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+
         <a href="@Url.Action("Index", "Inventory")"
            class="btn btn-primary btn-header">
-            <i class="fas fa-home"></i> Inventory Page
+            <i class="fas fa-clipboard-list"></i> Inventory
         </a>
 
         <div class="dropdown nav-export-dropdown">

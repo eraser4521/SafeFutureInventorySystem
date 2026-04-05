@@ -1,8 +1,162 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model SafeFutureInventorySystem.Models.HomeDashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="page-title-bar">
+    <h2>Operations Dashboard</h2>
+</div>
+
+<div class="dashboard-intro-card">
+    <div>
+        <div class="dashboard-intro-eyebrow">Today At A Glance</div>
+        <h3>Focus on the items that need action first.</h3>
+        <p>The dashboard surfaces stock risk, recent activity, and direct links into the detailed inventory workspace.</p>
+    </div>
+    <div class="dashboard-intro-actions">
+        <a asp-controller="Inventory" asp-action="Index" class="btn btn-primary">
+            <i class="fas fa-clipboard-list"></i> Open Inventory
+        </a>
+        <a asp-controller="Inventory" asp-action="Create" class="btn btn-success">
+            <i class="fas fa-plus"></i> Add New Item
+        </a>
+    </div>
+</div>
+
+<div class="dashboard-summary-grid">
+    <a asp-controller="Inventory" asp-action="Index" class="dashboard-summary-card dashboard-summary-total">
+        <div class="dashboard-summary-icon"><i class="fas fa-boxes"></i></div>
+        <div>
+            <div class="dashboard-summary-value">@Model.TotalItems</div>
+            <div class="dashboard-summary-label">Total Items</div>
+        </div>
+    </a>
+
+    <a asp-controller="Inventory" asp-action="Index" asp-route-expirationFilter="LowStock" class="dashboard-summary-card dashboard-summary-low">
+        <div class="dashboard-summary-icon"><i class="fas fa-exclamation-triangle"></i></div>
+        <div>
+            <div class="dashboard-summary-value">@Model.LowStockCount</div>
+            <div class="dashboard-summary-label">Low Stock</div>
+        </div>
+    </a>
+
+    <a asp-controller="Inventory" asp-action="Index" asp-route-expirationFilter="NoStock" class="dashboard-summary-card dashboard-summary-none">
+        <div class="dashboard-summary-icon"><i class="fas fa-times-circle"></i></div>
+        <div>
+            <div class="dashboard-summary-value">@Model.NoStockCount</div>
+            <div class="dashboard-summary-label">No Stock</div>
+        </div>
+    </a>
+
+    <a asp-controller="Inventory" asp-action="Index" asp-route-expirationFilter="ExpiringSoon" class="dashboard-summary-card dashboard-summary-expiring">
+        <div class="dashboard-summary-icon"><i class="fas fa-clock"></i></div>
+        <div>
+            <div class="dashboard-summary-value">@Model.ExpiringSoonCount</div>
+            <div class="dashboard-summary-label">Expiring Soon</div>
+        </div>
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-xl-7 mb-4">
+        <div class="card dashboard-panel">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-bell"></i> Needs Attention</h5>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.AttentionItems.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0 dashboard-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Quantity</th>
+                                    <th>Status</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.AttentionItems)
+                                {
+                                    <tr>
+                                        <td>
+                                            <a asp-controller="Inventory" asp-action="Details" asp-route-id="@item.Id" class="inventory-name-link">
+                                                @item.Name
+                                            </a>
+                                        </td>
+                                        <td>@item.Quantity</td>
+                                        <td>
+                                            @if (item.Quantity <= 0)
+                                            {
+                                                <span class="badge badge-danger">No Stock</span>
+                                            }
+                                            else if (item.IsLowStock)
+                                            {
+                                                <span class="badge badge-warning text-dark">Low Stock</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-warning text-dark">Expiring Soon</span>
+                                            }
+                                        </td>
+                                        <td class="text-right">
+                                            <a asp-controller="Inventory" asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i> Details
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="p-4 text-center text-muted">
+                        <i class="fas fa-check-circle fa-2x mb-2 d-block opacity-50"></i>
+                        No low-stock, no-stock, or expiring-soon items right now.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-5 mb-4">
+        <div class="card dashboard-panel">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-history"></i> Recently Updated</h5>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.RecentItems.Any())
+                {
+                    <ul class="list-group list-group-flush dashboard-recent-list">
+                        @foreach (var item in Model.RecentItems)
+                        {
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <div class="font-weight-bold">@item.Name</div>
+                                        <small class="text-muted">
+                                            Updated @(item.LastUpdated ?? item.DateAdded).ToString("MMM dd, yyyy h:mm tt")
+                                        </small>
+                                    </div>
+                                    <a asp-controller="Inventory" asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">
+                                        View
+                                    </a>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <div class="p-4 text-center text-muted">
+                        No recent inventory updates.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
 </div>

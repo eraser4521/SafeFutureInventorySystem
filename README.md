@@ -6,9 +6,9 @@ A professional inventory and barcode web application built for Safe Future Found
 
 Official organization website: https://www.asafefuture.org/
 
-## Audience Guide (One README for Two Audiences)
+## Audience Guide
 
-This document is intentionally written for both non-technical stakeholders and technical maintainers.
+This document is intended for both non-technical stakeholders and technical maintainers.
 
 - If you are a client stakeholder, operations lead, or reviewer:
   - Start with Executive Summary, Client Context, Original Use Case and Business Need, Proposal Feature Alignment, Impact Statement.
@@ -27,13 +27,13 @@ Reading time guidance:
 - Project Name: Safe Future Barcode for Good
 - Client: Safe Future Foundation, Inc.
 - Repository: SafeFutureInventorySystem
-- Current Version: v1.0.0-client-handoff
+- Current Version: v1.0.0
 - Last Updated: 2026-04-05
 - Primary Environment: ASP.NET Core MVC on .NET 9 with SQLite
 
 ## Quick Start (Client and Reviewer)
 
-Use this section if you only need to run and verify the system quickly.
+This section provides the fastest path to run and review the application.
 
 1. Build and run:
 
@@ -53,12 +53,14 @@ dotnet run --project SafeFutureInventorySystem
 - Email: admin@safefuture.com
 - Password: admin1234
 
-4. Immediate first action:
+4. First recommended action:
 
 - Change the admin password after first successful login.
 
 5. Verify core client workflows:
 
+- Open the dashboard and review inventory summary cards.
+- Use the dashboard to jump into low stock, no stock, or expiring soon inventory views.
 - Create or merge an inventory item.
 - Open item details and confirm QR generation.
 - Scan QR on mobile and verify the item details page opens.
@@ -98,7 +100,7 @@ The foundation requested a system to:
 - Enable scan-to-open item pages from mobile devices.
 - Produce downloadable inventory reports for internal and external stakeholders.
 
-The delivered application provides the core technical foundation for these needs and includes a roadmap for remaining enhancements.
+The delivered application provides the technical foundation for these needs and includes a clear roadmap for future enhancements.
 
 ## Proposal Feature Alignment [Business + Technical]
 
@@ -113,7 +115,7 @@ The delivered application provides the core technical foundation for these needs
 | Simple login protection | Implemented | ASP.NET Identity with role-based access and login flow is active. |
 | Upload inventory information | Planned | Upload/import workflow is a recommended next enhancement. |
 | Low-stock alerts and monitoring | Implemented | Per-item low-stock thresholds, admin-managed editing, low/no-stock indicators, summary cards, export visibility, and low/no-stock filtering are available. |
-| Reports and summaries | Implemented (core) | PDF and CSV reporting available; richer dashboards can be added. |
+| Reports and summaries | Implemented | Home dashboard summary cards, attention lists, and CSV/PDF/Excel reporting are available; broader KPI dashboards can still be expanded. |
 
 ## Current Solution Highlights [Business + Technical]
 
@@ -122,6 +124,8 @@ The delivered application provides the core technical foundation for these needs
 - Donation and adjustment logs for operational traceability, including metadata edits.
 - Expiration-state awareness for proactive stock management.
 - Low-stock threshold tracking with admin-managed editing, alert visibility, and stock summary cards.
+- Home dashboard with operational summary cards and attention lists.
+- Explicit navigation for Dashboard, Inventory, Export, and Admin workflows.
 - QR code generation for direct scan-to-item workflows.
 - Batch printable QR labels for selected inventory items.
 - PDF, CSV, and Excel export for reporting.
@@ -136,7 +140,7 @@ The repository includes multiple organization logo files for use in UI polish, p
 - SafeFutureInventorySystem/wwwroot/images/safefuture-logo-original.png
 - SafeFutureInventorySystem/wwwroot/images/safefuturelogo.webp
 
-If preferred, this README image can be switched to any of the alternatives above.
+These alternatives may also be used for presentations, printed materials, or future branding updates.
 
 ## Technology Stack [Technical]
 
@@ -173,10 +177,12 @@ At application startup:
 
 ### InventoryItem
 
-- Name, description, quantity, barcode, category
+- Name, description, quantity, category
 - ExpirationDate, DateAdded, LastUpdated
 - Computed ExpirationStatus (Expired, Expiring Soon, Expiring This Month, Good, No Expiration)
 - One-to-many relationship with donation and adjustment logs
+
+Legacy barcode support remains in the data model, but QR-code routing is the primary item-identification workflow used by the application.
 
 ### DonationLog
 
@@ -253,9 +259,16 @@ Change this password immediately in staging/production environments.
 
 ## Operational Workflows [Business + Technical]
 
+### Dashboard and Navigation
+
+- Home now serves as the operational dashboard landing page.
+- Dashboard cards provide quick counts for total items, low stock, no stock, and expiring soon inventory.
+- Summary cards and action buttons link directly into the detailed inventory workspace.
+- The top navigation now separates Dashboard, Inventory, Export, and Admin tasks more clearly.
+
 ### Inventory Search and Review
 
-- Search by name, description, barcode
+- Search by name and description
 - Filter by expiration condition, low-stock status, no-stock status, and date window
 - Sort and paginate for high-volume inventories
 - Preserve current page, filters, and sorting when navigating into item details and back
@@ -264,10 +277,11 @@ Change this password immediately in staging/production environments.
 
 When staff adds an item:
 
-1. Match by barcode first.
-2. If no barcode match, match by normalized name.
-3. Merge quantity into existing item when matched.
-4. Create a new item when no match is found.
+1. Match by normalized item name.
+2. Merge quantity into the existing item when matched.
+3. Create a new item when no match is found.
+
+The current operational workflow relies on item-name merge logic. A legacy barcode field remains in the model, but barcode-based intake is no longer the primary path after the move to QR-driven item lookup.
 
 ### Adjustment and Audit Trail
 
@@ -303,7 +317,7 @@ When staff adds an item:
 5. Choose the preferred stock preset, label template, and print layout.
 6. Print the sheet directly or export the batch as PDF.
 
-## Deployment and Production Readiness Notes [Technical]
+## Deployment and Production Readiness [Technical]
 
 This project is production-capable with additional hardening recommended before client go-live:
 
@@ -336,13 +350,13 @@ Status key: Complete, In Progress, Planned
 - Email: Info@asafefuture.org
 - Phone: 904-803-0034
 
-### Recommended Technical Ownership Model
+### Technical Ownership Model
 
 - Product Owner (Client): Approves workflow changes and operational priorities.
 - Technical Maintainer (Student team or designated successor): Implements updates and release fixes.
 - Operations Contact (Client): Confirms day-to-day usability and issue priority.
 
-### Change Request Process (Recommended)
+### Change Request Process
 
 1. Submit request with business impact, urgency, and expected behavior.
 2. Triage request as bug, enhancement, or compliance requirement.
@@ -350,15 +364,15 @@ Status key: Complete, In Progress, Planned
 4. Approve and schedule into release window.
 5. Validate in staging before production rollout.
 
-## Operational Handoff Notes [Technical]
+## Operational Handoff [Technical]
 
 ### Backups
 
 - Inventory data file: SafeFutureInventory.db
 - Auth data file: SafeFutureAuth.db
-- Minimum recommendation: daily backup with weekly restore verification.
+- Minimum recommended cadence: daily backup with weekly restore verification.
 
-### Release and Rollback (Recommended)
+### Release and Rollback
 
 1. Build and test in staging environment.
 2. Back up both SQLite files prior to deployment.
@@ -371,6 +385,7 @@ Status key: Complete, In Progress, Planned
 To make this README client-ready for board members, funders, or operations staff, include the following screenshots:
 
 - Login screen
+- Dashboard landing page
 - Inventory list with filters and search
 - Item details page with quantity history
 - QR generation and mobile scan result
@@ -379,6 +394,7 @@ To make this README client-ready for board members, funders, or operations staff
 Suggested location for these assets:
 
 - docs/screenshots/login.png
+- docs/screenshots/dashboard.png
 - docs/screenshots/inventory-list.png
 - docs/screenshots/item-details.png
 - docs/screenshots/qr-scan-flow.png
@@ -387,7 +403,7 @@ Suggested location for these assets:
 ## Known Gaps Against Full Proposal Scope [Business + Technical]
 
 - Inventory upload/import is not implemented yet.
-- Rich operational dashboards and KPI summaries can be expanded further.
+- Richer operational dashboards and KPI summaries can be expanded further.
 
 ## Recommended Next Phase [Business + Technical]
 

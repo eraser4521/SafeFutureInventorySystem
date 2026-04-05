@@ -3,10 +3,10 @@ Building...
 D:\Projects\SafeFutureInventorySystem\SafeFutureInventorySystem\SafeFutureInventorySystem.csproj : warning NU1701: Package 'iTextSharp 5.5.13.4' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net9.0'. This package may not be fully compatible with your project.
 D:\Projects\SafeFutureInventorySystem\SafeFutureInventorySystem\SafeFutureInventorySystem.csproj : warning NU1701: Package 'iTextSharp 5.5.13.4' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net9.0'. This package may not be fully compatible with your project.
 info: Microsoft.EntityFrameworkCore.Database.Command[20101]
-      Executed DbCommand (13ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
       SELECT COUNT(*) FROM "sqlite_master" WHERE "type" = 'table' AND "rootpage" IS NOT NULL;
 info: Microsoft.EntityFrameworkCore.Database.Command[20101]
-      Executed DbCommand (5ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      Executed DbCommand (6ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
       SELECT COUNT(*) FROM "sqlite_master" WHERE "type" = 'table' AND "rootpage" IS NOT NULL;
 info: Microsoft.EntityFrameworkCore.Database.Command[20101]
       Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='?' (Size = 5)], CommandType='Text', CommandTimeout='30']
@@ -59,45 +59,12 @@ info: Microsoft.EntityFrameworkCore.Database.Command[20101]
 warn: Microsoft.EntityFrameworkCore.Query[20504]
       Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
 info: Microsoft.EntityFrameworkCore.Database.Command[20101]
-      Executed DbCommand (1ms) [Parameters=[@__id_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
-      SELECT "i0"."Id", "i0"."Barcode", "i0"."Category", "i0"."DateAdded", "i0"."Description", "i0"."ExpirationDate", "i0"."LastUpdated", "i0"."LowStockThreshold", "i0"."Name", "i0"."Quantity", "d"."Id", "d"."DonationDate", "d"."DonorName", "d"."InventoryItemId", "d"."Notes", "d"."QuantityDonated", "a"."Id", "a"."AdjustedBy", "a"."AdjustmentDate", "a"."InventoryItemId", "a"."NewQuantity", "a"."OldQuantity", "a"."Reason"
-      FROM (
-          SELECT "i"."Id", "i"."Barcode", "i"."Category", "i"."DateAdded", "i"."Description", "i"."ExpirationDate", "i"."LastUpdated", "i"."LowStockThreshold", "i"."Name", "i"."Quantity"
-          FROM "InventoryItems" AS "i"
-          WHERE "i"."Id" = @__id_0
-          LIMIT 1
-      ) AS "i0"
-      LEFT JOIN "DonationLogs" AS "d" ON "i0"."Id" = "d"."InventoryItemId"
-      LEFT JOIN "AdjustmentLogs" AS "a" ON "i0"."Id" = "a"."InventoryItemId"
-      ORDER BY "i0"."Id", "d"."Id"
-info: Microsoft.EntityFrameworkCore.Database.Command[20101]
-      Executed DbCommand (0ms) [Parameters=[@__p_0='?' (Size = 36)], CommandType='Text', CommandTimeout='30']
-      SELECT "a"."Id", "a"."AccessFailedCount", "a"."ConcurrencyStamp", "a"."Email", "a"."EmailConfirmed", "a"."FirstName", "a"."LastName", "a"."LockoutEnabled", "a"."LockoutEnd", "a"."MustChangePassword", "a"."NormalizedEmail", "a"."NormalizedUserName", "a"."PasswordHash", "a"."PasswordSetByAdmin", "a"."PhoneNumber", "a"."PhoneNumberConfirmed", "a"."SecurityStamp", "a"."TemporaryPasswordIssuedAtUtc", "a"."TwoFactorEnabled", "a"."UserName"
-      FROM "AspNetUsers" AS "a"
-      WHERE "a"."Id" = @__p_0
-      LIMIT 1
-warn: SafeFutureInventorySystem.Controllers.HomeController[0]
-      Request to /.well-known/appspecific/com.chrome.devtools.json returned status code 404
-info: Microsoft.EntityFrameworkCore.Database.Command[20101]
-      Executed DbCommand (0ms) [Parameters=[@__p_0='?' (Size = 36)], CommandType='Text', CommandTimeout='30']
-      SELECT "a"."Id", "a"."AccessFailedCount", "a"."ConcurrencyStamp", "a"."Email", "a"."EmailConfirmed", "a"."FirstName", "a"."LastName", "a"."LockoutEnabled", "a"."LockoutEnd", "a"."MustChangePassword", "a"."NormalizedEmail", "a"."NormalizedUserName", "a"."PasswordHash", "a"."PasswordSetByAdmin", "a"."PhoneNumber", "a"."PhoneNumberConfirmed", "a"."SecurityStamp", "a"."TemporaryPasswordIssuedAtUtc", "a"."TwoFactorEnabled", "a"."UserName"
-      FROM "AspNetUsers" AS "a"
-      WHERE "a"."Id" = @__p_0
-      LIMIT 1
-info: Microsoft.EntityFrameworkCore.Database.Command[20101]
-      Executed DbCommand (0ms) [Parameters=[@__id_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
-      SELECT "i"."Id", "i"."Barcode", "i"."Category", "i"."DateAdded", "i"."Description", "i"."ExpirationDate", "i"."LastUpdated", "i"."LowStockThreshold", "i"."Name", "i"."Quantity"
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "i"."Id", "i"."Barcode", "i"."Category", "i"."DateAdded", "i"."Description", "i"."ExpirationDate", "i"."LastUpdated", "i"."LowStockThreshold", "i"."Name", "i"."Quantity", "d"."Id", "d"."DonationDate", "d"."DonorName", "d"."InventoryItemId", "d"."Notes", "d"."QuantityDonated", "a"."Id", "a"."AdjustedBy", "a"."AdjustmentDate", "a"."InventoryItemId", "a"."NewQuantity", "a"."OldQuantity", "a"."Reason"
       FROM "InventoryItems" AS "i"
-      WHERE "i"."Id" = @__id_0
-      LIMIT 1
-info: Microsoft.EntityFrameworkCore.Database.Command[20101]
-      Executed DbCommand (0ms) [Parameters=[@__p_0='?' (Size = 36)], CommandType='Text', CommandTimeout='30']
-      SELECT "a"."Id", "a"."AccessFailedCount", "a"."ConcurrencyStamp", "a"."Email", "a"."EmailConfirmed", "a"."FirstName", "a"."LastName", "a"."LockoutEnabled", "a"."LockoutEnd", "a"."MustChangePassword", "a"."NormalizedEmail", "a"."NormalizedUserName", "a"."PasswordHash", "a"."PasswordSetByAdmin", "a"."PhoneNumber", "a"."PhoneNumberConfirmed", "a"."SecurityStamp", "a"."TemporaryPasswordIssuedAtUtc", "a"."TwoFactorEnabled", "a"."UserName"
-      FROM "AspNetUsers" AS "a"
-      WHERE "a"."Id" = @__p_0
-      LIMIT 1
-warn: SafeFutureInventorySystem.Controllers.HomeController[0]
-      Request to /.well-known/appspecific/com.chrome.devtools.json returned status code 404
+      LEFT JOIN "DonationLogs" AS "d" ON "i"."Id" = "d"."InventoryItemId"
+      LEFT JOIN "AdjustmentLogs" AS "a" ON "i"."Id" = "a"."InventoryItemId"
+      ORDER BY "i"."Id", "d"."Id"
 info: Microsoft.EntityFrameworkCore.Database.Command[20101]
       Executed DbCommand (0ms) [Parameters=[@__p_0='?' (Size = 36)], CommandType='Text', CommandTimeout='30']
       SELECT "a"."Id", "a"."AccessFailedCount", "a"."ConcurrencyStamp", "a"."Email", "a"."EmailConfirmed", "a"."FirstName", "a"."LastName", "a"."LockoutEnabled", "a"."LockoutEnd", "a"."MustChangePassword", "a"."NormalizedEmail", "a"."NormalizedUserName", "a"."PasswordHash", "a"."PasswordSetByAdmin", "a"."PhoneNumber", "a"."PhoneNumberConfirmed", "a"."SecurityStamp", "a"."TemporaryPasswordIssuedAtUtc", "a"."TwoFactorEnabled", "a"."UserName"
@@ -105,22 +72,87 @@ info: Microsoft.EntityFrameworkCore.Database.Command[20101]
       WHERE "a"."Id" = @__p_0
       LIMIT 1
 info: Microsoft.EntityFrameworkCore.Database.Command[20101]
-      Executed DbCommand (0ms) [Parameters=[@__id_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
-      SELECT "i0"."Id", "i0"."Barcode", "i0"."Category", "i0"."DateAdded", "i0"."Description", "i0"."ExpirationDate", "i0"."LastUpdated", "i0"."LowStockThreshold", "i0"."Name", "i0"."Quantity", "d"."Id", "d"."DonationDate", "d"."DonorName", "d"."InventoryItemId", "d"."Notes", "d"."QuantityDonated", "a"."Id", "a"."AdjustedBy", "a"."AdjustmentDate", "a"."InventoryItemId", "a"."NewQuantity", "a"."OldQuantity", "a"."Reason"
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT COUNT(*)
+      FROM "InventoryItems" AS "i"
+      WHERE "i"."Quantity" > 0 AND "i"."LowStockThreshold" > 0 AND "i"."Quantity" <= "i"."LowStockThreshold"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT COUNT(*)
+      FROM "InventoryItems" AS "i"
+      WHERE "i"."Quantity" <= 0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT COUNT(*)
+      FROM "InventoryItems" AS "i"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[@__p_1='?' (DbType = Int32), @__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT "i0"."Id", "i0"."Barcode", "i0"."Category", "i0"."DateAdded", "i0"."Description", "i0"."ExpirationDate", "i0"."LastUpdated", "i0"."LowStockThreshold", "i0"."Name", "i0"."Quantity", "d"."Id", "d"."DonationDate", "d"."DonorName", "d"."InventoryItemId", "d"."Notes", "d"."QuantityDonated"
       FROM (
           SELECT "i"."Id", "i"."Barcode", "i"."Category", "i"."DateAdded", "i"."Description", "i"."ExpirationDate", "i"."LastUpdated", "i"."LowStockThreshold", "i"."Name", "i"."Quantity"
           FROM "InventoryItems" AS "i"
-          WHERE "i"."Id" = @__id_0
-          LIMIT 1
+          ORDER BY "i"."Name"
+          LIMIT @__p_1 OFFSET @__p_0
       ) AS "i0"
       LEFT JOIN "DonationLogs" AS "d" ON "i0"."Id" = "d"."InventoryItemId"
-      LEFT JOIN "AdjustmentLogs" AS "a" ON "i0"."Id" = "a"."InventoryItemId"
-      ORDER BY "i0"."Id", "d"."Id"
+      ORDER BY "i0"."Name", "i0"."Id"
 info: Microsoft.EntityFrameworkCore.Database.Command[20101]
       Executed DbCommand (0ms) [Parameters=[@__p_0='?' (Size = 36)], CommandType='Text', CommandTimeout='30']
       SELECT "a"."Id", "a"."AccessFailedCount", "a"."ConcurrencyStamp", "a"."Email", "a"."EmailConfirmed", "a"."FirstName", "a"."LastName", "a"."LockoutEnabled", "a"."LockoutEnd", "a"."MustChangePassword", "a"."NormalizedEmail", "a"."NormalizedUserName", "a"."PasswordHash", "a"."PasswordSetByAdmin", "a"."PhoneNumber", "a"."PhoneNumberConfirmed", "a"."SecurityStamp", "a"."TemporaryPasswordIssuedAtUtc", "a"."TwoFactorEnabled", "a"."UserName"
       FROM "AspNetUsers" AS "a"
       WHERE "a"."Id" = @__p_0
       LIMIT 1
-warn: SafeFutureInventorySystem.Controllers.HomeController[0]
-      Request to /.well-known/appspecific/com.chrome.devtools.json returned status code 404
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "a"."Id", "a"."AccessFailedCount", "a"."ConcurrencyStamp", "a"."Email", "a"."EmailConfirmed", "a"."FirstName", "a"."LastName", "a"."LockoutEnabled", "a"."LockoutEnd", "a"."MustChangePassword", "a"."NormalizedEmail", "a"."NormalizedUserName", "a"."PasswordHash", "a"."PasswordSetByAdmin", "a"."PhoneNumber", "a"."PhoneNumberConfirmed", "a"."SecurityStamp", "a"."TemporaryPasswordIssuedAtUtc", "a"."TwoFactorEnabled", "a"."UserName"
+      FROM "AspNetUsers" AS "a"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (Size = 36)], CommandType='Text', CommandTimeout='30']
+      SELECT "a0"."Name"
+      FROM "AspNetUserRoles" AS "a"
+      INNER JOIN "AspNetRoles" AS "a0" ON "a"."RoleId" = "a0"."Id"
+      WHERE "a"."UserId" = @__userId_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[@__p_0='?' (Size = 36)], CommandType='Text', CommandTimeout='30']
+      SELECT "a"."Id", "a"."AccessFailedCount", "a"."ConcurrencyStamp", "a"."Email", "a"."EmailConfirmed", "a"."FirstName", "a"."LastName", "a"."LockoutEnabled", "a"."LockoutEnd", "a"."MustChangePassword", "a"."NormalizedEmail", "a"."NormalizedUserName", "a"."PasswordHash", "a"."PasswordSetByAdmin", "a"."PhoneNumber", "a"."PhoneNumberConfirmed", "a"."SecurityStamp", "a"."TemporaryPasswordIssuedAtUtc", "a"."TwoFactorEnabled", "a"."UserName"
+      FROM "AspNetUsers" AS "a"
+      WHERE "a"."Id" = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT COUNT(*)
+      FROM "InventoryItems" AS "i"
+      WHERE "i"."Quantity" > 0 AND "i"."LowStockThreshold" > 0 AND "i"."Quantity" <= "i"."LowStockThreshold"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT COUNT(*)
+      FROM "InventoryItems" AS "i"
+      WHERE "i"."Quantity" <= 0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT COUNT(*)
+      FROM "InventoryItems" AS "i"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[@__p_1='?' (DbType = Int32), @__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT "i0"."Id", "i0"."Barcode", "i0"."Category", "i0"."DateAdded", "i0"."Description", "i0"."ExpirationDate", "i0"."LastUpdated", "i0"."LowStockThreshold", "i0"."Name", "i0"."Quantity", "d"."Id", "d"."DonationDate", "d"."DonorName", "d"."InventoryItemId", "d"."Notes", "d"."QuantityDonated"
+      FROM (
+          SELECT "i"."Id", "i"."Barcode", "i"."Category", "i"."DateAdded", "i"."Description", "i"."ExpirationDate", "i"."LastUpdated", "i"."LowStockThreshold", "i"."Name", "i"."Quantity"
+          FROM "InventoryItems" AS "i"
+          ORDER BY "i"."Name"
+          LIMIT @__p_1 OFFSET @__p_0
+      ) AS "i0"
+      LEFT JOIN "DonationLogs" AS "d" ON "i0"."Id" = "d"."InventoryItemId"
+      ORDER BY "i0"."Name", "i0"."Id"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[@__p_0='?' (Size = 36)], CommandType='Text', CommandTimeout='30']
+      SELECT "a"."Id", "a"."AccessFailedCount", "a"."ConcurrencyStamp", "a"."Email", "a"."EmailConfirmed", "a"."FirstName", "a"."LastName", "a"."LockoutEnabled", "a"."LockoutEnd", "a"."MustChangePassword", "a"."NormalizedEmail", "a"."NormalizedUserName", "a"."PasswordHash", "a"."PasswordSetByAdmin", "a"."PhoneNumber", "a"."PhoneNumberConfirmed", "a"."SecurityStamp", "a"."TemporaryPasswordIssuedAtUtc", "a"."TwoFactorEnabled", "a"."UserName"
+      FROM "AspNetUsers" AS "a"
+      WHERE "a"."Id" = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "i"."Id", "i"."Barcode", "i"."Category", "i"."DateAdded", "i"."Description", "i"."ExpirationDate", "i"."LastUpdated", "i"."LowStockThreshold", "i"."Name", "i"."Quantity", "d"."Id", "d"."DonationDate", "d"."DonorName", "d"."InventoryItemId", "d"."Notes", "d"."QuantityDonated", "a"."Id", "a"."AdjustedBy", "a"."AdjustmentDate", "a"."InventoryItemId", "a"."NewQuantity", "a"."OldQuantity", "a"."Reason"
+      FROM "InventoryItems" AS "i"
+      LEFT JOIN "DonationLogs" AS "d" ON "i"."Id" = "d"."InventoryItemId"
+      LEFT JOIN "AdjustmentLogs" AS "a" ON "i"."Id" = "a"."InventoryItemId"
+      ORDER BY "i"."Id", "d"."Id"

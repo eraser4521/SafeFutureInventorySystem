@@ -19,6 +19,13 @@
     <h2>Inventory Management</h2>
 </div>
 
+@{
+    var hasActiveFilters = !string.IsNullOrWhiteSpace(Model.SearchTerm)
+        || !string.IsNullOrWhiteSpace(Model.ExpirationFilter)
+        || Model.FromDate.HasValue
+        || Model.ToDate.HasValue;
+}
+
 @if (Model.LowStockCount > 0 || Model.NoStockCount > 0 || Model.ExpirationFilter == "LowStock" || Model.ExpirationFilter == "NoStock")
 {
 <div class="inventory-stock-summary">
@@ -160,24 +167,58 @@
     </form>
 </div>
 
-    <!-- Action Buttons -->
-    <div class="action-btn-row inventory-actions-row">
-        <a asp-action="Create" class="btn btn-success">
-            <i class="fas fa-plus"></i> Add New Item
-        </a>
+<div class="inventory-toolbar-card">
+    <div class="inventory-toolbar-top">
+        <div class="inventory-results-meta">
+            Showing @((Model.PageNumber - 1) * Model.PageSize + 1) to
+            @(Math.Min(Model.PageNumber * Model.PageSize, Model.TotalCount))
+            of @Model.TotalCount items
+        </div>
 
-        <button type="button" class="btn btn-danger" id="removeSelectedBtn" disabled>
-            <i class="fas fa-trash"></i> Remove Selected (<span id="selectedCount">0</span>)
-        </button>
-
-        <button type="button" class="btn btn-secondary" id="printQrLabelsBtn" disabled>
-            <i class="fas fa-qrcode"></i> Print Selected QR Labels (<span id="qrSelectedCount">0</span>)
-        </button>
-
-        <button type="button" class="btn btn-danger" id="exportSelectedPdfBtn" disabled>
-            <i class="fas fa-file-pdf"></i> Export Selected PDF (<span id="pdfSelectedCount">0</span>)
-        </button>
+        @if (hasActiveFilters)
+        {
+            <div class="inventory-active-filters">
+                @if (!string.IsNullOrWhiteSpace(Model.SearchTerm))
+                {
+                    <span class="inventory-filter-chip"><i class="fas fa-search"></i> @Model.SearchTerm</span>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.ExpirationFilter))
+                {
+                    <span class="inventory-filter-chip"><i class="fas fa-filter"></i> @Model.ExpirationFilter</span>
+                }
+                @if (Model.FromDate.HasValue || Model.ToDate.HasValue)
+                {
+                    <span class="inventory-filter-chip"><i class="fas fa-calendar-alt"></i> Date Window</span>
+                }
+                <a asp-action="Index" asp-route-pageSize="@Model.PageSize" class="inventory-clear-link">Clear filters</a>
+            </div>
+        }
     </div>
+
+    <div class="inventory-toolbar-actions">
+        <div class="inventory-action-group">
+            <span class="inventory-action-group-label">Inventory</span>
+            <a asp-action="Create" class="btn btn-success">
+                <i class="fas fa-plus"></i> Add New Item
+            </a>
+        </div>
+
+        <div class="inventory-action-group">
+            <span class="inventory-action-group-label">Selected Items</span>
+            <button type="button" class="btn btn-danger" id="removeSelectedBtn" disabled>
+                <i class="fas fa-trash"></i> Remove Selected (<span id="selectedCount">0</span>)
+            </button>
+
+            <button type="button" class="btn btn-secondary" id="printQrLabelsBtn" disabled>
+                <i class="fas fa-qrcode"></i> Print Selected QR Labels (<span id="qrSelectedCount">0</span>)
+            </button>
+
+            <button type="button" class="btn btn-danger" id="exportSelectedPdfBtn" disabled>
+                <i class="fas fa-file-pdf"></i> Export Selected PDF (<span id="pdfSelectedCount">0</span>)
+            </button>
+        </div>
+    </div>
+</div>
 
     <!-- Inventory Table -->
     <div class="card inventory-table-card">
@@ -517,12 +558,6 @@
                     </div>
                 </nav>
             }
-
-            <div class="text-center text-muted mt-3">
-                Showing @((Model.PageNumber - 1) * Model.PageSize + 1) to
-                @(Math.Min(Model.PageNumber * Model.PageSize, Model.TotalCount))
-                of @Model.TotalCount items
-            </div>
         </div>
     </div>
 </div>
