@@ -18,6 +18,9 @@ namespace SafeFutureInventorySystem.Models
         [Required]
         public int Quantity { get; set; }
 
+        [Range(0, int.MaxValue)]
+        public int LowStockThreshold { get; set; }
+
         [StringLength(50)]
         public string? Barcode { get; set; }
 
@@ -54,5 +57,7 @@ namespace SafeFutureInventorySystem.Models
                     return "Good";
             }
         }
+
+        public bool IsLowStock => LowStockThreshold > 0 && Quantity <= LowStockThreshold;
     }
 }

@@ -23,6 +23,8 @@ namespace SafeFutureInventorySystem.Models
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 10;
         public int TotalCount { get; set; }
+        public int LowStockCount { get; set; }
+        public int NoStockCount { get; set; }
 
         // Computed property for total pages
         public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);

@@ -37,7 +37,11 @@ namespace SafeFutureInventorySystem.Controllers
         {
             try
             {
-                var query = _context.InventoryItems.AsQueryable();
+                var inventoryItems = _context.InventoryItems.AsQueryable();
+                var lowStockCount = inventoryItems.Count(i => i.Quantity > 0 && i.LowStockThreshold > 0 && i.Quantity <= i.LowStockThreshold);
+                var noStockCount = inventoryItems.Count(i => i.Quantity <= 0);
+
+                var query = inventoryItems;
 
                 if (!string.IsNullOrWhiteSpace(searchTerm))
                 {
@@ -79,6 +83,16 @@ namespace SafeFutureInventorySystem.Controllers
 
                         case "NoExpiration":
                             query = query.Where(i => !i.ExpirationDate.HasValue);
+                            break;
+
+                        case "LowStock":
+                            query = query.Where(i => i.Quantity > 0 &&
+                                                   i.LowStockThreshold > 0 &&
+                                                   i.Quantity <= i.LowStockThreshold);
+                            break;
+
+                        case "NoStock":
+                            query = query.Where(i => i.Quantity <= 0);
                             break;
                     }
                 }
@@ -131,7 +145,9 @@ namespace SafeFutureInventorySystem.Controllers
                     SortOrder = sortOrder,
                     PageNumber = page,
                     PageSize = pageSize,
-                    TotalCount = totalCount
+                    TotalCount = totalCount,
+                    LowStockCount = lowStockCount,
+                    NoStockCount = noStockCount
                 };
 
                 return View(viewModel);
@@ -219,6 +235,10 @@ namespace SafeFutureInventorySystem.Controllers
                     // MERGE into existing item
                     int oldQty = existing.Quantity;
                     existing.Quantity += item.Quantity;
+                    if (item.LowStockThreshold > 0)
+                    {
+                        existing.LowStockThreshold = item.LowStockThreshold;
+                    }
                     existing.LastUpdated = DateTime.Now;
 
                     _context.DonationLogs.Add(new DonationLog
@@ -267,7 +287,9 @@ namespace SafeFutureInventorySystem.Controllers
         }
 
 
-        public IActionResult Details(int id)
+        public IActionResult Details(int id, string searchTerm, string expirationFilter,
+            DateTime? fromDate, DateTime? toDate, string sortBy = "Name",
+            string sortOrder = "asc", int page = 1, int pageSize = 10)
         {
             try
             {
@@ -287,6 +309,15 @@ namespace SafeFutureInventorySystem.Controllers
                 ViewBag.DonationHistory = item.DonationLogs
                     .OrderByDescending(d => d.DonationDate)
                     .ToList();
+
+                ViewBag.ReturnSearchTerm = searchTerm;
+                ViewBag.ReturnExpirationFilter = expirationFilter;
+                ViewBag.ReturnFromDate = fromDate;
+                ViewBag.ReturnToDate = toDate;
+                ViewBag.ReturnSortBy = sortBy;
+                ViewBag.ReturnSortOrder = sortOrder;
+                ViewBag.ReturnPage = page;
+                ViewBag.ReturnPageSize = pageSize;
 
                 return View(item);
             }
@@ -341,6 +372,41 @@ namespace SafeFutureInventorySystem.Controllers
             {
                 _logger.LogError(ex, "Error adjusting quantity for item {ItemId}", id);
                 return new JsonResult(new { success = false, message = "An error occurred while adjusting the quantity." });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult UpdateLowStockThreshold(int id, int lowStockThreshold, string searchTerm, string expirationFilter,
+            DateTime? fromDate, DateTime? toDate, string sortBy = "Name",
+            string sortOrder = "asc", int page = 1, int pageSize = 10)
+        {
+            try
+            {
+                if (lowStockThreshold < 0)
+                {
+                    TempData["error"] = "Low-stock threshold cannot be negative.";
+                    return RedirectToAction(nameof(Details), new { id, searchTerm, expirationFilter, fromDate, toDate, sortBy, sortOrder, page, pageSize });
+                }
+
+                var item = _context.InventoryItems.Find(id);
+                if (item == null)
+                {
+                    return ItemNotFoundResult(id);
+                }
+
+                item.LowStockThreshold = lowStockThreshold;
+                item.LastUpdated = DateTime.Now;
+                _context.SaveChanges();
+
+                TempData["SuccessMessage"] = $"Low-stock threshold updated for '{item.Name}'.";
+                return RedirectToAction(nameof(Details), new { id, searchTerm, expirationFilter, fromDate, toDate, sortBy, sortOrder, page, pageSize });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating low-stock threshold for item {ItemId}", id);
+                TempData["error"] = "We couldn't update the low-stock threshold.";
+                return RedirectToAction(nameof(Details), new { id, searchTerm, expirationFilter, fromDate, toDate, sortBy, sortOrder, page, pageSize });
             }
         }
 
@@ -426,11 +492,11 @@ namespace SafeFutureInventorySystem.Controllers
                     document.Add(new Paragraph("\n"));
 
                     // ── Main Table ──
-                    PdfPTable table = new PdfPTable(8);
+                    PdfPTable table = new PdfPTable(10);
                     table.WidthPercentage = 100;
-                    table.SetWidths(new float[] { 6, 16, 18, 8, 12, 12, 14, 14 });
+                    table.SetWidths(new float[] { 5, 14, 16, 7, 9, 10, 11, 9, 10, 9 });
 
-                    string[] headers = { "ID", "Name", "Description", "Qty", "Category", "Expiration", "Date Added", "Donor" };
+                    string[] headers = { "ID", "Name", "Description", "Qty", "Threshold", "Category", "Expiration", "Status", "Date Added", "Donor" };
                     bool altHeader = false;
                     foreach (string header in headers)
                     {
@@ -465,11 +531,19 @@ namespace SafeFutureInventorySystem.Controllers
                         table.AddCell(new PdfPCell(new Phrase(item.Quantity.ToString(),
                             FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 9)))
                         { Padding = 5, HorizontalAlignment = Element.ALIGN_CENTER, BackgroundColor = new BaseColor(230, 245, 255) });
+                        table.AddCell(new PdfPCell(new Phrase(
+                            item.LowStockThreshold > 0 ? item.LowStockThreshold.ToString() : "Disabled",
+                            FontFactory.GetFont(FontFactory.HELVETICA, 8)))
+                        { Padding = 5, HorizontalAlignment = Element.ALIGN_CENTER, BackgroundColor = rowBg });
                         table.AddCell(new PdfPCell(new Phrase(item.Category ?? "Uncategorized",
                             FontFactory.GetFont(FontFactory.HELVETICA, 8)))
                         { Padding = 5, BackgroundColor = rowBg });
                         table.AddCell(new PdfPCell(new Phrase(
                             item.ExpirationDate?.ToString("yyyy-MM-dd") ?? "No Expiration",
+                            FontFactory.GetFont(FontFactory.HELVETICA, 8)))
+                        { Padding = 5, HorizontalAlignment = Element.ALIGN_CENTER, BackgroundColor = rowBg });
+                        table.AddCell(new PdfPCell(new Phrase(
+                            item.IsLowStock ? "Low Stock" : item.ExpirationStatus,
                             FontFactory.GetFont(FontFactory.HELVETICA, 8)))
                         { Padding = 5, HorizontalAlignment = Element.ALIGN_CENTER, BackgroundColor = rowBg });
                         table.AddCell(new PdfPCell(new Phrase(item.DateAdded.ToString("yyyy-MM-dd"),
@@ -719,7 +793,7 @@ namespace SafeFutureInventorySystem.Controllers
                 using (TextWriter writer = new StreamWriter(memoryStream, System.Text.Encoding.UTF8))
                 {
                     // Write CSV headers
-                    string[] headers = { "ID", "Name", "Description", "Quantity", "Category", "Expiration Date", "Date Added" };
+                    string[] headers = { "ID", "Name", "Description", "Quantity", "Low Stock Threshold", "Low Stock Alert", "Category", "Expiration Date", "Date Added" };
                     writer.WriteLine(string.Join(",", headers.Select(h => $"\"{h}\"")));
 
                     // Write data rows
@@ -731,6 +805,8 @@ namespace SafeFutureInventorySystem.Controllers
                             $"\"{item.Name}\"",
                             $"\"{item.Description ?? ""}\"",
                             item.Quantity.ToString(),
+                            item.LowStockThreshold.ToString(),
+                            item.IsLowStock ? "\"Yes\"" : "\"No\"",
                             $"\"{item.Category ?? ""}\"",
                             item.ExpirationDate?.ToString("yyyy-MM-dd") ?? "N/A",
                             item.DateAdded.ToString("yyyy-MM-dd")
@@ -781,6 +857,8 @@ namespace SafeFutureInventorySystem.Controllers
                     "Name",
                     "Description",
                     "Quantity",
+                    "Low Stock Threshold",
+                    "Low Stock Alert",
                     "Category",
                     "Barcode",
                     "Expiration Date",
@@ -817,15 +895,17 @@ namespace SafeFutureInventorySystem.Controllers
                     worksheet.Cells[row, 2].Value = item.Name;
                     worksheet.Cells[row, 3].Value = item.Description;
                     worksheet.Cells[row, 4].Value = item.Quantity;
-                    worksheet.Cells[row, 5].Value = item.Category;
-                    worksheet.Cells[row, 6].Value = item.Barcode;
-                    worksheet.Cells[row, 7].Value = item.ExpirationDate?.ToString("yyyy-MM-dd");
-                    worksheet.Cells[row, 8].Value = item.ExpirationStatus;
-                    worksheet.Cells[row, 9].Value = item.DateAdded.ToString("yyyy-MM-dd");
-                    worksheet.Cells[row, 10].Value = item.LastUpdated?.ToString("yyyy-MM-dd HH:mm");
-                    worksheet.Cells[row, 11].Value = latestDonation?.DonorName;
-                    worksheet.Cells[row, 12].Value = item.DonationLogs.Count;
-                    worksheet.Cells[row, 13].Value = item.AdjustmentLogs.Count;
+                    worksheet.Cells[row, 5].Value = item.LowStockThreshold;
+                    worksheet.Cells[row, 6].Value = item.IsLowStock ? "Yes" : "No";
+                    worksheet.Cells[row, 7].Value = item.Category;
+                    worksheet.Cells[row, 8].Value = item.Barcode;
+                    worksheet.Cells[row, 9].Value = item.ExpirationDate?.ToString("yyyy-MM-dd");
+                    worksheet.Cells[row, 10].Value = item.ExpirationStatus;
+                    worksheet.Cells[row, 11].Value = item.DateAdded.ToString("yyyy-MM-dd");
+                    worksheet.Cells[row, 12].Value = item.LastUpdated?.ToString("yyyy-MM-dd HH:mm");
+                    worksheet.Cells[row, 13].Value = latestDonation?.DonorName;
+                    worksheet.Cells[row, 14].Value = item.DonationLogs.Count;
+                    worksheet.Cells[row, 15].Value = item.AdjustmentLogs.Count;
                 }
 
                 worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
@@ -867,7 +947,9 @@ namespace SafeFutureInventorySystem.Controllers
                         name = item.Name,
                         quantity = item.Quantity,
                         description = item.Description,
-                        expirationStatus = item.ExpirationStatus
+                        expirationStatus = item.ExpirationStatus,
+                        lowStockThreshold = item.LowStockThreshold,
+                        isLowStock = item.IsLowStock
                     }
                 });
             }

@@ -22,7 +22,7 @@
 
                                 <div class="form-group">
                                     <label asp-for="Name" class="control-label">
-                                        Item Name <span class="text-danger">*</span>
+                                        Item Name <span class="required-marker">*</span>
                                     </label>
                                     <div class="position-relative">
                                         <input asp-for="Name" id="itemNameInput" class="form-control"
@@ -73,12 +73,21 @@
 
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label asp-for="Quantity" class="control-label">Quantity <span class="text-danger">*</span></label>
+                                        <div class="form-group threshold-input-group">
+                                            <label asp-for="Quantity" class="control-label">Quantity <span class="required-marker">*</span></label>
                                             <input asp-for="Quantity" class="form-control" type="number" min="1"
                                                    placeholder="0" required />
                                             <span asp-validation-for="Quantity" class="text-danger"></span>
-                                            <small class="form-text text-muted">Must be a positive number</small>
+                                            <small class="form-text text-muted threshold-help-text">Must be a positive number</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group threshold-input-group">
+                                            <label asp-for="LowStockThreshold" class="control-label">Low-Stock Threshold</label>
+                                            <input asp-for="LowStockThreshold" class="form-control" type="number" min="0"
+                                                   placeholder="0" />
+                                            <span asp-validation-for="LowStockThreshold" class="text-danger"></span>
+                                            <small class="form-text text-muted threshold-help-text">Set to 0 to disable low-stock alerts for this item</small>
                                         </div>
                                     </div>
                                 </div>
@@ -264,3 +273,20 @@
 
     </script>
 }
+
+<style>
+    .required-marker {
+        color: var(--sf-danger);
+        display: inline;
+        margin-left: 0.15rem;
+    }
+
+    .threshold-input-group .control-label {
+        min-height: 1.5rem;
+    }
+
+    .threshold-help-text {
+        display: block;
+        min-height: 2.8rem;
+    }
+</style>

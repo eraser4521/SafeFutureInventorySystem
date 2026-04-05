@@ -19,6 +19,73 @@
     <h2>Inventory Management</h2>
 </div>
 
+@if (Model.LowStockCount > 0 || Model.NoStockCount > 0 || Model.ExpirationFilter == "LowStock" || Model.ExpirationFilter == "NoStock")
+{
+<div class="inventory-stock-summary">
+    @if (Model.LowStockCount > 0)
+    {
+        <a asp-action="Index"
+           asp-route-searchTerm="@Model.SearchTerm"
+           asp-route-expirationFilter="LowStock"
+           asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")"
+           asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")"
+           asp-route-sortBy="@Model.SortBy"
+           asp-route-sortOrder="@Model.SortOrder"
+           asp-route-pageSize="@Model.PageSize"
+           class="inventory-summary-card inventory-summary-low">
+            <span class="inventory-summary-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </span>
+            <span class="inventory-summary-content">
+                <span class="inventory-summary-value">@Model.LowStockCount</span>
+                <span class="inventory-summary-label">Low Stock</span>
+            </span>
+        </a>
+    }
+
+    @if (Model.NoStockCount > 0)
+    {
+        <a asp-action="Index"
+           asp-route-searchTerm="@Model.SearchTerm"
+           asp-route-expirationFilter="NoStock"
+           asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")"
+           asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")"
+           asp-route-sortBy="@Model.SortBy"
+           asp-route-sortOrder="@Model.SortOrder"
+           asp-route-pageSize="@Model.PageSize"
+           class="inventory-summary-card inventory-summary-none">
+            <span class="inventory-summary-icon">
+                <i class="fas fa-times-circle"></i>
+            </span>
+            <span class="inventory-summary-content">
+                <span class="inventory-summary-value">@Model.NoStockCount</span>
+                <span class="inventory-summary-label">No Stock</span>
+            </span>
+        </a>
+    }
+
+    @if (Model.ExpirationFilter == "LowStock" || Model.ExpirationFilter == "NoStock")
+    {
+        <a asp-action="Index"
+           asp-route-searchTerm="@Model.SearchTerm"
+           asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")"
+           asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")"
+           asp-route-sortBy="@Model.SortBy"
+           asp-route-sortOrder="@Model.SortOrder"
+           asp-route-pageSize="@Model.PageSize"
+           class="inventory-summary-card inventory-summary-clear">
+            <span class="inventory-summary-icon">
+                <i class="fas fa-list"></i>
+            </span>
+            <span class="inventory-summary-content">
+                <span class="inventory-summary-value">@Model.TotalCount</span>
+                <span class="inventory-summary-label">Show All</span>
+            </span>
+        </a>
+    }
+</div>
+}
+
 <!-- ── Compact Filter Bar ── -->
 <div class="filter-bar-card">
     <form method="get" asp-action="Index" id="filterForm">
@@ -37,9 +104,9 @@
                 </div>
             </div>
 
-            <!-- Expiration Filter -->
+            <!-- Status Filter -->
             <div class="filter-item">
-                <label>Expiration Status</label>
+                <label>Status</label>
                 <select name="expirationFilter" class="form-control">
                     <option value="">All Items</option>
                     <option value="Expired" selected="@(Model.ExpirationFilter == "Expired")">Expired</option>
@@ -47,6 +114,8 @@
                     <option value="ExpiringThisMonth" selected="@(Model.ExpirationFilter == "ExpiringThisMonth")">Expiring This Month</option>
                     <option value="Good" selected="@(Model.ExpirationFilter == "Good")">Good Condition</option>
                     <option value="NoExpiration" selected="@(Model.ExpirationFilter == "NoExpiration")">No Expiration</option>
+                    <option value="LowStock" selected="@(Model.ExpirationFilter == "LowStock")">Low Stock</option>
+                    <option value="NoStock" selected="@(Model.ExpirationFilter == "NoStock")">No Stock</option>
                 </select>
             </div>
 
@@ -192,7 +261,17 @@
                                         <input type="checkbox" class="item-checkbox" value="@item.Id" />
                                     </td>
                                     <td class="inventory-name-cell">
-                                        <a asp-action="Details" asp-route-id="@item.Id" class="inventory-name-link">
+                                        <a asp-action="Details"
+                                           asp-route-id="@item.Id"
+                                           asp-route-searchTerm="@Model.SearchTerm"
+                                           asp-route-expirationFilter="@Model.ExpirationFilter"
+                                           asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                                           asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")"
+                                           asp-route-sortBy="@Model.SortBy"
+                                           asp-route-sortOrder="@Model.SortOrder"
+                                           asp-route-page="@Model.PageNumber"
+                                           asp-route-pageSize="@Model.PageSize"
+                                           class="inventory-name-link">
                                             @item.Name
                                         </a>
                                     </td>
@@ -225,8 +304,20 @@
                                         }
                                     </td>
 
-                                    <td>
+                                    <td class="inventory-quantity-cell">
                                         <span class="badge badge-light text-dark">@item.Quantity</span>
+                                        @if (item.Quantity <= 0)
+                                        {
+                                            <span class="inventory-stock-indicator inventory-stock-none" title="No Stock">
+                                                <i class="fas fa-times-circle"></i>
+                                            </span>
+                                        }
+                                        else if (item.IsLowStock)
+                                        {
+                                            <span class="inventory-stock-indicator inventory-stock-low" title="Low Stock">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                            </span>
+                                        }
                                     </td>
                                     <td>
                                         @item.DateAdded.ToString("MM/dd/yyyy")
@@ -241,7 +332,23 @@
                                             <span class="text-muted">No Expiration</span>
                                         }
                                     </td>
-                                    <td>
+                                    <td class="inventory-status-cell">
+                                        @if (item.Quantity <= 0)
+                                        {
+                                            <div class="mb-1">
+                                                <span class="badge badge-danger inventory-status-badge">
+                                                    <i class="fas fa-times-circle"></i> No Stock
+                                                </span>
+                                            </div>
+                                        }
+                                        @if (item.IsLowStock)
+                                        {
+                                            <div class="mb-1">
+                                                <span class="badge badge-warning text-dark inventory-status-badge">
+                                                    <i class="fas fa-exclamation-circle"></i> Low Stock
+                                                </span>
+                                            </div>
+                                        }
                                         @{
                                             var bgClass = "";
                                             var textClass = "text-white";
@@ -278,7 +385,17 @@
                                     </td>
                                     <td class="inventory-actions-cell">
                                         <!-- View Details Button -->
-                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info inventory-row-action" title="View Details">
+                                        <a asp-action="Details"
+                                           asp-route-id="@item.Id"
+                                           asp-route-searchTerm="@Model.SearchTerm"
+                                           asp-route-expirationFilter="@Model.ExpirationFilter"
+                                           asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                                           asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")"
+                                           asp-route-sortBy="@Model.SortBy"
+                                           asp-route-sortOrder="@Model.SortOrder"
+                                           asp-route-page="@Model.PageNumber"
+                                           asp-route-pageSize="@Model.PageSize"
+                                           class="btn btn-sm btn-info inventory-row-action" title="View Details">
                                             <i class="fas fa-eye"></i><span class="action-label">Details</span>
                                         </a>
                                         <!-- QR Code Button -->

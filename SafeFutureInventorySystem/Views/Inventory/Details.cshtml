@@ -4,6 +4,14 @@
     ViewBag.Title = "Item Details";
     var adjustmentHistory = ViewBag.AdjustmentHistory as List<SafeFutureInventorySystem.Models.InventoryAdjustmentLog>;
     var donationHistory = ViewBag.DonationHistory as List<SafeFutureInventorySystem.Models.DonationLog>;
+    var returnSearchTerm = ViewBag.ReturnSearchTerm as string;
+    var returnExpirationFilter = ViewBag.ReturnExpirationFilter as string;
+    var returnFromDate = ViewBag.ReturnFromDate as DateTime?;
+    var returnToDate = ViewBag.ReturnToDate as DateTime?;
+    var returnSortBy = ViewBag.ReturnSortBy as string ?? "Name";
+    var returnSortOrder = ViewBag.ReturnSortOrder as string ?? "asc";
+    var returnPage = ViewBag.ReturnPage is int pageNumber ? pageNumber : 1;
+    var returnPageSize = ViewBag.ReturnPageSize is int pageSize ? pageSize : 10;
 }
 
 <div class="details-page-title">
@@ -34,6 +42,16 @@
                                 <th>Quantity</th>
                                 <td>
                                     <span class="badge bg-primary fs-6">@Model.Quantity units</span>
+                                    @if (Model.IsLowStock)
+                                    {
+                                        <span class="badge bg-warning text-dark fs-6 ml-2">
+                                            <i class="fas fa-exclamation-circle"></i> Low Stock
+                                        </span>
+                                    }
+                                </td>
+                                <th>Low-Stock Threshold</th>
+                                <td>
+                                    @(Model.LowStockThreshold > 0 ? Model.LowStockThreshold.ToString() : "Disabled")
                                 </td>
                             </tr>
                             <tr>
@@ -95,17 +113,51 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="card-footer d-flex gap-2 justify-content-end">
-                    <a asp-action="Index" class="btn btn-secondary btn-sm">
-                        <i class="fas fa-arrow-left"></i> Back
-                    </a>
-                    <a asp-action="QrCode" asp-route-id="@Model.Id" class="btn btn-info btn-sm">
-                        <i class="fas fa-qrcode"></i> QR Code
-                    </a>
-                    <button type="button" class="btn btn-warning btn-sm"
-                            onclick="openAdjustQuantityModal(@Model.Id, '@Model.Name', @Model.Quantity)">
-                        <i class="fas fa-edit"></i> Adjust Quantity
-                    </button>
+                <div class="card-footer details-footer">
+                    <form asp-action="UpdateLowStockThreshold" method="post" class="threshold-edit-form">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <input type="hidden" name="searchTerm" value="@returnSearchTerm" />
+                        <input type="hidden" name="expirationFilter" value="@returnExpirationFilter" />
+                        <input type="hidden" name="fromDate" value="@returnFromDate?.ToString("yyyy-MM-dd")" />
+                        <input type="hidden" name="toDate" value="@returnToDate?.ToString("yyyy-MM-dd")" />
+                        <input type="hidden" name="sortBy" value="@returnSortBy" />
+                        <input type="hidden" name="sortOrder" value="@returnSortOrder" />
+                        <input type="hidden" name="page" value="@returnPage" />
+                        <input type="hidden" name="pageSize" value="@returnPageSize" />
+                        <label for="lowStockThresholdInput" class="mb-0">Low-Stock Threshold</label>
+                        <input id="lowStockThresholdInput"
+                               name="lowStockThreshold"
+                               type="number"
+                               min="0"
+                               class="form-control form-control-sm"
+                               value="@Model.LowStockThreshold" />
+                        <button type="submit" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-save"></i> Save Threshold
+                        </button>
+                    </form>
+
+                    <div class="details-footer-actions">
+                        <a asp-action="Index"
+                           asp-route-searchTerm="@returnSearchTerm"
+                           asp-route-expirationFilter="@returnExpirationFilter"
+                           asp-route-fromDate="@returnFromDate?.ToString("yyyy-MM-dd")"
+                           asp-route-toDate="@returnToDate?.ToString("yyyy-MM-dd")"
+                           asp-route-sortBy="@returnSortBy"
+                           asp-route-sortOrder="@returnSortOrder"
+                           asp-route-page="@returnPage"
+                           asp-route-pageSize="@returnPageSize"
+                           class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </a>
+                        <a asp-action="QrCode" asp-route-id="@Model.Id" class="btn btn-info btn-sm">
+                            <i class="fas fa-qrcode"></i> QR Code
+                        </a>
+                        <button type="button" class="btn btn-warning btn-sm"
+                                onclick="openAdjustQuantityModal(@Model.Id, '@Model.Name', @Model.Quantity)">
+                            <i class="fas fa-edit"></i> Adjust Quantity
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -285,3 +337,31 @@
         });
     </script>
 }
+
+<style>
+    .details-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .threshold-edit-form {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+    }
+
+    .threshold-edit-form .form-control {
+        width: 110px;
+    }
+
+    .details-footer-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+</style>

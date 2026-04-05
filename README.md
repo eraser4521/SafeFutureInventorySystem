@@ -112,7 +112,7 @@ The delivered application provides the core technical foundation for these needs
 | Search and view product information | Implemented | Search, filters, sorting, and details pages are available. |
 | Simple login protection | Implemented | ASP.NET Identity with role-based access and login flow is active. |
 | Upload inventory information | Planned | Upload/import workflow is a recommended next enhancement. |
-| Low-stock alerts and monitoring | Planned | Expiration monitoring exists; low-stock alert thresholds can be added next. |
+| Low-stock alerts and monitoring | Implemented | Per-item low-stock thresholds, detail-page editing, low/no-stock indicators, summary cards, export visibility, and low/no-stock filtering are available. |
 | Reports and summaries | Implemented (core) | PDF and CSV reporting available; richer dashboards can be added. |
 
 ## Current Solution Highlights [Business + Technical]
@@ -121,9 +121,11 @@ The delivered application provides the core technical foundation for these needs
 - Inventory management with duplicate-merge logic for cleaner stock records.
 - Donation and adjustment logs for operational traceability.
 - Expiration-state awareness for proactive stock management.
+- Low-stock threshold tracking with detail-page editing, alert visibility, and stock summary cards.
 - QR code generation for direct scan-to-item workflows.
 - Batch printable QR labels for selected inventory items.
 - PDF, CSV, and Excel export for reporting.
+- Inventory list state is preserved when navigating to item details and back.
 - Centralized error handling and logging support.
 
 ## Branding and Logo Assets [Business + Technical]
@@ -254,8 +256,9 @@ Change this password immediately in staging/production environments.
 ### Inventory Search and Review
 
 - Search by name, description, barcode
-- Filter by expiration condition and date window
+- Filter by expiration condition, low-stock status, no-stock status, and date window
 - Sort and paginate for high-volume inventories
+- Preserve current page, filters, and sorting when navigating into item details and back
 
 ### Item Intake and Merge Logic
 
@@ -272,9 +275,8 @@ When staff adds an item:
 
 ### Exports
 
-- PDF inventory report endpoint
-- CSV inventory export endpoint
-- Excel inventory export endpoint
+- Navbar export dropdown for full inventory PDF, CSV, and Excel exports
+- Selected-item PDF export from the inventory list
 
 ## QR and Scan Flow [Business + Technical]
 
@@ -378,13 +380,12 @@ Suggested location for these assets:
 ## Known Gaps Against Full Proposal Scope [Business + Technical]
 
 - Inventory upload/import is not implemented yet.
-- Low-stock threshold alerting is not implemented yet.
 - Rich operational dashboards and KPI summaries can be expanded further.
 
 ## Recommended Next Phase [Business + Technical]
 
 1. Add CSV/Excel inventory import with validation and dry-run preview.
-2. Add low-stock thresholds, alert notifications, and dashboard widgets.
+2. Add notifications and broader dashboard widgets on top of the implemented low-stock system.
 3. Add production security hardening and comprehensive automated tests.
 4. Add role-specific reporting views for board and grant reporting support.
 
