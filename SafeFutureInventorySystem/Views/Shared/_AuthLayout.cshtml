@@ -58,6 +58,12 @@
             padding: 40px;
         }
 
+        @@media (max-width: 900px) {
+            .auth-main {
+                padding: clamp(12px, 2.5vw, 16px);
+            }
+        }
+
         @@media (max-width: 768px) {
             .auth-header {
                 top: 18px;
@@ -69,8 +75,14 @@
             }
 
             .auth-main {
-                padding: 18px;
-                padding-top: 88px;
+                padding: clamp(8px, 2.2vw, 12px);
+                min-height: 100dvh;
+            }
+        }
+
+        @@media (max-width: 768px) and (max-height: 700px) {
+            .auth-main {
+                align-items: flex-start;
             }
         }
     </style>

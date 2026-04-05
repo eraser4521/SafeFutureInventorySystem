@@ -154,6 +154,30 @@ h5 {
     align-items: center;
 }
 
+.nav-export-dropdown .dropdown-menu {
+    min-width: 200px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+    padding: 0.35rem;
+    z-index: 1080;
+}
+
+.nav-export-dropdown .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 0.55rem 0.7rem;
+}
+
+.nav-export-dropdown .dropdown-item:hover,
+.nav-export-dropdown .dropdown-item:focus {
+    background: var(--sf-primary-light);
+    color: var(--sf-text-primary);
+}
+
 .btn-header {
     padding: 0.45rem 1rem;
     font-size: 0.85rem;
@@ -188,6 +212,12 @@ h5 {
 .main-content {
     padding: 2rem 2.25rem;
     min-height: calc(100vh - 130px);
+}
+
+.app-shell {
+    width: 100%;
+    max-width: 1480px;
+    margin: 0 auto;
 }
 
 .container-fluid {
@@ -246,7 +276,8 @@ h5 {
 
     .card .table-responsive {
         border-radius: 0;
-        overflow: hidden;
+        overflow-x: auto;
+        overflow-y: hidden;
         /* Remove any mask-image from previous changes if present */
         -webkit-mask-image: none;
         mask-image: none;
@@ -1031,6 +1062,49 @@ hr.my-4 {
     .main-content, .container-fluid {
         padding: 1.25rem;
     }
+
+    .action-btn-row {
+        gap: 0.5rem;
+    }
+
+    .action-btn-row .btn {
+        flex: 0 0 auto;
+    }
+
+    #inventoryTable {
+        min-width: 1020px;
+    }
+}
+
+@media (max-width: 1100px) {
+    .inventory-table-card .table {
+        font-size: 0.84rem !important;
+    }
+
+    .inventory-table-card .table thead th,
+    .inventory-table-card .table tbody td {
+        padding: 0.55rem 0.45rem;
+    }
+
+    .inventory-status-badge {
+        font-size: 0.68rem;
+        padding: 0.3em 0.5em;
+    }
+
+    .inventory-row-action {
+        min-width: 2.2rem;
+        padding: 0.3rem 0.45rem !important;
+        gap: 0;
+    }
+
+    .inventory-row-action .action-label {
+        display: none;
+    }
+
+    .inventory-row-action i {
+        margin: 0;
+        font-size: 0.82rem;
+    }
 }
 
 @media (max-width: 768px) {
@@ -1164,18 +1238,156 @@ hr.my-4 {
         height: 38px;
     }
 
-    .filter-bar-card .btn {
-        height: 38px;
-        padding: 0 1rem;
+.filter-bar-card .btn {
+    height: 38px;
+    padding: 0 1rem;
+}
+
+@media (max-width: 960px) {
+    .filter-bar-card .filter-row {
+        align-items: stretch;
     }
 
+    .filter-bar-card .filter-row .filter-item {
+        flex: 1 1 calc(50% - 0.6rem);
+        min-width: 220px;
+    }
+
+    .filter-bar-card .filter-row .filter-item-sm,
+    .filter-bar-card .filter-row .filter-item-xs,
+    .filter-bar-card .filter-row .filter-btn {
+        flex: 1 1 calc(25% - 0.6rem);
+        min-width: 130px;
+    }
+
+    .filter-bar-card .filter-row .filter-btn .btn {
+        width: 100%;
+    }
+}
+
 /* ── Action Button Row ───────────────────────────────────── */
+.inventory-action-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    margin-bottom: 1.25rem;
+    position: relative;
+    z-index: 5;
+    overflow: visible;
+}
+
+.action-group-card {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 0.7rem 0.85rem 0.85rem;
+    backdrop-filter: blur(4px);
+    overflow: visible;
+    position: relative;
+    z-index: 1;
+}
+
+.action-group-card:has(.dropdown-menu.show) {
+    z-index: 20;
+}
+
+.action-group-heading {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.55rem;
+}
+
+.export-dropdown .dropdown-menu {
+    min-width: 220px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+    padding: 0.35rem;
+    z-index: 1080;
+}
+
+.export-dropdown .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 0.55rem 0.7rem;
+}
+
+.export-dropdown .dropdown-item:hover,
+.export-dropdown .dropdown-item:focus {
+    background: var(--sf-primary-light);
+    color: var(--sf-text-primary);
+}
+
+.export-dropdown button.dropdown-item {
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+}
+
 .action-btn-row {
     display: flex;
     flex-wrap: wrap;
     gap: 0.6rem;
-    margin-bottom: 1.25rem;
     align-items: center;
+}
+
+.inventory-actions-row {
+    margin-bottom: 1.25rem;
+}
+
+.inventory-table-card {
+    overflow: hidden !important;
+}
+
+.inventory-table-card > *:first-child,
+.inventory-table-card > *:last-child {
+    overflow: visible;
+}
+
+.inventory-table-card .card-body {
+    padding: 0 !important;
+    overflow: visible !important;
+}
+
+.inventory-table-card .table-responsive {
+    display: block;
+    width: 100%;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable both-edges;
+}
+
+.inventory-actions-cell {
+    white-space: nowrap;
+}
+
+.inventory-name-link {
+    color: var(--sf-text-primary);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.inventory-name-link:hover,
+.inventory-name-link:focus {
+    color: var(--sf-primary-dark);
+    text-decoration: underline;
+}
+
+.inventory-row-action {
+    justify-content: center;
+}
+
+.inventory-row-action .action-label {
+    display: inline;
 }
 
 /* ── Details Page Enhancements ───────────────────────────── */
@@ -1202,13 +1414,25 @@ hr.my-4 {
 @media (max-width: 768px) {
     .filter-bar-card .filter-row {
         flex-direction: column;
+        align-items: stretch;
     }
 
         .filter-bar-card .filter-row .filter-item,
         .filter-bar-card .filter-row .filter-item-sm,
-        .filter-bar-card .filter-row .filter-item-xs {
+        .filter-bar-card .filter-row .filter-item-xs,
+        .filter-bar-card .filter-row .filter-btn {
             flex: 1 1 100%;
+            min-width: 0;
+            width: 100%;
         }
+
+    .filter-bar-card {
+        padding: 1rem;
+    }
+
+    .filter-bar-card .filter-row .filter-btn .btn {
+        width: 100%;
+    }
 
     .page-title-bar h2, .details-page-title h2 {
         font-size: 1.4rem;

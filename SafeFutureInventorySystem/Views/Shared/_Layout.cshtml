@@ -23,12 +23,12 @@
 <body data-no-taghelper="true">
 
 <header class="page-header">
-    <div class="logo-container">
+    <a href="@Url.Action("Index", "Inventory")" class="logo-container">
         <img src="~/images/safe-future-logo.png"
              alt="Safe Future Foundation"
              class="logo-image" />
         <div class="logo-text"></div>
-    </div>
+    </a>
 
     <div class="header-actions">
 
@@ -37,17 +37,22 @@
             <i class="fas fa-home"></i> Inventory Page
         </a>
 
-        <a href="@Url.Action("ExportFullInventoryPdf", "Inventory")"
-            class="btn btn-primary btn-header">
-                <i class="fas fa-file-pdf"></i> Create PDF
-        </a>
-            
-        
-
-        <button type="button"
-                class="btn btn-primary btn-header">
-            <i class="fas fa-user"></i> Account
-        </button>
+        <div class="dropdown nav-export-dropdown">
+            <button class="btn btn-success btn-header dropdown-toggle" type="button" id="navExportDropdownBtn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-file-export"></i> Export
+            </button>
+            <div class="dropdown-menu" aria-labelledby="navExportDropdownBtn">
+                <a href="@Url.Action("ExportFullInventoryPdf", "Inventory")" class="dropdown-item">
+                    <i class="fas fa-file-pdf text-danger"></i> Export PDF
+                </a>
+                <a href="@Url.Action("ExportInventoryCsv", "Inventory")" class="dropdown-item">
+                    <i class="fas fa-file-csv text-info"></i> Export CSV
+                </a>
+                <a href="@Url.Action("ExportInventoryExcel", "Inventory")" class="dropdown-item">
+                    <i class="fas fa-file-excel text-success"></i> Export Excel
+                </a>
+            </div>
+        </div>
 
         @if (User != null && User.IsInRole("Admin"))
         {
@@ -66,7 +71,7 @@
     </div>
 </header>
 
-<div class="container">
+<div class="container-fluid app-shell">
     <main role="main" class="pb-3">
         @RenderBody()
     </main>
