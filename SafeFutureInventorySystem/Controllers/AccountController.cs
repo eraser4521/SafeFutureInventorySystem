@@ -23,7 +23,7 @@ namespace SafeFutureInventorySystem.Controllers
         public IActionResult Login(string? returnUrl = null)
         {
             if (User.Identity != null && User.Identity.IsAuthenticated)
-                return RedirectToAction("Index", "Inventory");
+                return RedirectToAction("Index", "Home");
 
             ViewBag.ReturnUrl = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
             return View("Login");
@@ -77,7 +77,7 @@ namespace SafeFutureInventorySystem.Controllers
             if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
                 return Redirect(returnUrl);
 
-            return RedirectToAction("Index", "Inventory");
+            return RedirectToAction("Index", "Home");
         }
 
         [Authorize]
@@ -89,7 +89,7 @@ namespace SafeFutureInventorySystem.Controllers
                 return RedirectToAction(nameof(Login));
 
             if (!user.MustChangePassword)
-                return RedirectToAction("Index", "Inventory");
+                return RedirectToAction("Index", "Home");
 
             ViewBag.Email = user.Email ?? "";
             return View("ForceChangePassword");
@@ -146,7 +146,7 @@ namespace SafeFutureInventorySystem.Controllers
             await _userManager.UpdateAsync(user);
             await _signInManager.RefreshSignInAsync(user);
 
-            return RedirectToAction("Index", "Inventory");
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpGet, AllowAnonymous]
