@@ -31,7 +31,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
-    options.LogoutPath = "/Account/LogoutLink";
+    options.LogoutPath = "/Account/Logout";
     options.AccessDeniedPath = "/Account/Login";
     options.ExpireTimeSpan = TimeSpan.FromHours(8);
     options.SlidingExpiration = true;
@@ -112,8 +112,7 @@ app.Use(async (context, next) =>
 
         var allowed =
             path.StartsWith("/Account/ForceChangePassword", StringComparison.OrdinalIgnoreCase) ||
-            path.StartsWith("/Account/Logout", StringComparison.OrdinalIgnoreCase) ||
-            path.StartsWith("/Account/LogoutLink", StringComparison.OrdinalIgnoreCase);
+            path.StartsWith("/Account/Logout", StringComparison.OrdinalIgnoreCase);
 
         if (!allowed)
         {

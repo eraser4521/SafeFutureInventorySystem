@@ -108,7 +108,7 @@ namespace SafeFutureInventorySystem.Controllers
                 return RedirectToAction(nameof(Login));
 
             if (!user.MustChangePassword)
-                return RedirectToAction("Index", "Inventory");
+                return RedirectToAction("Index", "Home");
 
             ViewBag.Email = user.Email ?? "";
 
@@ -161,14 +161,6 @@ namespace SafeFutureInventorySystem.Controllers
         public IActionResult Register(string firstName, string lastName, string email, string password, string confirmPassword)
         {
             TempData["Error"] = "Self registration is disabled. Please contact an admin.";
-            return RedirectToAction(nameof(Login));
-        }
-
-        [Authorize]
-        [HttpGet]
-        public async Task<IActionResult> LogoutLink()
-        {
-            await _signInManager.SignOutAsync();
             return RedirectToAction(nameof(Login));
         }
 

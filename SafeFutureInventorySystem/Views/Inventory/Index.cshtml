@@ -205,9 +205,12 @@
 
         <div class="inventory-action-group">
             <span class="inventory-action-group-label">Selected Items</span>
-            <button type="button" class="btn btn-danger" id="removeSelectedBtn" disabled>
-                <i class="fas fa-trash"></i> Remove Selected (<span id="selectedCount">0</span>)
-            </button>
+            @if (User.IsInRole("Admin"))
+            {
+                <button type="button" class="btn btn-danger" id="removeSelectedBtn" disabled>
+                    <i class="fas fa-trash"></i> Remove Selected (<span id="selectedCount">0</span>)
+                </button>
+            }
 
             <button type="button" class="btn btn-secondary" id="printQrLabelsBtn" disabled>
                 <i class="fas fa-qrcode"></i> Print Selected QR Labels (<span id="qrSelectedCount">0</span>)
@@ -614,6 +617,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
 
     <script>
+        const inventoryRequestVerificationToken = document.querySelector('meta[name="request-verification-token"]')?.getAttribute('content');
+
         $(document).ready(function() {
             // Select All checkbox functionality
             $('#selectAll').change(function() {
@@ -671,6 +676,7 @@
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(selectedIds),
+                    headers: { 'RequestVerificationToken': inventoryRequestVerificationToken },
                     success: function(response) {
                         if (response.success) {
                             alert(response.message);
@@ -704,6 +710,7 @@
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(selectedIds),
+                headers: { 'RequestVerificationToken': inventoryRequestVerificationToken },
                 xhrFields: { responseType: 'blob' },
                 success: function (data) {
                     var url = window.URL.createObjectURL(data);
@@ -799,6 +806,7 @@
                     newQuantity: newQuantity,
                     reason: reason
                 },
+                headers: { 'RequestVerificationToken': inventoryRequestVerificationToken },
                 success: function(response) {
                     if (response.success) {
                         alert(response.message);

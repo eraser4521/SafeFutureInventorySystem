@@ -308,6 +308,8 @@
 
 @section Scripts {
     <script>
+        const detailsRequestVerificationToken = document.querySelector('meta[name="request-verification-token"]')?.getAttribute('content');
+
         function openAdjustQuantityModal(id, name, currentQuantity) {
             $('#adjustItemId').val(id);
             $('#adjustItemName').val(name);
@@ -326,6 +328,7 @@
                 url: '@Url.Action("AdjustQuantity", "Inventory")',
                 type: 'POST',
                 data: { id: id, newQuantity: newQuantity, reason: reason },
+                headers: { 'RequestVerificationToken': detailsRequestVerificationToken },
                 success: function(r) {
                     if (r.success) { alert(r.message); $('#adjustQuantityModal').modal('hide'); location.reload(); }
                     else { alert('Error: ' + r.message); }

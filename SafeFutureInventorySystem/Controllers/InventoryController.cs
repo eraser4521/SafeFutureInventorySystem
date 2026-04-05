@@ -544,6 +544,7 @@ namespace SafeFutureInventorySystem.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult AdjustQuantity(int id, int newQuantity, string reason)
         {
             try
@@ -592,6 +593,7 @@ namespace SafeFutureInventorySystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public IActionResult UpdateLowStockThreshold(int id, int lowStockThreshold, string searchTerm, string expirationFilter,
             DateTime? fromDate, DateTime? toDate, string sortBy = "Name",
             string sortOrder = "asc", int page = 1, int pageSize = 10)
@@ -626,6 +628,8 @@ namespace SafeFutureInventorySystem.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public JsonResult RemoveItems([FromBody] int[] itemIds)
         {
             try
@@ -658,6 +662,7 @@ namespace SafeFutureInventorySystem.Controllers
 
         // ── FULL INVENTORY EXPORT (Header "Create PDF" button) ──────────────────────
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         [Route("Inventory/ExportFullPdf")]
         public IActionResult ExportFullInventoryPdf()
         {
@@ -826,6 +831,7 @@ namespace SafeFutureInventorySystem.Controllers
 
         // ── SELECTED ITEMS EXPORT (Table "Export to PDF" button) ────────────────────
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Route("Inventory/ExportSelectedPdf")]
         public IActionResult ExportSelectedItemsPdf([FromBody] int[] selectedIds)
         {
@@ -991,6 +997,7 @@ namespace SafeFutureInventorySystem.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         [Route("ExportCsv")]
         public IActionResult ExportInventoryCsv()
         {
@@ -1044,6 +1051,7 @@ namespace SafeFutureInventorySystem.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         [Route("ExportExcel")]
         public IActionResult ExportInventoryExcel()
         {
