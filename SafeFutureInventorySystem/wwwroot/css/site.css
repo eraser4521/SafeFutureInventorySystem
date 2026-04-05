@@ -1928,7 +1928,12 @@ hr.my-4 {
     overflow-x: auto !important;
     overflow-y: hidden !important;
     -webkit-overflow-scrolling: touch;
-    scrollbar-gutter: stable both-edges;
+    scrollbar-gutter: auto;
+}
+
+.inventory-table-card .table {
+    width: 100%;
+    margin-bottom: 0;
 }
 
 .inventory-actions-cell {
@@ -2023,6 +2028,10 @@ hr.my-4 {
 
     .inventory-action-group .btn {
         justify-content: center;
+    }
+
+    .inventory-action-group .btn {
+        width: 100%;
     }
 
     .filter-bar-card .filter-row {
