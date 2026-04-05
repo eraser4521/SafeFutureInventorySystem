@@ -56,6 +56,14 @@
             <div class="dashboard-summary-label">Expiring Soon</div>
         </div>
     </a>
+
+    <a asp-controller="Inventory" asp-action="Index" asp-route-expirationFilter="Expired" class="dashboard-summary-card dashboard-summary-expired">
+        <div class="dashboard-summary-icon"><i class="fas fa-calendar-times"></i></div>
+        <div>
+            <div class="dashboard-summary-value">@Model.ExpiredCount</div>
+            <div class="dashboard-summary-label">Expired</div>
+        </div>
+    </a>
 </div>
 
 <div class="row">
@@ -135,26 +143,28 @@
                         @foreach (var activity in Model.RecentActivity)
                         {
                             <li class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <div class="font-weight-bold">@activity.ItemName</div>
-                                        <div class="mb-1">
-                                            @if (activity.ActivityType == "Donation")
-                                            {
-                                                <span class="badge badge-success">@activity.ActivityType</span>
-                                            }
-                                            else if (activity.ActivityType == "Metadata Update")
-                                            {
-                                                <span class="badge badge-info text-white">@activity.ActivityType</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge badge-primary">@activity.ActivityType</span>
-                                            }
+                                <div class="d-flex justify-content-between align-items-start dashboard-activity-row">
+                                    <div class="dashboard-activity-main">
+                                        <div class="dashboard-activity-topline">
+                                            <span class="dashboard-activity-icon">
+                                                <i class="fas @activity.ActivityIcon"></i>
+                                            </span>
+                                            <div>
+                                                <div class="font-weight-bold">@activity.ItemName</div>
+                                                <div class="dashboard-activity-badges">
+                                                    <span class="badge @activity.ActivityBadgeClass">@activity.ActivityType</span>
+                                                    @if (!string.IsNullOrWhiteSpace(activity.ActivityMeta))
+                                                    {
+                                                        <span class="dashboard-activity-meta">@activity.ActivityMeta</span>
+                                                    }
+                                                </div>
+                                            </div>
                                         </div>
-                                        <small class="text-muted d-block">@activity.Summary</small>
-                                        <small class="text-muted">
-                                            @activity.PerformedBy on @activity.ActivityDate.ToString("MMM dd, yyyy h:mm tt")
+                                        <small class="text-muted d-block dashboard-activity-summary">@activity.Summary</small>
+                                        <small class="text-muted dashboard-activity-byline">
+                                            by @activity.PerformedBy
+                                            <span class="dashboard-activity-separator">•</span>
+                                            @activity.ActivityDate.ToString("MMM dd, yyyy 'at' h:mm tt")
                                         </small>
                                     </div>
                                     <a asp-controller="Inventory" asp-action="Details" asp-route-id="@activity.InventoryItemId" class="btn btn-sm btn-outline-primary">

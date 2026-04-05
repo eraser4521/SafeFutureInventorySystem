@@ -491,6 +491,10 @@ h5 {
     background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
 }
 
+.dashboard-summary-expired {
+    background: linear-gradient(135deg, #8e44ad 0%, #6c3483 100%);
+}
+
 .dashboard-summary-expiring {
     background: linear-gradient(135deg, #5b7cfa 0%, #3f5de2 100%);
 }
@@ -531,6 +535,29 @@ h5 {
     color: inherit;
 }
 
+.dashboard-panel {
+    border-radius: 18px !important;
+    overflow: hidden;
+}
+
+.dashboard-panel .card-header:first-child {
+    border-top-left-radius: 18px !important;
+    border-top-right-radius: 18px !important;
+}
+
+.dashboard-panel .card-body {
+    overflow: hidden;
+    border-bottom-left-radius: 18px !important;
+    border-bottom-right-radius: 18px !important;
+}
+
+.dashboard-panel .table-responsive,
+.dashboard-panel .dashboard-recent-list {
+    overflow: hidden;
+    border-bottom-left-radius: 18px !important;
+    border-bottom-right-radius: 18px !important;
+}
+
 .dashboard-table th,
 .dashboard-table td {
     vertical-align: middle;
@@ -538,6 +565,73 @@ h5 {
 
 .dashboard-recent-list .list-group-item {
     background: transparent;
+}
+
+.dashboard-recent-list .list-group-item:first-child {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.dashboard-recent-list .list-group-item:last-child {
+    border-bottom-left-radius: 18px !important;
+    border-bottom-right-radius: 18px !important;
+}
+
+.dashboard-activity-row {
+    gap: 0.9rem;
+}
+
+.dashboard-activity-main {
+    min-width: 0;
+}
+
+.dashboard-activity-topline {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.25rem;
+}
+
+.dashboard-activity-icon {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgba(65, 129, 214, 0.12);
+    color: var(--sf-primary);
+    flex: 0 0 auto;
+}
+
+.dashboard-activity-badges {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+    margin-top: 0.2rem;
+}
+
+.dashboard-activity-meta {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--sf-text-secondary);
+    letter-spacing: 0.02em;
+}
+
+.dashboard-activity-summary {
+    margin-bottom: 0.18rem;
+}
+
+.dashboard-activity-byline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+}
+
+.dashboard-activity-separator {
+    opacity: 0.5;
 }
 
 .admin-hero-card,

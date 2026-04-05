@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SafeFutureInventorySystem.Data;
 using SafeFutureInventorySystem.Models;
-using System.Globalization;
-
 namespace SafeFutureInventorySystem.Controllers
 {
     [Authorize]  
@@ -42,8 +40,11 @@ namespace SafeFutureInventorySystem.Controllers
                         ItemName = item.Name,
                         ActivityDate = log.AdjustmentDate,
                         ActivityType = log.OldQuantity == log.NewQuantity ? "Metadata Update" : "Quantity Update",
-                        Summary = log.Reason ?? "Inventory updated",
-                        PerformedBy = string.IsNullOrWhiteSpace(log.AdjustedBy) ? "System" : log.AdjustedBy
+                        Summary = BuildAdjustmentSummary(log),
+                        PerformedBy = string.IsNullOrWhiteSpace(log.AdjustedBy) ? "System" : log.AdjustedBy,
+                        ActivityIcon = log.OldQuantity == log.NewQuantity ? "fa-pen" : "fa-exchange-alt",
+                        ActivityBadgeClass = log.OldQuantity == log.NewQuantity ? "badge-info text-white" : "badge-primary",
+                        ActivityMeta = BuildAdjustmentMeta(log)
                     });
 
                     var donationEvents = item.DonationLogs.Select(log => new HomeDashboardActivityItem
@@ -53,7 +54,10 @@ namespace SafeFutureInventorySystem.Controllers
                         ActivityDate = log.DonationDate,
                         ActivityType = "Donation",
                         Summary = BuildDonationSummary(log),
-                        PerformedBy = string.IsNullOrWhiteSpace(log.DonorName) ? "Unknown donor" : log.DonorName
+                        PerformedBy = string.IsNullOrWhiteSpace(log.DonorName) ? "Unknown donor" : log.DonorName,
+                        ActivityIcon = "fa-hand-holding-heart",
+                        ActivityBadgeClass = "badge-success",
+                        ActivityMeta = $"+{log.QuantityDonated} unit{(log.QuantityDonated == 1 ? "" : "s")}"
                     });
 
                     return adjustmentEvents.Concat(donationEvents);
@@ -67,6 +71,8 @@ namespace SafeFutureInventorySystem.Controllers
                 TotalItems = items.Count,
                 LowStockCount = items.Count(i => i.Quantity > 0 && i.IsLowStock),
                 NoStockCount = items.Count(i => i.Quantity <= 0),
+                ExpiredCount = items.Count(i => i.ExpirationDate.HasValue &&
+                    i.ExpirationDate.Value.Date < today),
                 ExpiringSoonCount = items.Count(i => i.ExpirationDate.HasValue &&
                     i.ExpirationDate.Value.Date >= today &&
                     i.ExpirationDate.Value.Date <= weekFromNow),
@@ -92,13 +98,36 @@ namespace SafeFutureInventorySystem.Controllers
 
         private static string BuildDonationSummary(DonationLog log)
         {
-            var summary = $"Donated {log.QuantityDonated} unit{(log.QuantityDonated == 1 ? "" : "s")}";
+            var summary = $"Donation received: {log.QuantityDonated} unit{(log.QuantityDonated == 1 ? "" : "s")}";
             if (!string.IsNullOrWhiteSpace(log.Notes))
             {
                 summary += $": {log.Notes}";
             }
 
             return summary;
+        }
+
+        private static string BuildAdjustmentSummary(InventoryAdjustmentLog log)
+        {
+            if (log.OldQuantity != log.NewQuantity)
+            {
+                return $"Quantity adjusted from {log.OldQuantity} to {log.NewQuantity}";
+            }
+
+            if (string.IsNullOrWhiteSpace(log.Reason))
+            {
+                return "Item details updated";
+            }
+
+            var reason = log.Reason.Replace("Item metadata updated:", "").Trim();
+            return string.IsNullOrWhiteSpace(reason) ? "Item details updated" : reason;
+        }
+
+        private static string BuildAdjustmentMeta(InventoryAdjustmentLog log)
+        {
+            return log.OldQuantity != log.NewQuantity
+                ? $"{log.OldQuantity} -> {log.NewQuantity}"
+                : "Fields updated";
         }
 
 

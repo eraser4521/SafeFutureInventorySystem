@@ -110,7 +110,7 @@ The delivered application provides the technical foundation for these needs and 
 | Generate QR code labels with human-readable context | Implemented | QR generation is implemented, resolves to item details pages, and supports batch printable QR label sheets for selected items. |
 | Add product info with QR linkage | Implemented | Item creation and persistence are in place with associated QR generation. |
 | Scan QR to open product page and act | Implemented | QR points to item details route where users can review and manage item data. |
-| Download all inventory data | Implemented (partial) | CSV, PDF, and Excel exports are available. Full DB dump endpoint not yet implemented. |
+| Download all inventory data | Implemented (partial) | Admin users can export full inventory data as CSV, PDF, and Excel. Selected-item PDF export remains available from the inventory workspace. |
 | Search and view product information | Implemented | Search, filters, sorting, and details pages are available. |
 | Simple login protection | Implemented | ASP.NET Identity with role-based access and login flow is active. |
 | Upload inventory information | Planned | Upload/import workflow is a recommended next enhancement. |
@@ -124,11 +124,11 @@ The delivered application provides the technical foundation for these needs and 
 - Donation and adjustment logs for operational traceability, including metadata edits.
 - Expiration-state awareness for proactive stock management.
 - Low-stock threshold tracking with admin-managed editing, alert visibility, and stock summary cards.
-- Home dashboard with operational summary cards and attention lists.
+- Home dashboard with operational summary cards, attention lists, expired and expiring item visibility, and recent activity feed.
 - Explicit navigation for Dashboard, Inventory, Export, and Admin workflows.
 - QR code generation for direct scan-to-item workflows.
 - Batch printable QR labels for selected inventory items.
-- PDF, CSV, and Excel export for reporting.
+- PDF, CSV, and Excel export for reporting, with full exports restricted to admins.
 - Inventory list state is preserved when navigating to item details and back.
 - Centralized error handling and logging support.
 
@@ -257,14 +257,29 @@ Important:
 
 Change this password immediately in staging/production environments.
 
+### Role Permissions Matrix
+
+| Capability | Admin | Volunteer |
+|---|---|---|
+| View dashboard and inventory | Yes | Yes |
+| Search, filter, sort, and review item details | Yes | Yes |
+| Adjust quantity | Yes | Yes |
+| Create or merge inventory items | Yes | Yes |
+| Print QR labels and selected-item PDF export | Yes | Yes |
+| Edit item metadata | Yes | No |
+| Remove inventory items | Yes | No |
+| Full inventory export from navbar | Yes | No |
+| Access admin user management | Yes | No |
+
 ## Operational Workflows [Business + Technical]
 
 ### Dashboard and Navigation
 
 - Home now serves as the operational dashboard landing page.
-- Dashboard cards provide quick counts for total items, low stock, no stock, and expiring soon inventory.
+- Dashboard cards provide quick counts for total items, low stock, no stock, expiring soon, and expired inventory.
 - Summary cards and action buttons link directly into the detailed inventory workspace.
 - The top navigation now separates Dashboard, Inventory, Export, and Admin tasks more clearly.
+- The recent activity feed summarizes donations, quantity changes, and metadata updates with user context and timestamps.
 
 ### Inventory Search and Review
 
@@ -291,13 +306,13 @@ The current operational workflow relies on item-name merge logic. A legacy barco
 ### Item Details and Editing
 
 - Item details pages show current status, threshold, donation history, and recent adjustments.
-- Admins can open a dedicated edit page to update item metadata such as name, description, category, expiration date, and low-stock threshold.
+- Admins can open a dedicated edit page to update item metadata such as name, description, category, quantity, expiration date, and low-stock threshold.
 - Volunteers can review item details but cannot access the item metadata edit flow.
 
 ### Exports
 
-- Navbar export dropdown for full inventory PDF, CSV, and Excel exports
-- Selected-item PDF export from the inventory list
+- Admin-only navbar export dropdown for full inventory PDF, CSV, and Excel exports
+- Selected-item PDF export from the inventory list for authenticated users
 
 ## QR and Scan Flow [Business + Technical]
 
@@ -337,7 +352,7 @@ Status key: Complete, In Progress, Planned
 - Export for reporting (CSV/PDF/Excel): Complete
 - Password policy hardening for production: Planned
 - Migration-based deployment strategy: Planned
-- Full endpoint authorization audit: In Progress
+- Full endpoint authorization audit: Complete
 - Backup/restore runbook: Planned
 - Monitoring and alerting strategy: Planned
 
