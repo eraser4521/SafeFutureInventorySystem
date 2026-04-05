@@ -208,6 +208,12 @@ namespace SafeFutureInventorySystem.Controllers
             ModelState.Remove("DonationLogs");
             ModelState.Remove("AdjustmentLogs");
 
+            var isAdmin = User.IsInRole("Admin");
+            if (!isAdmin)
+            {
+                item.LowStockThreshold = 0;
+            }
+
             if (!ModelState.IsValid)
                 return View(item);
 
@@ -235,10 +241,6 @@ namespace SafeFutureInventorySystem.Controllers
                     // MERGE into existing item
                     int oldQty = existing.Quantity;
                     existing.Quantity += item.Quantity;
-                    if (item.LowStockThreshold > 0)
-                    {
-                        existing.LowStockThreshold = item.LowStockThreshold;
-                    }
                     existing.LastUpdated = DateTime.Now;
 
                     _context.DonationLogs.Add(new DonationLog
