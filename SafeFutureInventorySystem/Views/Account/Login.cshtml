@@ -26,6 +26,8 @@
                 }
 
                 <form method="post" asp-action="Login" asp-controller="Account">
+                    <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
                     <div class="field">
                         <label>Email Address</label>
                         <input name="email" type="email" placeholder="Email" required />
