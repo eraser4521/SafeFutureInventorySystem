@@ -231,9 +231,10 @@ Example:
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Data Source=SafeFutureInventory.db",
-    "AuthConnection": "Data Source=SafeFutureAuth.db"
+    "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=SafeFutureDB;Trusted_Connection=True;MultipleActiveResultSets=true",
+    "AuthConnection": "Server=(localdb)\\mssqllocaldb;Database=SafeFutureAuthDB;Trusted_Connection=True;MultipleActiveResultSets=true"
   },
+
   "QrCodeBaseUrl": ""
 }
 ```
