@@ -1,4 +1,4 @@
-# Safe Future Barcode for Good
+# Safe Future Inventory System
 
 ![Safe Future Foundation Logo](SafeFutureInventorySystem/wwwroot/images/safe-future-logo.png)
 
