@@ -1,7 +1,10 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\SafeFutureInventorySystem",
+    "\\SafeFutureInventorySystem\\Views",
+    "\\SafeFutureInventorySystem\\Views\\Inventory"
   ],
-  "SelectedNode": "\\C:\\Users\\PC\\Source\\Repos\\SafeFutureInventorySystemFinal",
+  "SelectedNode": "\\SafeFutureInventorySystem\\Views\\Inventory\\Create.cshtml",
   "PreviewInSolutionExplorer": false
 }
