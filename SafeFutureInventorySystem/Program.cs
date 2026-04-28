@@ -8,10 +8,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddDbContext<AuthDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("AuthConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("AuthConnection")));
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
@@ -44,13 +44,13 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var inventoryDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    inventoryDb.Database.EnsureCreated();
-    await EnsureInventoryItemsColumnsAsync(inventoryDb);
+    inventoryDb.Database.Migrate();
+    //await EnsureInventoryItemsColumnsAsync(inventoryDb);
 
     var authDb = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
-    authDb.Database.EnsureCreated();
+    authDb.Database.Migrate();
 
-    await EnsureAspNetUsersColumnsAsync(authDb);
+    //await EnsureAspNetUsersColumnsAsync(authDb);
 
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
@@ -170,7 +170,7 @@ static async Task EnsureInventoryItemsColumnsAsync(ApplicationDbContext inventor
     }
 }
 
-static async Task EnsureAspNetUsersColumnsAsync(AuthDbContext authDb)
+/*static async Task EnsureAspNetUsersColumnsAsync(AuthDbContext authDb)
 {
     var connection = authDb.Database.GetDbConnection();
     await connection.OpenAsync();
@@ -213,3 +213,4 @@ static async Task EnsureAspNetUsersColumnsAsync(AuthDbContext authDb)
         await connection.CloseAsync();
     }
 }
+*/

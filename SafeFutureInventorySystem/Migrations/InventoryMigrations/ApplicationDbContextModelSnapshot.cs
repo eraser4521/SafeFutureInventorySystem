@@ -2,12 +2,13 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SafeFutureInventorySystem.Data;
 
 #nullable disable
 
-namespace SafeFutureInventorySystem.Migrations
+namespace SafeFutureInventorySystem.Migrations.InventoryMigrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -15,30 +16,36 @@ namespace SafeFutureInventorySystem.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.10");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "9.0.10")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("SafeFutureInventorySystem.Models.DonationLog", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("DonationDate")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("DonorName")
                         .HasMaxLength(200)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("InventoryItemId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(500)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("QuantityDonated")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -50,7 +57,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 1,
-                            DonationDate = new DateTime(2025, 12, 1, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(1290),
+                            DonationDate = new DateTime(2025, 12, 29, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(8997),
                             DonorName = "Sarah Johnson",
                             InventoryItemId = 1,
                             Notes = "Initial donation — item created.",
@@ -59,7 +66,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 2,
-                            DonationDate = new DateTime(2025, 12, 31, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(1930),
+                            DonationDate = new DateTime(2026, 1, 28, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9309),
                             DonorName = "Michael Chen",
                             InventoryItemId = 2,
                             Notes = "Initial donation — item created.",
@@ -68,7 +75,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 3,
-                            DonationDate = new DateTime(2025, 11, 1, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(1940),
+                            DonationDate = new DateTime(2025, 11, 29, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9313),
                             DonorName = "Jennifer Martinez",
                             InventoryItemId = 3,
                             Notes = "Initial donation — item created.",
@@ -77,7 +84,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 4,
-                            DonationDate = new DateTime(2026, 1, 30, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2050),
+                            DonationDate = new DateTime(2026, 2, 27, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9315),
                             DonorName = "Robert Williams",
                             InventoryItemId = 4,
                             Notes = "Initial donation — item created.",
@@ -86,7 +93,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 5,
-                            DonationDate = new DateTime(2026, 2, 19, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2060),
+                            DonationDate = new DateTime(2026, 3, 19, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9318),
                             DonorName = "Lisa Anderson",
                             InventoryItemId = 5,
                             Notes = "Initial donation — item created.",
@@ -95,7 +102,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 6,
-                            DonationDate = new DateTime(2026, 2, 9, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2060),
+                            DonationDate = new DateTime(2026, 3, 9, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9330),
                             DonorName = "Target Store #1234",
                             InventoryItemId = 6,
                             Notes = "Initial donation — item created.",
@@ -104,7 +111,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 7,
-                            DonationDate = new DateTime(2026, 2, 24, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2070),
+                            DonationDate = new DateTime(2026, 3, 24, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9332),
                             DonorName = "David Thompson",
                             InventoryItemId = 7,
                             Notes = "Initial donation — item created.",
@@ -113,7 +120,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 8,
-                            DonationDate = new DateTime(2026, 3, 13, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2070),
+                            DonationDate = new DateTime(2026, 4, 10, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9334),
                             DonorName = "Emily Davis",
                             InventoryItemId = 8,
                             Notes = "Initial donation — item created.",
@@ -122,7 +129,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 9,
-                            DonationDate = new DateTime(2026, 2, 14, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2070),
+                            DonationDate = new DateTime(2026, 3, 14, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9339),
                             DonorName = "James Wilson",
                             InventoryItemId = 9,
                             Notes = "Initial donation — item created.",
@@ -131,7 +138,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 10,
-                            DonationDate = new DateTime(2026, 3, 1, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2080),
+                            DonationDate = new DateTime(2026, 3, 29, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9341),
                             DonorName = "Patricia Moore",
                             InventoryItemId = 10,
                             Notes = "Initial donation — item created.",
@@ -140,7 +147,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 11,
-                            DonationDate = new DateTime(2026, 3, 13, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2090),
+                            DonationDate = new DateTime(2026, 4, 10, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9343),
                             DonorName = "Walmart Store #5678",
                             InventoryItemId = 10,
                             Notes = "Merged into existing stock. Previous qty: 60",
@@ -149,7 +156,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 12,
-                            DonationDate = new DateTime(2026, 3, 24, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2090),
+                            DonationDate = new DateTime(2026, 4, 21, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9345),
                             DonorName = "St. Mary's Church",
                             InventoryItemId = 10,
                             Notes = "Merged into existing stock. Previous qty: 110",
@@ -158,7 +165,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 13,
-                            DonationDate = new DateTime(2026, 3, 6, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2100),
+                            DonationDate = new DateTime(2026, 4, 3, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9346),
                             DonorName = "Christopher Taylor",
                             InventoryItemId = 11,
                             Notes = "Initial donation — item created.",
@@ -167,7 +174,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 14,
-                            DonationDate = new DateTime(2026, 3, 17, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2100),
+                            DonationDate = new DateTime(2026, 4, 14, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9348),
                             DonorName = "Jessica Brown",
                             InventoryItemId = 11,
                             Notes = "Merged into existing stock. Previous qty: 80",
@@ -176,7 +183,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 15,
-                            DonationDate = new DateTime(2026, 3, 28, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2100),
+                            DonationDate = new DateTime(2026, 4, 25, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9350),
                             DonorName = "Community Health Center",
                             InventoryItemId = 11,
                             Notes = "Merged into existing stock. Previous qty: 150",
@@ -185,7 +192,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 16,
-                            DonationDate = new DateTime(2026, 3, 11, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2110),
+                            DonationDate = new DateTime(2026, 4, 8, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9352),
                             DonorName = "Daniel Garcia",
                             InventoryItemId = 12,
                             Notes = "Initial donation — item created.",
@@ -194,7 +201,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 17,
-                            DonationDate = new DateTime(2026, 3, 16, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2110),
+                            DonationDate = new DateTime(2026, 4, 13, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9353),
                             DonorName = "Matthew Rodriguez",
                             InventoryItemId = 13,
                             Notes = "Initial donation — item created.",
@@ -203,7 +210,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 18,
-                            DonationDate = new DateTime(2026, 3, 21, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2120),
+                            DonationDate = new DateTime(2026, 4, 18, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9355),
                             DonorName = "Ashley Lewis",
                             InventoryItemId = 14,
                             Notes = "Initial donation — item created.",
@@ -212,7 +219,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 19,
-                            DonationDate = new DateTime(2026, 3, 23, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2120),
+                            DonationDate = new DateTime(2026, 4, 20, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9357),
                             DonorName = "Hannah Campbell",
                             InventoryItemId = 15,
                             Notes = "Initial donation — item created.",
@@ -221,7 +228,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 20,
-                            DonationDate = new DateTime(2026, 3, 26, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2130),
+                            DonationDate = new DateTime(2026, 4, 23, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9358),
                             DonorName = "Nathan Parker",
                             InventoryItemId = 16,
                             Notes = "Initial donation — item created.",
@@ -230,7 +237,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 21,
-                            DonationDate = new DateTime(2026, 3, 3, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2140),
+                            DonationDate = new DateTime(2026, 3, 31, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9367),
                             DonorName = "Alexis Evans",
                             InventoryItemId = 17,
                             Notes = "Initial donation — item created.",
@@ -239,7 +246,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 22,
-                            DonationDate = new DateTime(2026, 3, 21, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2140),
+                            DonationDate = new DateTime(2026, 4, 18, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9368),
                             DonorName = "Samuel Edwards",
                             InventoryItemId = 17,
                             Notes = "Merged into existing stock. Previous qty: 100",
@@ -248,7 +255,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 23,
-                            DonationDate = new DateTime(2026, 3, 9, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2150),
+                            DonationDate = new DateTime(2026, 4, 6, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9370),
                             DonorName = "Joshua Walker",
                             InventoryItemId = 18,
                             Notes = "Initial donation — item created.",
@@ -257,7 +264,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 24,
-                            DonationDate = new DateTime(2026, 3, 19, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2150),
+                            DonationDate = new DateTime(2026, 4, 16, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9371),
                             DonorName = "Grace Collins",
                             InventoryItemId = 18,
                             Notes = "Merged into existing stock. Previous qty: 100",
@@ -266,7 +273,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 25,
-                            DonationDate = new DateTime(2026, 3, 27, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2150),
+                            DonationDate = new DateTime(2026, 4, 24, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9373),
                             DonorName = "Benjamin Stewart",
                             InventoryItemId = 18,
                             Notes = "Merged into existing stock. Previous qty: 180",
@@ -275,7 +282,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 26,
-                            DonationDate = new DateTime(2026, 3, 17, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2160),
+                            DonationDate = new DateTime(2026, 4, 14, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9374),
                             DonorName = "Amanda Hall",
                             InventoryItemId = 19,
                             Notes = "Initial donation — item created.",
@@ -284,7 +291,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 27,
-                            DonationDate = new DateTime(2026, 3, 14, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2160),
+                            DonationDate = new DateTime(2026, 4, 11, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9376),
                             DonorName = "Community Health Center",
                             InventoryItemId = 20,
                             Notes = "Initial donation — item created.",
@@ -293,7 +300,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 28,
-                            DonationDate = new DateTime(2026, 3, 20, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2170),
+                            DonationDate = new DateTime(2026, 4, 17, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9377),
                             DonorName = "Ryan Allen",
                             InventoryItemId = 21,
                             Notes = "Initial donation — item created.",
@@ -302,7 +309,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 29,
-                            DonationDate = new DateTime(2026, 3, 15, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2170),
+                            DonationDate = new DateTime(2026, 4, 12, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9379),
                             DonorName = "Samantha Young",
                             InventoryItemId = 22,
                             Notes = "Initial donation — item created.",
@@ -311,7 +318,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 30,
-                            DonationDate = new DateTime(2026, 3, 22, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2180),
+                            DonationDate = new DateTime(2026, 4, 19, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9381),
                             DonorName = "Brandon King",
                             InventoryItemId = 23,
                             Notes = "Initial donation — item created.",
@@ -320,7 +327,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 31,
-                            DonationDate = new DateTime(2026, 3, 10, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2180),
+                            DonationDate = new DateTime(2026, 4, 7, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9382),
                             DonorName = "Nicole Wright",
                             InventoryItemId = 24,
                             Notes = "Initial donation — item created.",
@@ -329,7 +336,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 32,
-                            DonationDate = new DateTime(2026, 3, 22, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2190),
+                            DonationDate = new DateTime(2026, 4, 19, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9384),
                             DonorName = "Justin Scott",
                             InventoryItemId = 24,
                             Notes = "Merged into existing stock. Previous qty: 100",
@@ -338,7 +345,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 33,
-                            DonationDate = new DateTime(2026, 3, 18, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2190),
+                            DonationDate = new DateTime(2026, 4, 15, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9385),
                             DonorName = "Megan Green",
                             InventoryItemId = 25,
                             Notes = "Initial donation — item created.",
@@ -347,7 +354,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 34,
-                            DonationDate = new DateTime(2026, 3, 25, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2200),
+                            DonationDate = new DateTime(2026, 4, 22, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9387),
                             DonorName = "Tyler Adams",
                             InventoryItemId = 26,
                             Notes = "Initial donation — item created.",
@@ -356,7 +363,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 35,
-                            DonationDate = new DateTime(2026, 3, 7, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2200),
+                            DonationDate = new DateTime(2026, 4, 4, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9388),
                             DonorName = "Rachel Baker",
                             InventoryItemId = 27,
                             Notes = "Initial donation — item created.",
@@ -365,7 +372,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 36,
-                            DonationDate = new DateTime(2026, 3, 24, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2210),
+                            DonationDate = new DateTime(2026, 4, 21, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9390),
                             DonorName = "Kevin Nelson",
                             InventoryItemId = 28,
                             Notes = "Initial donation — item created.",
@@ -374,7 +381,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 37,
-                            DonationDate = new DateTime(2026, 3, 27, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2210),
+                            DonationDate = new DateTime(2026, 4, 24, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9399),
                             DonorName = "Lauren Carter",
                             InventoryItemId = 29,
                             Notes = "Initial donation — item created.",
@@ -383,7 +390,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 38,
-                            DonationDate = new DateTime(2026, 3, 4, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2220),
+                            DonationDate = new DateTime(2026, 4, 1, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9401),
                             DonorName = "Jacob Mitchell",
                             InventoryItemId = 30,
                             Notes = "Initial donation — item created.",
@@ -392,7 +399,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 39,
-                            DonationDate = new DateTime(2026, 3, 5, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2220),
+                            DonationDate = new DateTime(2026, 4, 2, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9402),
                             DonorName = "Kimberly Perez",
                             InventoryItemId = 31,
                             Notes = "Initial donation — item created.",
@@ -401,7 +408,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 40,
-                            DonationDate = new DateTime(2026, 3, 16, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2230),
+                            DonationDate = new DateTime(2026, 4, 13, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9404),
                             DonorName = "Austin Roberts",
                             InventoryItemId = 32,
                             Notes = "Initial donation — item created.",
@@ -410,7 +417,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 41,
-                            DonationDate = new DateTime(2026, 3, 19, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2230),
+                            DonationDate = new DateTime(2026, 4, 16, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9406),
                             DonorName = "Brittany Turner",
                             InventoryItemId = 33,
                             Notes = "Initial donation — item created.",
@@ -419,7 +426,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 42,
-                            DonationDate = new DateTime(2026, 3, 2, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2230),
+                            DonationDate = new DateTime(2026, 3, 30, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9407),
                             DonorName = "Costco Wholesale",
                             InventoryItemId = 34,
                             Notes = "Initial donation — item created.",
@@ -428,7 +435,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 43,
-                            DonationDate = new DateTime(2026, 2, 28, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2240),
+                            DonationDate = new DateTime(2026, 3, 28, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9409),
                             DonorName = "Zachary Phillips",
                             InventoryItemId = 35,
                             Notes = "Initial donation — item created.",
@@ -437,7 +444,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 44,
-                            DonationDate = new DateTime(2026, 2, 26, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2240),
+                            DonationDate = new DateTime(2026, 3, 26, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9410),
                             DonorName = "Victoria Sanchez",
                             InventoryItemId = 36,
                             Notes = "Initial donation — item created.",
@@ -446,7 +453,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 45,
-                            DonationDate = new DateTime(2026, 3, 19, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2250),
+                            DonationDate = new DateTime(2026, 4, 16, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9412),
                             DonorName = "Alexander Morris",
                             InventoryItemId = 37,
                             Notes = "Initial donation — item created.",
@@ -455,7 +462,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 46,
-                            DonationDate = new DateTime(2026, 3, 12, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2260),
+                            DonationDate = new DateTime(2026, 4, 9, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9413),
                             DonorName = "Sophia Rogers",
                             InventoryItemId = 38,
                             Notes = "Initial donation — item created.",
@@ -464,7 +471,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 47,
-                            DonationDate = new DateTime(2026, 3, 8, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2260),
+                            DonationDate = new DateTime(2026, 4, 5, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9415),
                             DonorName = "Elijah Reed",
                             InventoryItemId = 39,
                             Notes = "Initial donation — item created.",
@@ -473,7 +480,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 48,
-                            DonationDate = new DateTime(2026, 3, 23, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2270),
+                            DonationDate = new DateTime(2026, 4, 20, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9416),
                             DonorName = "Olivia Cook",
                             InventoryItemId = 40,
                             Notes = "Initial donation — item created.",
@@ -482,7 +489,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 49,
-                            DonationDate = new DateTime(2026, 2, 17, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2270),
+                            DonationDate = new DateTime(2026, 3, 17, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9418),
                             DonorName = "Mason Morgan",
                             InventoryItemId = 41,
                             Notes = "Initial donation — item created.",
@@ -491,7 +498,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 50,
-                            DonationDate = new DateTime(2026, 2, 4, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2270),
+                            DonationDate = new DateTime(2026, 3, 4, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9420),
                             DonorName = "Ava Bell",
                             InventoryItemId = 42,
                             Notes = "Initial donation — item created.",
@@ -500,7 +507,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 51,
-                            DonationDate = new DateTime(2026, 3, 9, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2280),
+                            DonationDate = new DateTime(2026, 4, 6, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9421),
                             DonorName = "Lucas Murphy",
                             InventoryItemId = 42,
                             Notes = "Merged into existing stock. Previous qty: 100",
@@ -509,7 +516,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 52,
-                            DonationDate = new DateTime(2026, 2, 11, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2280),
+                            DonationDate = new DateTime(2026, 3, 11, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9423),
                             DonorName = "Isabella Bailey",
                             InventoryItemId = 43,
                             Notes = "Initial donation — item created.",
@@ -518,7 +525,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 53,
-                            DonationDate = new DateTime(2026, 2, 21, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2290),
+                            DonationDate = new DateTime(2026, 3, 21, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9432),
                             DonorName = "Ethan Rivera",
                             InventoryItemId = 44,
                             Notes = "Initial donation — item created.",
@@ -527,7 +534,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 54,
-                            DonationDate = new DateTime(2026, 2, 7, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2300),
+                            DonationDate = new DateTime(2026, 3, 7, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9433),
                             DonorName = "Mia Cooper",
                             InventoryItemId = 45,
                             Notes = "Initial donation — item created.",
@@ -536,7 +543,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 55,
-                            DonationDate = new DateTime(2026, 2, 15, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2300),
+                            DonationDate = new DateTime(2026, 3, 15, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9435),
                             DonorName = "Charlotte Cox",
                             InventoryItemId = 46,
                             Notes = "Initial donation — item created.",
@@ -545,7 +552,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 56,
-                            DonationDate = new DateTime(2026, 1, 25, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2310),
+                            DonationDate = new DateTime(2026, 2, 22, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9437),
                             DonorName = "Aiden Howard",
                             InventoryItemId = 47,
                             Notes = "Initial donation — item created.",
@@ -554,7 +561,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 57,
-                            DonationDate = new DateTime(2026, 1, 19, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2310),
+                            DonationDate = new DateTime(2026, 2, 16, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9438),
                             DonorName = "Amelia Ward",
                             InventoryItemId = 48,
                             Notes = "Initial donation — item created.",
@@ -563,7 +570,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 58,
-                            DonationDate = new DateTime(2026, 1, 2, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2310),
+                            DonationDate = new DateTime(2026, 1, 30, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9440),
                             DonorName = "Liam Torres",
                             InventoryItemId = 49,
                             Notes = "Initial donation — item created.",
@@ -572,7 +579,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 59,
-                            DonationDate = new DateTime(2026, 1, 13, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2320),
+                            DonationDate = new DateTime(2026, 2, 10, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9441),
                             DonorName = "Harper Peterson",
                             InventoryItemId = 50,
                             Notes = "Initial donation — item created.",
@@ -581,7 +588,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 60,
-                            DonationDate = new DateTime(2026, 2, 19, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2320),
+                            DonationDate = new DateTime(2026, 3, 19, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9443),
                             DonorName = "Noah Gray",
                             InventoryItemId = 50,
                             Notes = "Merged into existing stock. Previous qty: 100",
@@ -590,7 +597,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 61,
-                            DonationDate = new DateTime(2026, 3, 21, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2330),
+                            DonationDate = new DateTime(2026, 4, 18, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9445),
                             DonorName = "Costco Wholesale",
                             InventoryItemId = 50,
                             Notes = "Merged into existing stock. Previous qty: 184",
@@ -599,7 +606,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 62,
-                            DonationDate = new DateTime(2025, 12, 26, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2330),
+                            DonationDate = new DateTime(2026, 1, 23, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9446),
                             DonorName = "Patricia Moore",
                             InventoryItemId = 51,
                             Notes = "Initial donation — item created.",
@@ -608,7 +615,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 63,
-                            DonationDate = new DateTime(2025, 12, 19, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2340),
+                            DonationDate = new DateTime(2026, 1, 16, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9448),
                             DonorName = "Ryan Allen",
                             InventoryItemId = 52,
                             Notes = "Initial donation — item created.",
@@ -617,7 +624,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 64,
-                            DonationDate = new DateTime(2026, 2, 1, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2340),
+                            DonationDate = new DateTime(2026, 3, 1, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9449),
                             DonorName = "Lisa Anderson",
                             InventoryItemId = 53,
                             Notes = "Initial donation — item created.",
@@ -626,7 +633,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 65,
-                            DonationDate = new DateTime(2026, 1, 7, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2350),
+                            DonationDate = new DateTime(2026, 2, 4, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9451),
                             DonorName = "Logan Richardson",
                             InventoryItemId = 54,
                             Notes = "Initial donation — item created.",
@@ -635,7 +642,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 66,
-                            DonationDate = new DateTime(2026, 2, 28, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2350),
+                            DonationDate = new DateTime(2026, 3, 28, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9452),
                             DonorName = "James Wilson",
                             InventoryItemId = 54,
                             Notes = "Merged into existing stock. Previous qty: 12",
@@ -644,7 +651,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 67,
-                            DonationDate = new DateTime(2026, 1, 21, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2350),
+                            DonationDate = new DateTime(2026, 2, 18, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9454),
                             DonorName = "Samantha Young",
                             InventoryItemId = 55,
                             Notes = "Initial donation — item created.",
@@ -653,7 +660,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 68,
-                            DonationDate = new DateTime(2026, 2, 13, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2360),
+                            DonationDate = new DateTime(2026, 3, 13, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9456),
                             DonorName = "Brandon King",
                             InventoryItemId = 56,
                             Notes = "Initial donation — item created.",
@@ -662,7 +669,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 69,
-                            DonationDate = new DateTime(2025, 12, 11, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2370),
+                            DonationDate = new DateTime(2026, 1, 8, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9458),
                             DonorName = "Emily Davis",
                             InventoryItemId = 57,
                             Notes = "Initial donation — item created.",
@@ -671,7 +678,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 70,
-                            DonationDate = new DateTime(2025, 12, 23, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2370),
+                            DonationDate = new DateTime(2026, 1, 20, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9460),
                             DonorName = "David Thompson",
                             InventoryItemId = 58,
                             Notes = "Initial donation — item created.",
@@ -680,7 +687,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 71,
-                            DonationDate = new DateTime(2026, 1, 28, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2380),
+                            DonationDate = new DateTime(2026, 2, 25, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9461),
                             DonorName = "Target Store #1234",
                             InventoryItemId = 59,
                             Notes = "Initial donation — item created.",
@@ -689,7 +696,7 @@ namespace SafeFutureInventorySystem.Migrations
                         new
                         {
                             Id = 72,
-                            DonationDate = new DateTime(2026, 1, 15, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(2380),
+                            DonationDate = new DateTime(2026, 2, 12, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(9463),
                             DonorName = "Noah Gray",
                             InventoryItemId = 60,
                             Notes = "Initial donation — item created.",
@@ -701,29 +708,31 @@ namespace SafeFutureInventorySystem.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AdjustedBy")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("AdjustmentDate")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("InventoryItemId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("NewQuantity")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("OldQuantity")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<string>("Reason")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(500)");
 
                     b.HasKey("Id");
 
@@ -736,7 +745,7 @@ namespace SafeFutureInventorySystem.Migrations
                         {
                             Id = 1,
                             AdjustedBy = "Admin",
-                            AdjustmentDate = new DateTime(2026, 3, 26, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(3900),
+                            AdjustmentDate = new DateTime(2026, 4, 23, 15, 51, 37, 546, DateTimeKind.Local).AddTicks(132),
                             InventoryItemId = 10,
                             NewQuantity = 150,
                             OldQuantity = 120,
@@ -746,7 +755,7 @@ namespace SafeFutureInventorySystem.Migrations
                         {
                             Id = 2,
                             AdjustedBy = "Volunteer",
-                            AdjustmentDate = new DateTime(2026, 3, 29, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(4300),
+                            AdjustmentDate = new DateTime(2026, 4, 26, 15, 51, 37, 546, DateTimeKind.Local).AddTicks(301),
                             InventoryItemId = 10,
                             NewQuantity = 130,
                             OldQuantity = 150,
@@ -756,7 +765,7 @@ namespace SafeFutureInventorySystem.Migrations
                         {
                             Id = 3,
                             AdjustedBy = "Admin",
-                            AdjustmentDate = new DateTime(2026, 3, 28, 5, 41, 52, 379, DateTimeKind.Local).AddTicks(4300),
+                            AdjustmentDate = new DateTime(2026, 4, 25, 15, 51, 37, 546, DateTimeKind.Local).AddTicks(304),
                             InventoryItemId = 18,
                             NewQuantity = 220,
                             OldQuantity = 250,
@@ -768,35 +777,40 @@ namespace SafeFutureInventorySystem.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Barcode")
                         .HasMaxLength(50)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Category")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DateAdded")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime?>("ExpirationDate")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("LastUpdated")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("LowStockThreshold")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -808,9 +822,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 1,
                             Barcode = "070074680002",
                             Category = "Baby Formula",
-                            DateAdded = new DateTime(2025, 12, 1, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4240),
+                            DateAdded = new DateTime(2025, 12, 29, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4271),
                             Description = "EXPIRED - Similac Advance, 12.4 oz",
-                            ExpirationDate = new DateTime(2026, 3, 1, 5, 41, 52, 368, DateTimeKind.Local).AddTicks(8600),
+                            ExpirationDate = new DateTime(2026, 3, 29, 15, 51, 37, 543, DateTimeKind.Local).AddTicks(8980),
+                            LowStockThreshold = 0,
                             Name = "Expired Baby Formula",
                             Quantity = 15
                         },
@@ -819,9 +834,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 2,
                             Barcode = "036000516517",
                             Category = "Baby Wipes",
-                            DateAdded = new DateTime(2025, 12, 31, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4770),
+                            DateAdded = new DateTime(2026, 1, 28, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4636),
                             Description = "EXPIRED - Huggies Natural Care, 72 count",
-                            ExpirationDate = new DateTime(2026, 3, 16, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4760),
+                            ExpirationDate = new DateTime(2026, 4, 13, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4631),
+                            LowStockThreshold = 0,
                             Name = "Expired Baby Wipes",
                             Quantity = 8
                         },
@@ -830,9 +846,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 3,
                             Barcode = "085898800015",
                             Category = "Baby Care",
-                            DateAdded = new DateTime(2025, 11, 1, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4780),
+                            DateAdded = new DateTime(2025, 11, 29, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4641),
                             Description = "EXPIRED - Boudreaux's Butt Paste, 4 oz",
-                            ExpirationDate = new DateTime(2026, 1, 30, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4780),
+                            ExpirationDate = new DateTime(2026, 2, 27, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4639),
+                            LowStockThreshold = 0,
                             Name = "Expired Diaper Cream",
                             Quantity = 3
                         },
@@ -841,9 +858,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 4,
                             Barcode = "050000339877",
                             Category = "Baby Formula",
-                            DateAdded = new DateTime(2026, 1, 30, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4790),
+                            DateAdded = new DateTime(2026, 2, 27, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4645),
                             Description = "EXPIRING SOON - Gentle powder, 32 oz",
-                            ExpirationDate = new DateTime(2026, 4, 3, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4790),
+                            ExpirationDate = new DateTime(2026, 5, 1, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4644),
+                            LowStockThreshold = 0,
                             Name = "Gerber Good Start Formula",
                             Quantity = 45
                         },
@@ -852,9 +870,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 5,
                             Barcode = "859668006010",
                             Category = "Baby Wipes",
-                            DateAdded = new DateTime(2026, 2, 19, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4800),
+                            DateAdded = new DateTime(2026, 3, 19, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4666),
                             Description = "EXPIRING SOON - 99.9% water, 540 count",
-                            ExpirationDate = new DateTime(2026, 4, 5, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4800),
+                            ExpirationDate = new DateTime(2026, 5, 3, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4665),
+                            LowStockThreshold = 0,
                             Name = "WaterWipes Baby Wipes",
                             Quantity = 180
                         },
@@ -863,9 +882,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 6,
                             Barcode = "051000138255",
                             Category = "Baby Food",
-                            DateAdded = new DateTime(2026, 2, 9, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4810),
+                            DateAdded = new DateTime(2026, 3, 9, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4669),
                             Description = "EXPIRING SOON - Stage 1, 4 oz jar",
-                            ExpirationDate = new DateTime(2026, 4, 7, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4810),
+                            ExpirationDate = new DateTime(2026, 5, 5, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4668),
+                            LowStockThreshold = 0,
                             Name = "Organic Baby Food - Peas",
                             Quantity = 22
                         },
@@ -874,9 +894,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 7,
                             Barcode = "070074682532",
                             Category = "Baby Formula",
-                            DateAdded = new DateTime(2026, 2, 24, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4820),
+                            DateAdded = new DateTime(2026, 3, 24, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4672),
                             Description = "Expiring this month - 30.8 oz powder",
-                            ExpirationDate = new DateTime(2026, 4, 25, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4820),
+                            ExpirationDate = new DateTime(2026, 5, 23, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4671),
+                            LowStockThreshold = 0,
                             Name = "Similac Pro-Advance Formula",
                             Quantity = 130
                         },
@@ -885,9 +906,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 8,
                             Barcode = "037000830689",
                             Category = "Baby Wipes",
-                            DateAdded = new DateTime(2026, 3, 13, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4830),
+                            DateAdded = new DateTime(2026, 4, 10, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4675),
                             Description = "Expiring this month - 504 count",
-                            ExpirationDate = new DateTime(2026, 4, 20, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4830),
+                            ExpirationDate = new DateTime(2026, 5, 18, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4674),
+                            LowStockThreshold = 0,
                             Name = "Pampers Sensitive Wipes",
                             Quantity = 250
                         },
@@ -896,9 +918,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 9,
                             Barcode = "363824009001",
                             Category = "Baby Health",
-                            DateAdded = new DateTime(2026, 2, 14, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4830),
+                            DateAdded = new DateTime(2026, 3, 14, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4678),
                             Description = "Expiring this month - Liquid supplement",
-                            ExpirationDate = new DateTime(2026, 4, 28, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4830),
+                            ExpirationDate = new DateTime(2026, 5, 26, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4677),
+                            LowStockThreshold = 0,
                             Name = "Baby Vitamin D Drops",
                             Quantity = 68
                         },
@@ -907,9 +930,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 10,
                             Barcode = "037000465911",
                             Category = "Diapers",
-                            DateAdded = new DateTime(2026, 3, 1, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4870),
+                            DateAdded = new DateTime(2026, 3, 29, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4696),
                             Description = "Size N, Up to 10 lbs, 32 count pack",
-                            ExpirationDate = new DateTime(2027, 9, 30, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4840),
+                            ExpirationDate = new DateTime(2027, 10, 28, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4680),
+                            LowStockThreshold = 0,
                             Name = "Pampers Newborn Diapers",
                             Quantity = 150
                         },
@@ -918,9 +942,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 11,
                             Barcode = "036000406481",
                             Category = "Diapers",
-                            DateAdded = new DateTime(2026, 3, 6, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4880),
+                            DateAdded = new DateTime(2026, 4, 3, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4700),
                             Description = "Size 1, 8-14 lbs, 84 count pack",
-                            ExpirationDate = new DateTime(2028, 3, 31, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4880),
+                            ExpirationDate = new DateTime(2028, 4, 28, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4698),
+                            LowStockThreshold = 0,
                             Name = "Huggies Size 1 Diapers",
                             Quantity = 200
                         },
@@ -929,9 +954,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 12,
                             Barcode = "037000465928",
                             Category = "Diapers",
-                            DateAdded = new DateTime(2026, 3, 11, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4890),
+                            DateAdded = new DateTime(2026, 4, 8, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4703),
                             Description = "Size 2, 12-18 lbs, 112 count pack",
-                            ExpirationDate = new DateTime(2027, 11, 30, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4890),
+                            ExpirationDate = new DateTime(2027, 12, 28, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4702),
+                            LowStockThreshold = 0,
                             Name = "Pampers Size 2 Diapers",
                             Quantity = 180
                         },
@@ -940,9 +966,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 13,
                             Barcode = "036000406498",
                             Category = "Diapers",
-                            DateAdded = new DateTime(2026, 3, 16, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4940),
+                            DateAdded = new DateTime(2026, 4, 13, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4716),
                             Description = "Size 3, 16-28 lbs, 104 count pack",
-                            ExpirationDate = new DateTime(2028, 1, 31, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4930),
+                            ExpirationDate = new DateTime(2028, 2, 28, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4714),
+                            LowStockThreshold = 0,
                             Name = "Huggies Size 3 Diapers",
                             Quantity = 165
                         },
@@ -951,9 +978,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 14,
                             Barcode = "037000465935",
                             Category = "Diapers",
-                            DateAdded = new DateTime(2026, 3, 21, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4940),
+                            DateAdded = new DateTime(2026, 4, 18, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4719),
                             Description = "Size 4, 22-37 lbs, 92 count pack",
-                            ExpirationDate = new DateTime(2027, 10, 31, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4940),
+                            ExpirationDate = new DateTime(2027, 11, 28, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4717),
+                            LowStockThreshold = 0,
                             Name = "Pampers Size 4 Diapers",
                             Quantity = 140
                         },
@@ -962,9 +990,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 15,
                             Barcode = "036000406504",
                             Category = "Diapers",
-                            DateAdded = new DateTime(2026, 3, 23, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4950),
+                            DateAdded = new DateTime(2026, 4, 20, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4729),
                             Description = "Size 5, 27+ lbs, 80 count pack",
-                            ExpirationDate = new DateTime(2027, 12, 31, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4950),
+                            ExpirationDate = new DateTime(2028, 1, 28, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4728),
+                            LowStockThreshold = 0,
                             Name = "Huggies Size 5 Diapers",
                             Quantity = 120
                         },
@@ -973,9 +1002,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 16,
                             Barcode = "037000465942",
                             Category = "Diapers",
-                            DateAdded = new DateTime(2026, 3, 26, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4960),
+                            DateAdded = new DateTime(2026, 4, 23, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4732),
                             Description = "Size 6, 35+ lbs, 68 count pack",
-                            ExpirationDate = new DateTime(2028, 2, 29, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4960),
+                            ExpirationDate = new DateTime(2028, 3, 28, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4731),
+                            LowStockThreshold = 0,
                             Name = "Pampers Size 6 Diapers",
                             Quantity = 95
                         },
@@ -984,9 +1014,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 17,
                             Barcode = "300871214415",
                             Category = "Baby Formula",
-                            DateAdded = new DateTime(2026, 3, 3, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4970),
+                            DateAdded = new DateTime(2026, 3, 31, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4736),
                             Description = "Infant formula powder, 28.3 oz",
-                            ExpirationDate = new DateTime(2027, 1, 31, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4970),
+                            ExpirationDate = new DateTime(2027, 2, 28, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4735),
+                            LowStockThreshold = 0,
                             Name = "Enfamil NeuroPro Formula",
                             Quantity = 145
                         },
@@ -995,9 +1026,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 18,
                             Barcode = "036000516500",
                             Category = "Baby Wipes",
-                            DateAdded = new DateTime(2026, 3, 9, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4980),
+                            DateAdded = new DateTime(2026, 4, 6, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4739),
                             Description = "Fragrance-free, 552 count (8 packs)",
-                            ExpirationDate = new DateTime(2027, 5, 31, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4970),
+                            ExpirationDate = new DateTime(2027, 6, 28, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4738),
+                            LowStockThreshold = 0,
                             Name = "Huggies Natural Care Wipes",
                             Quantity = 220
                         },
@@ -1006,9 +1038,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 19,
                             Barcode = "067981105001",
                             Category = "Diapering",
-                            DateAdded = new DateTime(2026, 3, 17, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4990),
+                            DateAdded = new DateTime(2026, 4, 14, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4742),
                             Description = "Desitin Maximum Strength, 4 oz tube",
-                            ExpirationDate = new DateTime(2027, 9, 30, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(4980),
+                            ExpirationDate = new DateTime(2027, 10, 28, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4741),
+                            LowStockThreshold = 0,
                             Name = "Diaper Rash Cream",
                             Quantity = 85
                         },
@@ -1017,9 +1050,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 20,
                             Barcode = "381371161423",
                             Category = "Baby Care",
-                            DateAdded = new DateTime(2026, 3, 14, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5000),
+                            DateAdded = new DateTime(2026, 4, 11, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4745),
                             Description = "Johnson's Head-to-Toe, 27.1 fl oz",
-                            ExpirationDate = new DateTime(2028, 9, 30, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5000),
+                            ExpirationDate = new DateTime(2028, 10, 28, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4743),
+                            LowStockThreshold = 0,
                             Name = "Baby Shampoo & Body Wash",
                             Quantity = 135
                         },
@@ -1028,8 +1062,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 21,
                             Barcode = "072239311004",
                             Category = "Feeding",
-                            DateAdded = new DateTime(2026, 3, 20, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5000),
+                            DateAdded = new DateTime(2026, 4, 17, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4746),
                             Description = "Dr. Brown's Anti-Colic, 3-pack",
+                            LowStockThreshold = 0,
                             Name = "Baby Bottles 8oz",
                             Quantity = 70
                         },
@@ -1038,8 +1073,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 22,
                             Barcode = "072239314012",
                             Category = "Feeding",
-                            DateAdded = new DateTime(2026, 3, 15, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5010),
+                            DateAdded = new DateTime(2026, 4, 12, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4748),
                             Description = "Silicone, 6-pack, 0-3 months",
+                            LowStockThreshold = 0,
                             Name = "Bottle Nipples - Slow Flow",
                             Quantity = 125
                         },
@@ -1048,8 +1084,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 23,
                             Barcode = "849854012345",
                             Category = "Feeding",
-                            DateAdded = new DateTime(2026, 3, 22, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5020),
+                            DateAdded = new DateTime(2026, 4, 19, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4750),
                             Description = "100% cotton, 10-pack set",
+                            LowStockThreshold = 0,
                             Name = "Burp Cloths",
                             Quantity = 90
                         },
@@ -1058,8 +1095,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 24,
                             Barcode = "078742317298",
                             Category = "Clothing",
-                            DateAdded = new DateTime(2026, 3, 10, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5020),
+                            DateAdded = new DateTime(2026, 4, 7, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4751),
                             Description = "Short sleeve, 5-pack, assorted colors",
+                            LowStockThreshold = 0,
                             Name = "Onesies 0-3 Months",
                             Quantity = 160
                         },
@@ -1068,8 +1106,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 25,
                             Barcode = "078742317305",
                             Category = "Clothing",
-                            DateAdded = new DateTime(2026, 3, 18, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5030),
+                            DateAdded = new DateTime(2026, 4, 15, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4753),
                             Description = "Footed sleepers, fleece, 3-pack",
+                            LowStockThreshold = 0,
                             Name = "Baby Sleepers 3-6 Months",
                             Quantity = 105
                         },
@@ -1078,8 +1117,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 26,
                             Barcode = "849854023456",
                             Category = "Clothing",
-                            DateAdded = new DateTime(2026, 3, 25, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5040),
+                            DateAdded = new DateTime(2026, 4, 22, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4755),
                             Description = "Non-slip grip, 12-pack",
+                            LowStockThreshold = 0,
                             Name = "Baby Socks 0-12 Months",
                             Quantity = 200
                         },
@@ -1088,8 +1128,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 27,
                             Barcode = "849854034567",
                             Category = "Clothing",
-                            DateAdded = new DateTime(2026, 3, 7, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5040),
+                            DateAdded = new DateTime(2026, 4, 4, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4764),
                             Description = "Scratch-free mittens, 6-pack",
+                            LowStockThreshold = 0,
                             Name = "Baby Mittens",
                             Quantity = 80
                         },
@@ -1098,8 +1139,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 28,
                             Barcode = "735363012010",
                             Category = "Diapering",
-                            DateAdded = new DateTime(2026, 3, 24, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5050),
+                            DateAdded = new DateTime(2026, 4, 21, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4766),
                             Description = "Waterproof, 50 count pack",
+                            LowStockThreshold = 0,
                             Name = "Disposable Changing Pads",
                             Quantity = 65
                         },
@@ -1108,8 +1150,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 29,
                             Barcode = "849854045678",
                             Category = "Baby Care",
-                            DateAdded = new DateTime(2026, 3, 27, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5050),
+                            DateAdded = new DateTime(2026, 4, 24, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4768),
                             Description = "Safety nail care set with file",
+                            LowStockThreshold = 0,
                             Name = "Baby Nail Clippers",
                             Quantity = 55
                         },
@@ -1118,8 +1161,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 30,
                             Barcode = "853689006133",
                             Category = "Baby Health",
-                            DateAdded = new DateTime(2026, 3, 4, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5060),
+                            DateAdded = new DateTime(2026, 4, 1, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4770),
                             Description = "NoseFrida with 20 filters",
+                            LowStockThreshold = 0,
                             Name = "Nasal Aspirator",
                             Quantity = 45
                         },
@@ -1128,8 +1172,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 31,
                             Barcode = "849854056789",
                             Category = "Bedding",
-                            DateAdded = new DateTime(2026, 3, 5, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5060),
+                            DateAdded = new DateTime(2026, 4, 2, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4772),
                             Description = "Muslin, 4-pack, 47x47 inches",
+                            LowStockThreshold = 0,
                             Name = "Swaddle Blankets",
                             Quantity = 100
                         },
@@ -1138,8 +1183,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 32,
                             Barcode = "849854067890",
                             Category = "Bedding",
-                            DateAdded = new DateTime(2026, 3, 16, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5070),
+                            DateAdded = new DateTime(2026, 4, 13, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4774),
                             Description = "Fitted, 100% cotton, 2-pack",
+                            LowStockThreshold = 0,
                             Name = "Crib Sheets",
                             Quantity = 75
                         },
@@ -1148,8 +1194,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 33,
                             Barcode = "849854078901",
                             Category = "Bathing",
-                            DateAdded = new DateTime(2026, 3, 19, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5070),
+                            DateAdded = new DateTime(2026, 4, 16, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4775),
                             Description = "Extra soft, 30x30 inches, 3-pack",
+                            LowStockThreshold = 0,
                             Name = "Baby Hooded Towels",
                             Quantity = 88
                         },
@@ -1158,8 +1205,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 34,
                             Barcode = "849854089012",
                             Category = "Bathing",
-                            DateAdded = new DateTime(2026, 3, 2, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5080),
+                            DateAdded = new DateTime(2026, 3, 30, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4777),
                             Description = "Ultra-soft, 12-pack",
+                            LowStockThreshold = 0,
                             Name = "Baby Washcloths",
                             Quantity = 150
                         },
@@ -1168,8 +1216,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 35,
                             Barcode = "849854090123",
                             Category = "Accessories",
-                            DateAdded = new DateTime(2026, 2, 28, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5080),
+                            DateAdded = new DateTime(2026, 3, 28, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4779),
                             Description = "Multi-pocket backpack style",
+                            LowStockThreshold = 0,
                             Name = "Diaper Bags",
                             Quantity = 35
                         },
@@ -1178,8 +1227,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 36,
                             Barcode = "849854101234",
                             Category = "Baby Health",
-                            DateAdded = new DateTime(2026, 2, 26, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5090),
+                            DateAdded = new DateTime(2026, 3, 26, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4781),
                             Description = "Digital forehead & ear thermometer",
+                            LowStockThreshold = 0,
                             Name = "Baby Thermometer",
                             Quantity = 50
                         },
@@ -1188,9 +1238,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 37,
                             Barcode = "732913441914",
                             Category = "Diapers",
-                            DateAdded = new DateTime(2026, 3, 19, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5100),
+                            DateAdded = new DateTime(2026, 4, 16, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4784),
                             Description = "Eco-friendly, Size 1, 8-14 lbs, 40 count",
-                            ExpirationDate = new DateTime(2027, 6, 30, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5090),
+                            ExpirationDate = new DateTime(2027, 7, 28, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4783),
+                            LowStockThreshold = 0,
                             Name = "Seventh Generation Size 1 Diapers",
                             Quantity = 75
                         },
@@ -1199,9 +1250,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 38,
                             Barcode = "381371161416",
                             Category = "Baby Care",
-                            DateAdded = new DateTime(2026, 3, 12, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5100),
+                            DateAdded = new DateTime(2026, 4, 9, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4787),
                             Description = "Johnson's Baby Powder, cornstarch, 9 oz",
-                            ExpirationDate = new DateTime(2028, 3, 31, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5100),
+                            ExpirationDate = new DateTime(2028, 4, 28, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4785),
+                            LowStockThreshold = 0,
                             Name = "Baby Powder",
                             Quantity = 110
                         },
@@ -1210,9 +1262,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 39,
                             Barcode = "381371161430",
                             Category = "Baby Care",
-                            DateAdded = new DateTime(2026, 3, 8, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5110),
+                            DateAdded = new DateTime(2026, 4, 5, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4798),
                             Description = "Aveeno Baby Daily Moisture, 18 fl oz",
-                            ExpirationDate = new DateTime(2028, 5, 31, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5110),
+                            ExpirationDate = new DateTime(2028, 6, 28, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4788),
+                            LowStockThreshold = 0,
                             Name = "Baby Lotion",
                             Quantity = 115
                         },
@@ -1221,9 +1274,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 40,
                             Barcode = "072239314029",
                             Category = "Comfort",
-                            DateAdded = new DateTime(2026, 3, 23, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5120),
+                            DateAdded = new DateTime(2026, 4, 20, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4801),
                             Description = "Orthodontic, BPA-free, 4-pack",
-                            ExpirationDate = new DateTime(2029, 3, 31, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5120),
+                            ExpirationDate = new DateTime(2029, 4, 28, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4800),
+                            LowStockThreshold = 0,
                             Name = "Baby Pacifiers 0-6 Months",
                             Quantity = 140
                         },
@@ -1232,8 +1286,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 41,
                             Barcode = "849854112345",
                             Category = "Feeding",
-                            DateAdded = new DateTime(2026, 2, 17, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5130),
+                            DateAdded = new DateTime(2026, 3, 17, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4802),
                             Description = "Silicone, easy clean, 3-pack",
+                            LowStockThreshold = 0,
                             Name = "Baby Bibs - Waterproof",
                             Quantity = 92
                         },
@@ -1242,9 +1297,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 42,
                             Barcode = "051000138262",
                             Category = "Baby Food",
-                            DateAdded = new DateTime(2026, 2, 4, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5140),
+                            DateAdded = new DateTime(2026, 3, 4, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4805),
                             Description = "Organic stage 1, 4 oz jar",
-                            ExpirationDate = new DateTime(2026, 5, 15, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5130),
+                            ExpirationDate = new DateTime(2026, 6, 12, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4804),
+                            LowStockThreshold = 0,
                             Name = "Baby Food - Sweet Potatoes",
                             Quantity = 185
                         },
@@ -1253,9 +1309,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 43,
                             Barcode = "051000138279",
                             Category = "Baby Food",
-                            DateAdded = new DateTime(2026, 2, 11, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5150),
+                            DateAdded = new DateTime(2026, 3, 11, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4808),
                             Description = "Organic stage 1, 4 oz jar",
-                            ExpirationDate = new DateTime(2026, 5, 20, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5140),
+                            ExpirationDate = new DateTime(2026, 6, 17, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4807),
+                            LowStockThreshold = 0,
                             Name = "Baby Food - Carrots",
                             Quantity = 167
                         },
@@ -1264,8 +1321,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 44,
                             Barcode = "849854123456",
                             Category = "Feeding",
-                            DateAdded = new DateTime(2026, 2, 21, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5150),
+                            DateAdded = new DateTime(2026, 3, 21, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4810),
                             Description = "Soft-tip silicone, 6-pack",
+                            LowStockThreshold = 0,
                             Name = "Baby Spoons",
                             Quantity = 78
                         },
@@ -1274,8 +1332,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 45,
                             Barcode = "849854134567",
                             Category = "Feeding",
-                            DateAdded = new DateTime(2026, 2, 7, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5160),
+                            DateAdded = new DateTime(2026, 3, 7, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4811),
                             Description = "BPA-free, 3-pack with lids",
+                            LowStockThreshold = 0,
                             Name = "Baby Bowls with Suction",
                             Quantity = 61
                         },
@@ -1284,8 +1343,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 46,
                             Barcode = "849854145678",
                             Category = "Baby Health",
-                            DateAdded = new DateTime(2026, 2, 15, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5170),
+                            DateAdded = new DateTime(2026, 3, 15, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4813),
                             Description = "BPA-free silicone, 4-pack",
+                            LowStockThreshold = 0,
                             Name = "Teething Toys",
                             Quantity = 103
                         },
@@ -1294,9 +1354,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 47,
                             Barcode = "738443002151",
                             Category = "Baby Care",
-                            DateAdded = new DateTime(2026, 1, 25, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5180),
+                            DateAdded = new DateTime(2026, 2, 22, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4816),
                             Description = "Mineral-based, tear-free, 3 oz",
-                            ExpirationDate = new DateTime(2027, 7, 31, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5170),
+                            ExpirationDate = new DateTime(2027, 8, 28, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4815),
+                            LowStockThreshold = 0,
                             Name = "Baby Sunscreen SPF 50",
                             Quantity = 47
                         },
@@ -1305,8 +1366,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 48,
                             Barcode = "037000120261",
                             Category = "Baby Care",
-                            DateAdded = new DateTime(2026, 1, 19, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5180),
+                            DateAdded = new DateTime(2026, 2, 16, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4818),
                             Description = "Dreft, hypoallergenic, 50 oz",
+                            LowStockThreshold = 0,
                             Name = "Baby Laundry Detergent",
                             Quantity = 82
                         },
@@ -1315,8 +1377,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 49,
                             Barcode = "849854156789",
                             Category = "Safety",
-                            DateAdded = new DateTime(2026, 1, 2, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5190),
+                            DateAdded = new DateTime(2026, 1, 30, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4820),
                             Description = "Pressure-mounted, 29-38 inches",
+                            LowStockThreshold = 0,
                             Name = "Baby Safety Gates",
                             Quantity = 18
                         },
@@ -1325,8 +1388,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 50,
                             Barcode = "849854167890",
                             Category = "Safety",
-                            DateAdded = new DateTime(2026, 1, 13, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5200),
+                            DateAdded = new DateTime(2026, 2, 10, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4822),
                             Description = "Child-proof, 36-pack",
+                            LowStockThreshold = 0,
                             Name = "Outlet Covers",
                             Quantity = 234
                         },
@@ -1335,8 +1399,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 51,
                             Barcode = "849854178901",
                             Category = "Safety",
-                            DateAdded = new DateTime(2025, 12, 26, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5200),
+                            DateAdded = new DateTime(2026, 1, 23, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4823),
                             Description = "Video monitor with night vision",
+                            LowStockThreshold = 0,
                             Name = "Baby Monitor",
                             Quantity = 12
                         },
@@ -1345,8 +1410,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 52,
                             Barcode = "849854189012",
                             Category = "Baby Health",
-                            DateAdded = new DateTime(2025, 12, 19, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5210),
+                            DateAdded = new DateTime(2026, 1, 16, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4832),
                             Description = "Cool mist, 1 gallon capacity",
+                            LowStockThreshold = 0,
                             Name = "Baby Humidifier",
                             Quantity = 28
                         },
@@ -1355,8 +1421,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 53,
                             Barcode = "849854190123",
                             Category = "Feeding",
-                            DateAdded = new DateTime(2026, 2, 1, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5210),
+                            DateAdded = new DateTime(2026, 3, 1, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4834),
                             Description = "Disposable, 60 count box",
+                            LowStockThreshold = 0,
                             Name = "Nursing Pads",
                             Quantity = 144
                         },
@@ -1365,8 +1432,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 54,
                             Barcode = "849854201234",
                             Category = "Bathing",
-                            DateAdded = new DateTime(2026, 1, 7, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5220),
+                            DateAdded = new DateTime(2026, 2, 4, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4836),
                             Description = "Infant to toddler, with sling",
+                            LowStockThreshold = 0,
                             Name = "Baby Bath Tub",
                             Quantity = 22
                         },
@@ -1375,8 +1443,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 55,
                             Barcode = "849854212345",
                             Category = "Baby Care",
-                            DateAdded = new DateTime(2026, 1, 21, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5230),
+                            DateAdded = new DateTime(2026, 2, 18, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4838),
                             Description = "Soft bristle brush and comb",
+                            LowStockThreshold = 0,
                             Name = "Baby Hair Brush Set",
                             Quantity = 67
                         },
@@ -1385,8 +1454,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 56,
                             Barcode = "849854223456",
                             Category = "Diapering",
-                            DateAdded = new DateTime(2026, 2, 13, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5230),
+                            DateAdded = new DateTime(2026, 3, 13, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4840),
                             Description = "Deodorizing, 6-pack rings",
+                            LowStockThreshold = 0,
                             Name = "Diaper Pail Refills",
                             Quantity = 98
                         },
@@ -1395,8 +1465,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 57,
                             Barcode = "849854234567",
                             Category = "Accessories",
-                            DateAdded = new DateTime(2025, 12, 11, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5230),
+                            DateAdded = new DateTime(2026, 1, 8, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4850),
                             Description = "Ergonomic, 8-33 lbs capacity",
+                            LowStockThreshold = 0,
                             Name = "Baby Carrier",
                             Quantity = 15
                         },
@@ -1405,8 +1476,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 58,
                             Barcode = "849854245678",
                             Category = "Accessories",
-                            DateAdded = new DateTime(2025, 12, 23, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5240),
+                            DateAdded = new DateTime(2026, 1, 20, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4852),
                             Description = "Universal fit, clear PVC",
+                            LowStockThreshold = 0,
                             Name = "Stroller Rain Cover",
                             Quantity = 31
                         },
@@ -1415,8 +1487,9 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 59,
                             Barcode = "849854256789",
                             Category = "Accessories",
-                            DateAdded = new DateTime(2026, 1, 28, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5240),
+                            DateAdded = new DateTime(2026, 2, 25, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4854),
                             Description = "Velvet non-slip, 30-pack",
+                            LowStockThreshold = 0,
                             Name = "Baby Hangers",
                             Quantity = 176
                         },
@@ -1425,9 +1498,10 @@ namespace SafeFutureInventorySystem.Migrations
                             Id = 60,
                             Barcode = "363824012001",
                             Category = "Baby Health",
-                            DateAdded = new DateTime(2026, 1, 15, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5260),
+                            DateAdded = new DateTime(2026, 2, 12, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4857),
                             Description = "Natural, benzocaine-free, 0.33 oz",
-                            ExpirationDate = new DateTime(2026, 4, 2, 5, 41, 52, 378, DateTimeKind.Local).AddTicks(5250),
+                            ExpirationDate = new DateTime(2026, 4, 30, 15, 51, 37, 545, DateTimeKind.Local).AddTicks(4856),
+                            LowStockThreshold = 0,
                             Name = "Teething Gel",
                             Quantity = 54
                         });
