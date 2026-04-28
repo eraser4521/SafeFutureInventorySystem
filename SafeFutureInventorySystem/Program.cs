@@ -5,6 +5,7 @@ using SafeFutureInventorySystem.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// 1. SERVICES CONFIGURATION
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -41,55 +42,77 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+// 2. DATABASE INITIALIZATION WITH TRY-CATCH
+// This prevents 500.30 crashes by catching the exception before the process dies.
+try
 {
-    var inventoryDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    inventoryDb.Database.EnsureCreated();
-    await EnsureInventoryItemsColumnsAsync(inventoryDb);
-
-    var authDb = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
-    authDb.Database.EnsureCreated();
-
-    await EnsureAspNetUsersColumnsAsync(authDb);
-
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
-    string[] roles = { "Admin", "Volunteer" };
-    foreach (var r in roles)
+    using (var scope = app.Services.CreateScope())
     {
-        if (!await roleManager.RoleExistsAsync(r))
-            await roleManager.CreateAsync(new IdentityRole(r));
-    }
+        var services = scope.ServiceProvider;
 
-    var adminEmail = "admin@safefuture.com";
-    var adminPass = "admin1234";
+        // Log startup progress for debugging in Azure Log Stream
+        Console.WriteLine("Starting Database Migrations and Initialization...");
 
-    var adminUser = await userManager.FindByEmailAsync(adminEmail);
-    if (adminUser == null)
-    {
-       adminUser = new ApplicationUser
-{
-    UserName = adminEmail,
-    Email = adminEmail,
-    EmailConfirmed = true,
-    FirstName = "Admin",
-    LastName = "User",
-    MustChangePassword = false,
-    PasswordSetByAdmin = false
-};
+        var inventoryDb = services.GetRequiredService<ApplicationDbContext>();
+        inventoryDb.Database.EnsureCreated();
+        await EnsureInventoryItemsColumnsAsync(inventoryDb);
 
-        var createResult = await userManager.CreateAsync(adminUser, adminPass);
-        if (createResult.Succeeded)
-            await userManager.AddToRoleAsync(adminUser, "Admin");
-    }
-    else
-    {
-        if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
-            await userManager.AddToRoleAsync(adminUser, "Admin");
+        var authDb = services.GetRequiredService<AuthDbContext>();
+        authDb.Database.EnsureCreated();
+        await EnsureAspNetUsersColumnsAsync(authDb);
+
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+
+        string[] roles = { "Admin", "Volunteer" };
+        foreach (var r in roles)
+        {
+            if (!await roleManager.RoleExistsAsync(r))
+                await roleManager.CreateAsync(new IdentityRole(r));
+        }
+
+        var adminEmail = "admin@safefuture.com";
+        var adminPass = "admin1234";
+
+        var adminUser = await userManager.FindByEmailAsync(adminEmail);
+        if (adminUser == null)
+        {
+            adminUser = new ApplicationUser
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                EmailConfirmed = true,
+                FirstName = "Admin",
+                LastName = "User",
+                MustChangePassword = false,
+                PasswordSetByAdmin = false
+            };
+
+            var createResult = await userManager.CreateAsync(adminUser, adminPass);
+            if (createResult.Succeeded)
+                await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
+        else
+        {
+            if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
+                await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
+
+        Console.WriteLine("Database Initialization Successful.");
     }
 }
+catch (Exception ex)
+{
+    // This will print the EXACT error (like ArgumentException) to the Azure Logs
+    Console.WriteLine("CRITICAL STARTUP ERROR: " + ex.Message);
+    Console.WriteLine("STACK TRACE: " + ex.StackTrace);
 
+    // We rethrow so the app doesn't run in an invalid state, 
+    // but now the error is captured in the logs.
+    throw;
+}
+
+// 3. MIDDLEWARE PIPELINE
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -138,6 +161,7 @@ app.MapControllerRoute(
 
 app.Run();
 
+// 4. HELPER METHODS
 static async Task EnsureInventoryItemsColumnsAsync(ApplicationDbContext inventoryDb)
 {
     var connection = inventoryDb.Database.GetDbConnection();
