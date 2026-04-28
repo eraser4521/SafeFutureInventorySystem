@@ -44,11 +44,11 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var inventoryDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    inventoryDb.Database.Migrate();
+    inventoryDb.Database.EnsureCreated();
     await EnsureInventoryItemsColumnsAsync(inventoryDb);
 
     var authDb = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
-    authDb.Database.Migrate();
+    authDb.Database.EnsureCreated();
 
     await EnsureAspNetUsersColumnsAsync(authDb);
 
