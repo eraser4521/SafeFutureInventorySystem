@@ -8,10 +8,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddDbContext<AuthDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("AuthConnection")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("AuthConnection")));
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
@@ -45,12 +45,12 @@ using (var scope = app.Services.CreateScope())
 {
     var inventoryDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     inventoryDb.Database.Migrate();
-    //await EnsureInventoryItemsColumnsAsync(inventoryDb);
+    await EnsureInventoryItemsColumnsAsync(inventoryDb);
 
     var authDb = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
     authDb.Database.Migrate();
 
-    //await EnsureAspNetUsersColumnsAsync(authDb);
+    await EnsureAspNetUsersColumnsAsync(authDb);
 
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
@@ -138,3 +138,78 @@ app.MapControllerRoute(
 
 app.Run();
 
+static async Task EnsureInventoryItemsColumnsAsync(ApplicationDbContext inventoryDb)
+{
+    var connection = inventoryDb.Database.GetDbConnection();
+    await connection.OpenAsync();
+
+    try
+    {
+        var columns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        await using (var cmd = connection.CreateCommand())
+        {
+            cmd.CommandText = "PRAGMA table_info('InventoryItems')";
+            await using var reader = await cmd.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                columns.Add(reader.GetString(1));
+            }
+        }
+
+        if (!columns.Contains("LowStockThreshold"))
+        {
+            await inventoryDb.Database.ExecuteSqlRawAsync(
+                "ALTER TABLE InventoryItems ADD COLUMN LowStockThreshold INTEGER NOT NULL DEFAULT 0");
+        }
+    }
+    finally
+    {
+        await connection.CloseAsync();
+    }
+}
+
+static async Task EnsureAspNetUsersColumnsAsync(AuthDbContext authDb)
+{
+    var connection = authDb.Database.GetDbConnection();
+    await connection.OpenAsync();
+
+    try
+    {
+        var columns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        await using (var cmd = connection.CreateCommand())
+        {
+            cmd.CommandText = "PRAGMA table_info('AspNetUsers')";
+            await using var reader = await cmd.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                columns.Add(reader.GetString(1));
+            }
+        }
+
+        if (!columns.Contains("MustChangePassword"))
+        {
+            await authDb.Database.ExecuteSqlRawAsync(
+                "ALTER TABLE AspNetUsers ADD COLUMN MustChangePassword INTEGER NOT NULL DEFAULT 0");
+        }
+
+        if (!columns.Contains("PasswordSetByAdmin"))
+        {
+            await authDb.Database.ExecuteSqlRawAsync(
+                "ALTER TABLE AspNetUsers ADD COLUMN PasswordSetByAdmin INTEGER NOT NULL DEFAULT 0");
+        }
+
+        if (!columns.Contains("TemporaryPasswordIssuedAtUtc"))
+        {
+            await authDb.Database.ExecuteSqlRawAsync(
+                "ALTER TABLE AspNetUsers ADD COLUMN TemporaryPasswordIssuedAtUtc TEXT NULL");
+        }
+    }
+    finally
+    {
+        await connection.CloseAsync();
+    }
+}
